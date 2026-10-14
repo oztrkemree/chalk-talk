@@ -1,6 +1,9 @@
 {
   "name": "chalk-talk",
-  "owner": { "name": "Emre Ozturk" },
+  "owner": {
+    "name": "Emre Ozturk"
+  },
+  "description": "chalk-talk: explain any system as a step-by-step animated isometric diorama, with every block one click away from its code.",
   "plugins": [
     {
       "name": "chalk-talk",
