@@ -1,0 +1,67 @@
+{
+  "title": "Sign in with Google",
+  "subtitle": "the OAuth 2.0 authorization code flow",
+  "lang": "en",
+  "layout": "sequence",
+  "nodes": [
+    { "id": "you", "kind": "actor", "label": "You" },
+    { "id": "web", "kind": "browser", "label": "Your app", "sub": "in the browser" },
+    { "id": "google", "kind": "cloud", "label": "Google", "sub": "accounts.google.com" },
+    { "id": "server", "label": "Your server", "sub": "/auth/callback", "icon": "server" }
+  ],
+  "edges": [
+    { "id": "click", "from": "you", "to": "web", "label": "Sign in with Google" },
+    { "id": "authorize", "from": "web", "to": "google", "num": 1, "label": "redirect to /authorize", "packet": "client_id, scope" },
+    { "id": "consent", "from": "google", "to": "you", "label": "allow access?" },
+    { "id": "allow", "from": "you", "to": "google", "label": "Allow", "tone": "ok" },
+    { "id": "code", "from": "google", "to": "web", "num": 2, "label": "redirect back ?code=", "packet": "code" },
+    { "id": "callback", "from": "web", "to": "server", "num": 3, "label": "GET /auth/callback", "packet": "code" },
+    { "id": "token", "from": "server", "to": "google", "num": 4, "label": "POST /token", "packet": "code + secret" },
+    { "id": "tokens", "from": "google", "to": "server", "num": 5, "label": "tokens", "packet": "id_token", "tone": "ok" },
+    { "id": "verify", "from": "server", "to": "server", "label": "check signature" },
+    { "id": "session", "from": "server", "to": "web", "num": 6, "label": "session cookie", "packet": "cookie", "tone": "ok" }
+  ],
+  "steps": [
+    {
+      "title": "You ask to sign in",
+      "say": "You click the button. Your app has no password box at all; that is the point.",
+      "show": ["click"],
+      "flow": ["click"]
+    },
+    {
+      "title": "Off to Google",
+      "say": "The app sends your browser to Google with its **client id** and the access it wants.",
+      "flow": ["authorize"],
+      "notes": [{ "on": "google", "text": "you type your password here", "side": "right" }]
+    },
+    {
+      "title": "You say yes",
+      "say": "Google asks whether this app may see your name and email. You allow it.",
+      "flow": ["consent", "allow"]
+    },
+    {
+      "title": "A one-time code",
+      "say": "Google sends the browser back with a short-lived **code**, and the browser hands it to your server.",
+      "flow": ["code", "callback"],
+      "notes": [{ "on": "code", "text": "useless without the secret", "side": "left" }]
+    },
+    {
+      "title": "Code for tokens",
+      "say": "Your server trades the code plus its **client secret** for tokens. This call never touches the browser.",
+      "flow": ["token", "tokens"],
+      "focus": ["server"],
+      "notes": [{ "on": "token", "kind": "tag", "text": "server to server", "tone": "info" }]
+    },
+    {
+      "title": "Who is this?",
+      "say": "The server checks the `id_token` signature, reads your email from it and starts a session.",
+      "flow": ["verify", "session"]
+    },
+    {
+      "title": "The whole dance",
+      "say": "Your password only ever goes to Google. Your app gets a code, then tokens, then **knows who you are**.",
+      "recap": true,
+      "flow": ["authorize", "code", "callback", "token", "tokens", "session"]
+    }
+  ]
+}

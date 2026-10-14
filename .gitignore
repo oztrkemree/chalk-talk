@@ -1,0 +1,5 @@
+*-snaps/
+*-snaps-*/
+chalk-talks/
+.DS_Store
+.claude/

@@ -1,0 +1,79 @@
+{
+  "title": "Sipariş verince ne olur?",
+  "subtitle": "butona basmaktan kapıya gelen e-postaya",
+  "lang": "tr",
+  "nodes": [
+    { "id": "musteri", "kind": "actor", "label": "Müşteri", "at": [0, 1] },
+    { "id": "app", "kind": "phone", "label": "Mobil uygulama", "at": [1, 1] },
+    { "id": "api", "label": "Sipariş API", "sub": "POST /orders", "icon": "cart", "at": [2, 1] },
+    { "id": "stripe", "kind": "cloud", "label": "Stripe", "at": [2, 0] },
+    { "id": "db", "kind": "db", "label": "Postgres", "sub": "orders", "at": [2, 2] },
+    { "id": "kuyruk", "kind": "queue", "label": "Kuyruk", "sub": "order.placed", "at": [3, 1] },
+    { "id": "mail", "label": "E-posta işçisi", "sub": "mailer.ts", "icon": "mail", "at": [3, 0] },
+    { "id": "stok", "label": "Stok işçisi", "sub": "stock.ts", "icon": "box", "at": [3, 2] }
+  ],
+  "groups": [
+    { "id": "arka", "label": "arka planda", "members": ["kuyruk", "mail", "stok"] }
+  ],
+  "edges": [
+    { "id": "onay", "from": "musteri", "to": "app", "label": "sepeti onaylar" },
+    { "id": "istek", "from": "app", "to": "api", "num": 1, "label": "POST /orders", "packet": "sepet" },
+    { "id": "odeme", "from": "api", "to": "stripe", "num": 2, "label": "ödemeyi al", "packet": "₺420" },
+    { "id": "kayit", "from": "api", "to": "db", "num": 3, "label": "kaydet", "packet": "INSERT" },
+    { "id": "yayin", "from": "api", "to": "kuyruk", "num": 4, "label": "yayınla", "packet": "OrderPlaced", "style": "dashed" },
+    { "id": "cevap", "from": "api", "to": "app", "num": 5, "label": "201 Created", "packet": "#1042", "tone": "ok" },
+    { "id": "m", "from": "kuyruk", "to": "mail", "label": "dinler", "style": "dashed" },
+    { "id": "s", "from": "kuyruk", "to": "stok", "label": "dinler", "style": "dashed" }
+  ],
+  "steps": [
+    {
+      "title": "Her şey bir dokunuşla başlar",
+      "say": "Müşteri sepeti onaylar. Bu andan sonrası tamamen sunucunun işi.",
+      "show": ["onay"],
+      "flow": ["onay"]
+    },
+    {
+      "title": "İstek yola çıkar",
+      "say": "Uygulama sepeti tek bir `POST /orders` isteğiyle **Sipariş API**'ye yollar.",
+      "show": ["istek"],
+      "flow": ["istek"]
+    },
+    {
+      "title": "Önce para",
+      "say": "API siparişi kaydetmeden önce Stripe'tan ödemeyi alır. Ödeme geçmezse yolculuk **burada biter**.",
+      "flow": ["odeme", { "edge": "odeme", "reverse": true, "packet": "onay", "tone": "ok" }],
+      "notes": [{ "on": "stripe", "kind": "tag", "text": "red → 402", "tone": "error" }]
+    },
+    {
+      "title": "Kalıcı kayıt",
+      "say": "Ödeme onaylanınca sipariş Postgres'e yazılır. Artık sunucu çökse bile sipariş kaybolmaz.",
+      "flow": ["kayit"],
+      "notes": [{ "on": "db", "text": "tek gerçek kaynak", "side": "left" }]
+    },
+    {
+      "title": "Haber ver, bekleme",
+      "say": "API kuyruğa bir **OrderPlaced** olayı bırakır ve kimseyi beklemez. Yanıtın hızlı olmasının sırrı bu.",
+      "flow": ["yayin"],
+      "focus": ["kuyruk"]
+    },
+    {
+      "title": "Cevap döner",
+      "say": "Müşteri sipariş numarasını hemen görür. E-posta ve stok işi henüz başlamadı bile.",
+      "flow": ["cevap"],
+      "notes": [{ "on": "app", "text": "bekleme yok", "side": "left", "tone": "ok" }]
+    },
+    {
+      "title": "Arka planda",
+      "say": "İşçiler olayı kendi hızlarında alır: biri e-postayı yollar, öteki stoğu düşer. Biri çökse de sipariş geçerli kalır.",
+      "show": ["arka", "m", "s"],
+      "flow": ["m", "s"],
+      "together": true
+    },
+    {
+      "title": "Bütün yolculuk",
+      "say": "**Öde**, **kaydet**, **haber ver**, **cevap ver**. Yavaş işler kuyruğun arkasında, müşterinin yolunda değil.",
+      "recap": true,
+      "flow": ["istek", "odeme", "kayit", "yayin", "cevap"]
+    }
+  ]
+}

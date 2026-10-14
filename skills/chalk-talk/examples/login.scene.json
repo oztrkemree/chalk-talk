@@ -1,0 +1,65 @@
+{
+  "title": "How logging in works",
+  "subtitle": "from the password box to a session",
+  "lang": "en",
+  "nodes": [
+    { "id": "you", "kind": "actor", "label": "You", "at": [0, 1] },
+    { "id": "web", "kind": "browser", "label": "Web app", "sub": "login.tsx", "at": [1, 1] },
+    { "id": "api", "label": "Auth API", "sub": "POST /login", "icon": "key", "at": [2, 1] },
+    { "id": "users", "kind": "db", "label": "Postgres", "sub": "users", "at": [3, 2] },
+    { "id": "sessions", "kind": "db", "label": "Redis", "sub": "sessions", "color": "rose", "at": [3, 0] }
+  ],
+  "groups": [
+    { "id": "backend", "label": "backend", "members": ["api", "users", "sessions"] }
+  ],
+  "edges": [
+    { "id": "type", "from": "you", "to": "web", "label": "types email + password" },
+    { "id": "req", "from": "web", "to": "api", "num": 1, "label": "POST /login", "packet": "email, pw" },
+    { "id": "lookup", "from": "api", "to": "users", "num": 2, "label": "find user", "packet": "SELECT" },
+    { "id": "save", "from": "api", "to": "sessions", "num": 3, "label": "save session", "packet": "sid" },
+    { "id": "reply", "from": "api", "to": "web", "num": 4, "label": "200 + cookie", "packet": "cookie", "tone": "ok" }
+  ],
+  "steps": [
+    {
+      "title": "It starts with you",
+      "say": "You type your email and password into the login form. Nothing has left your browser yet.",
+      "show": ["type"],
+      "flow": ["type"]
+    },
+    {
+      "title": "The request",
+      "say": "The web app sends both to the **Auth API** in one `POST /login` request.",
+      "show": ["req"],
+      "flow": ["req"],
+      "notes": [{ "on": "req", "text": "always over HTTPS", "side": "top" }]
+    },
+    {
+      "title": "Is it really you?",
+      "say": "The API loads your row from Postgres and compares **password hashes**. The real password is never stored.",
+      "show": ["lookup"],
+      "flow": ["lookup", { "edge": "lookup", "reverse": true, "packet": "hash" }],
+      "notes": [{ "on": "api", "text": "bcrypt compare", "side": "bottom" }]
+    },
+    {
+      "title": "Remember the visit",
+      "say": "If the hash matches, the API creates a session id and keeps it in Redis, so later requests are cheap to check.",
+      "show": ["save", "backend"],
+      "flow": ["save"],
+      "notes": [{ "on": "sessions", "kind": "tag", "text": "expires in 7 days", "tone": "warn" }]
+    },
+    {
+      "title": "The answer",
+      "say": "The browser gets the session id back as a cookie. From now on every request carries it.",
+      "show": ["reply"],
+      "flow": ["reply"],
+      "focus": ["web"],
+      "notes": [{ "on": "web", "text": "httpOnly cookie: JS can't read it", "side": "bottom" }]
+    },
+    {
+      "title": "The whole trip",
+      "say": "Four hops: **send**, **check**, **remember**, **answer**. A wrong password stops the trip at step 2.",
+      "recap": true,
+      "flow": ["req", "lookup", "save", "reply"]
+    }
+  ]
+}
