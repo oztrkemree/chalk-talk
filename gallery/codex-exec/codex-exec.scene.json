@@ -1,0 +1,104 @@
+{
+  "title": "How Codex CLI runs a shell command",
+  "subtitle": "from the model's tool call to the output it reads back · codex-rs/core",
+  "lang": "en",
+  "root": "../../../chalk-gallery-src/codex/codex-rs/core/src",
+  "nodes": [
+    { "id": "model", "kind": "cloud", "label": "OpenAI model", "sub": "Responses API stream", "at": [0, 0] },
+    { "id": "turn", "label": "Turn loop", "sub": "try_run_sampling_request", "icon": "refresh", "at": [0, 1],
+      "code": { "file": "session/turn.rs", "lines": [2899, 2913], "mark": [2900, 2908] } },
+    { "id": "router", "label": "Tool router", "sub": "ToolRouter · ToolRegistry", "icon": "gear", "at": [0, 2],
+      "code": { "file": "tools/router.rs", "lines": [257, 274], "mark": [259, 273] } },
+    { "id": "exec", "label": "Exec handler", "sub": "exec_command", "icon": "code", "at": [2, 2],
+      "code": { "file": "tools/handlers/unified_exec/exec_command.rs", "lines": [399, 424], "mark": [423, 423] } },
+    { "id": "policy", "label": "Exec policy", "sub": "exec_policy.rs", "icon": "lock", "color": "amber", "at": [3, 2],
+      "code": { "file": "exec_policy.rs", "lines": [800, 846], "mark": [835, 844] } },
+    { "id": "orch", "label": "Orchestrator", "sub": "ToolOrchestrator::run", "icon": "shield", "at": [2, 0],
+      "code": { "file": "tools/orchestrator.rs", "lines": [164, 224], "mark": [203, 222] } },
+    { "id": "you", "kind": "actor", "label": "You", "sub": "approval prompt", "at": [3, 0] },
+    { "id": "shell", "label": "Shell", "sub": "sandboxed child", "icon": "server", "color": "red", "at": [1, 0],
+      "code": { "file": "unified_exec/process_manager.rs", "lines": [1427, 1455], "mark": [1441, 1451] } }
+  ],
+  "edges": [
+    { "id": "call", "from": "model", "to": "turn", "num": 1, "label": "tool call", "packet": "exec_command",
+      "code": "session/turn.rs:2804-2806", "calls": "ResponseEvent::OutputItemDone(" },
+    { "id": "dispatch", "from": "turn", "to": "router", "num": 2, "label": "handle_tool_call", "packet": "ToolCall",
+      "code": "stream_events_utils.rs:323-357", "calls": ["ToolRouter::build_tool_call(item.clone())", ".handle_tool_call(call, cancellation_token)"] },
+    { "id": "handle", "from": "router", "to": "exec", "num": 3, "label": "tool.handle()", "packet": "cmd",
+      "code": "tools/registry.rs:912-920", "calls": "tool.handle(invocation.clone())" },
+    { "id": "check", "from": "exec", "to": "policy", "num": 4, "label": "allowed?", "packet": "argv",
+      "code": "unified_exec/process_manager.rs:1508-1533", "calls": "create_exec_approval_requirement_for_shell(" },
+    { "id": "run", "from": "exec", "to": "orch", "num": 5, "label": "run", "packet": "req",
+      "code": "unified_exec/process_manager.rs:1534-1562", "calls": [".run(&mut runtime, &req, &tool_ctx)", "exec_approval_requirement,"] },
+    { "id": "ask", "from": "orch", "to": "you", "label": "request_approval", "packet": "command", "style": "dashed", "tone": "warn",
+      "code": "tools/orchestrator.rs:203-225", "calls": ".request_approval(action, approval_ctx)" },
+    { "id": "spawn", "from": "orch", "to": "shell", "num": 6, "label": "spawn in sandbox", "packet": "SandboxType",
+      "code": "tools/orchestrator.rs:341-384", "calls": ["sandbox_manager.select_initial(", "Self::run_attempt(tool, req, tool_ctx, &initial_attempt"] },
+    { "id": "output", "from": "shell", "to": "exec", "num": 7, "label": "collect output", "packet": "stdout · exit 0", "tone": "ok",
+      "code": "unified_exec/process_manager.rs:642-657", "calls": "Self::collect_output_until_deadline(" },
+    { "id": "result", "from": "router", "to": "turn", "num": 8, "label": "into history", "packet": "function_call_output", "tone": "ok",
+      "code": "session/turn.rs:2568-2596", "calls": ["in_flight.next().await", "sess.record_annotated_conversation_items("] },
+    { "id": "reply", "from": "turn", "to": "model", "num": 9, "label": "next turn", "packet": "history + output",
+      "code": "session/turn.rs:2671-2684", "calls": ".stream(prompt," }
+  ],
+  "steps": [
+    {
+      "title": "The model asks",
+      "say": "The model never touches your machine. It streams back a `function_call` named `exec_command`; Codex decides whether and how to run it.",
+      "show": ["call"],
+      "flow": ["call"],
+      "focus": ["turn"]
+    },
+    {
+      "title": "Routed by name",
+      "say": "The turn loop wraps the item as a `ToolCall`. The registry finds `exec_command` by name and starts it while the stream keeps going.",
+      "show": ["dispatch", "handle"],
+      "flow": ["dispatch", "handle"],
+      "notes": [{ "on": "router", "text": "spawned now, collected later", "side": "bottom" }]
+    },
+    {
+      "title": "May this run?",
+      "say": "Your `.rules` files and the approval policy decide first: run, ask, or refuse. Without an allow rule, a dangerous command never runs unasked.",
+      "show": ["check"],
+      "flow": ["check", { "edge": "check", "reverse": true, "packet": "NeedsApproval" }],
+      "focus": ["policy"],
+      "notes": [{ "on": "policy", "text": "on-request + sandbox: harmless runs", "side": "top-left" }]
+    },
+    {
+      "title": "Ask you, only if needed",
+      "say": "`ToolOrchestrator` acts on the verdict. `NeedsApproval` sends you the command and its reason, and nothing starts until you decide.",
+      "show": ["run", "ask"],
+      "flow": ["run", "ask", { "edge": "ask", "reverse": true, "packet": "Approved" }],
+      "notes": [{ "on": "you", "text": "hooks or Guardian may answer first", "side": "right" }]
+    },
+    {
+      "title": "Run inside a sandbox",
+      "say": "The orchestrator picks the OS sandbox and spawns the shell inside it. That fence is why harmless commands may skip your approval.",
+      "show": ["spawn"],
+      "flow": ["spawn"],
+      "focus": ["shell"],
+      "notes": [{ "on": "shell", "text": "Seatbelt · bwrap+seccomp · restricted token", "side": "right" }]
+    },
+    {
+      "title": "Output comes back",
+      "say": "The handler collects output until the command exits or its yield time (10 s by default) runs out, then returns it as the tool result.",
+      "show": ["output"],
+      "flow": ["output", { "edge": "handle", "reverse": true, "packet": "ExecCommandToolOutput" }],
+      "focus": ["exec"],
+      "notes": [{ "on": "exec", "text": "still running? returns a session ID", "side": "bottom-left" }]
+    },
+    {
+      "title": "Back to the model",
+      "say": "The result lands in history as a `function_call_output`, and the loop calls the model again so it can read it and choose the next move.",
+      "show": ["result", "reply"],
+      "flow": ["result", "reply"],
+      "focus": ["turn"]
+    },
+    {
+      "title": "The whole trip",
+      "say": "Ask, route, check, maybe approve, sandbox, capture, reply. Every arrow is traced to a line in `codex-rs/core`.",
+      "recap": true,
+      "flow": ["call", "dispatch", "handle", "check", "run", "spawn", "output", "result", "reply"]
+    }
+  ]
+}

@@ -1,62 +1,87 @@
 {
-  "title": "How a chalk talk gets built",
-  "subtitle": "from a scene file to a page you can step through",
+  "title": "How chalk-talk proves every arrow",
+  "subtitle": "from a scene file to a page you can trust",
   "lang": "en",
   "root": "..",
   "nodes": [
-    { "id": "claude", "kind": "actor", "label": "Claude", "at": [0, 1] },
+    { "id": "agent", "kind": "actor", "label": "Your agent", "at": [0, 1] },
     { "id": "scene", "kind": "file", "label": "Scene file", "sub": "talk.scene.json", "at": [1, 1] },
-    { "id": "build", "label": "build.sh", "sub": "scripts/build.sh", "icon": "gear", "at": [2, 1], "code": "scripts/build.sh:42-57" },
-    { "id": "embed", "kind": "pill", "label": "Code embedder", "sub": "scripts/embed.py", "icon": "code", "color": "teal", "at": [2, 0], "code": { "file": "scripts/embed.py", "lines": [77, 106], "mark": [83, 88] } },
-    { "id": "tpl", "kind": "file", "label": "Engine", "sub": "assets/template.html", "icon": "code", "color": "violet", "at": [2, 2], "code": "assets/template.html:1497-1519" },
-    { "id": "page", "kind": "browser", "label": "talk.html", "sub": "one file, no deps", "at": [3, 1], "code": "assets/template.html:2118-2147" }
+    { "id": "build", "label": "Builder", "sub": "scripts/build.mjs", "icon": "gear", "at": [2, 1],
+      "code": { "file": "scripts/build.mjs", "lines": [146, 174], "mark": [159, 161] } },
+    { "id": "proof", "kind": "pill", "label": "Proof checker", "sub": "proofOf()", "icon": "shield", "color": "teal", "at": [1, 0],
+      "code": { "file": "scripts/build.mjs", "lines": [109, 143], "mark": [133, 139] } },
+    { "id": "repo", "kind": "file", "label": "Your code", "sub": "src/**", "icon": "code", "color": "amber", "at": [3, 0] },
+    { "id": "tpl", "kind": "file", "label": "Engine", "sub": "assets/template.html", "icon": "code", "color": "violet", "at": [2, 2] },
+    { "id": "page", "kind": "browser", "label": "talk.html", "sub": "one file, no deps", "at": [3, 1] }
   ],
   "edges": [
-    { "id": "write", "from": "claude", "to": "scene", "num": 1, "label": "writes the story", "packet": "steps" },
-    { "id": "run", "from": "scene", "to": "build", "num": 2, "label": "build.sh", "packet": "scene" },
-    { "id": "snip", "from": "build", "to": "embed", "label": "\"code\" fields", "packet": "file:12-40", "style": "dashed" },
-    { "id": "fill", "from": "tpl", "to": "build", "label": "__SCENE__ slot", "packet": "engine" },
-    { "id": "out", "from": "build", "to": "page", "num": 3, "label": "one HTML file", "packet": "talk.html", "tone": "ok" }
+    { "id": "write", "from": "agent", "to": "scene", "num": 1, "label": "writes the story", "packet": "steps",
+      "inferred": "your agent writes this file; there is no chalk-talk code to point at" },
+    { "id": "run", "from": "scene", "to": "build", "num": 2, "label": "build.mjs", "packet": "scene",
+      "code": "scripts/build.mjs:34-36", "calls": "JSON.parse(raw)" },
+    { "id": "read", "from": "build", "to": "repo", "num": 3, "label": "reads cited lines", "packet": "file:12-40",
+      "code": "scripts/build.mjs:84-89", "calls": "fileLines(abs)" },
+    { "id": "check", "from": "build", "to": "proof", "num": 4, "label": "every arrow", "packet": "calls",
+      "code": "scripts/build.mjs:159-161", "calls": "proofOf(e, sources.get(e))" },
+    { "id": "match", "from": "proof", "to": "repo", "label": "is the call there?", "packet": "res.send(", "style": "dashed",
+      "code": "scripts/build.mjs:133-139", "calls": "findCall(src, c)" },
+    { "id": "fill", "from": "tpl", "to": "build", "label": "__SCENE__ slot", "packet": "engine",
+      "code": "scripts/build.mjs:179-183", "calls": "tpl.search(/^__SCENE__$/m)" },
+    { "id": "out", "from": "build", "to": "page", "num": 5, "label": "one HTML file", "packet": "talk.html", "tone": "ok",
+      "code": "scripts/build.mjs:182-184", "calls": "fs.writeFileSync(out" }
   ],
   "steps": [
     {
       "title": "It starts as a story",
-      "say": "Claude never draws. It writes a short **scene file**: what to show, what moves, what to say.",
+      "say": "Your agent never draws. It writes a short **scene file**: what to show, what moves, what to say, and which lines of code back each arrow.",
       "show": ["write"],
       "flow": ["write"]
     },
     {
       "title": "One script builds it",
-      "say": "`build.sh` checks the JSON and refuses a stray `<\/script`, the one string that would break the page.",
+      "say": "`build.mjs` reads the scene. Plain Node, no dependencies, the same on Windows, macOS and Linux.",
       "show": ["run"],
       "flow": ["run"],
       "focus": ["build"]
     },
     {
       "title": "Real code comes along",
-      "say": "Nodes can point at real lines. The embedder copies them in, so a click on a block shows its code.",
-      "show": ["snip"],
-      "flow": ["snip", { "edge": "snip", "reverse": true, "packet": "snippet" }],
-      "notes": [{ "on": "embed", "text": "plus a GitHub permalink", "side": "top" }]
+      "say": "Every `code` field points at real lines. The builder copies them in, so a click on a block or an arrow shows the code.",
+      "show": ["read"],
+      "flow": ["read", { "edge": "read", "reverse": true, "packet": "snippet" }],
+      "notes": [{ "on": "repo", "text": "plus a GitHub permalink", "side": "top" }]
+    },
+    {
+      "title": "Every arrow gets checked",
+      "say": "For each arrow, the checker looks for its `calls` text inside the cited lines. Found: a **✓**. Missing: the build warns and the arrow turns red.",
+      "show": ["check", "match"],
+      "flow": ["check", "match"],
+      "focus": ["proof"]
+    },
+    {
+      "title": "Guesses stay guesses",
+      "say": "The first arrow has no line of code behind it, so it carries a **?** instead of pretending. Press `V` to see which hops are proven.",
+      "active": ["write"],
+      "focus": ["write"]
     },
     {
       "title": "Into the engine",
-      "say": "The scene drops into the engine's `__SCENE__` slot. Layout, routing and 3D drawing all happen in the browser.",
+      "say": "The checked scene drops into the engine's `__SCENE__` slot. Layout, routing and 3D drawing happen in the browser.",
       "show": ["fill"],
       "flow": ["fill"]
     },
     {
       "title": "A page you can send",
-      "say": "Out comes **one HTML file**. Click any block with a code badge, or press `C`, to see the code behind it.",
+      "say": "Out comes **one HTML file**. It works offline and opens the exact lines behind every part.",
       "show": ["out"],
       "flow": ["out"],
       "focus": ["page"]
     },
     {
       "title": "The whole trip",
-      "say": "Story, build, embed, page. Every block with a `</>` badge opens the code it stands for.",
+      "say": "Story, build, read, check, page. Six hops traced to a line, one honest guess.",
       "recap": true,
-      "flow": ["write", "run", "snip", "out"]
+      "flow": ["write", "run", "read", "check", "out"]
     }
   ]
 }

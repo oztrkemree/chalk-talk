@@ -1,0 +1,471 @@
+{
+  "title": "How Vite hot-updates a module",
+  "subtitle": "from saving a file to new code running, without a reload",
+  "lang": "en",
+  "root": "../../../chalk-gallery-src/vite",
+  "nodes": [
+    {
+      "id": "you",
+      "kind": "actor",
+      "label": "You",
+      "sub": "save in your editor",
+      "at": [
+        0,
+        2
+      ]
+    },
+    {
+      "id": "watcher",
+      "label": "File watcher",
+      "sub": "chokidar.watch(root)",
+      "icon": "eye",
+      "at": [
+        0,
+        1
+      ],
+      "code": {
+        "file": "packages/vite/src/node/server/index.ts",
+        "lines": [
+          587,
+          604
+        ],
+        "mark": [
+          590
+        ]
+      }
+    },
+    {
+      "id": "graph",
+      "kind": "db",
+      "label": "Module graph",
+      "sub": "moduleGraph.ts",
+      "at": [
+        0,
+        0
+      ],
+      "code": {
+        "file": "packages/vite/src/node/server/moduleGraph.ts",
+        "lines": [
+          166,
+          213
+        ],
+        "mark": [
+          208
+        ]
+      }
+    },
+    {
+      "id": "hmr",
+      "label": "HMR engine",
+      "sub": "updateModules()",
+      "icon": "bolt",
+      "at": [
+        1,
+        0
+      ],
+      "code": {
+        "file": "packages/vite/src/node/server/hmr.ts",
+        "lines": [
+          683,
+          742
+        ],
+        "mark": [
+          699
+        ]
+      }
+    },
+    {
+      "id": "ws",
+      "kind": "queue",
+      "label": "WebSocket server",
+      "sub": "server/ws.ts",
+      "at": [
+        3,
+        0
+      ],
+      "code": {
+        "file": "packages/vite/src/node/server/ws.ts",
+        "lines": [
+          382,
+          400
+        ],
+        "mark": [
+          397
+        ]
+      }
+    },
+    {
+      "id": "transform",
+      "label": "Transform middleware",
+      "sub": "transformMiddleware",
+      "icon": "gear",
+      "at": [
+        3,
+        1
+      ],
+      "code": {
+        "file": "packages/vite/src/node/server/middlewares/transform.ts",
+        "lines": [
+          262,
+          277
+        ],
+        "mark": [
+          264
+        ]
+      }
+    },
+    {
+      "id": "client",
+      "kind": "browser",
+      "label": "Vite client",
+      "sub": "/@vite/client",
+      "at": [
+        2,
+        2
+      ],
+      "code": {
+        "file": "packages/vite/src/client/client.ts",
+        "lines": [
+          209,
+          227
+        ],
+        "mark": [
+          226
+        ]
+      }
+    },
+    {
+      "id": "accept",
+      "kind": "pill",
+      "label": "accept callback",
+      "sub": "import.meta.hot.accept",
+      "icon": "check",
+      "color": "blue",
+      "at": [
+        3,
+        2
+      ],
+      "code": {
+        "file": "packages/vite/src/shared/hmr.ts",
+        "lines": [
+          65,
+          76
+        ],
+        "mark": [
+          68
+        ]
+      }
+    }
+  ],
+  "groups": [
+    {
+      "id": "server",
+      "label": "dev server · Node",
+      "members": [
+        "watcher",
+        "hmr",
+        "graph",
+        "ws",
+        "transform"
+      ]
+    },
+    {
+      "id": "browser",
+      "label": "browser tab",
+      "members": [
+        "client",
+        "accept"
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "id": "save",
+      "from": "you",
+      "to": "watcher",
+      "num": 1,
+      "label": "save",
+      "packet": "change",
+      "inferred": "your editor writes the file; the OS file event reaches chokidar outside Vite's code"
+    },
+    {
+      "id": "invalidate",
+      "from": "watcher",
+      "to": "graph",
+      "num": 2,
+      "label": "onFileChange",
+      "packet": "file path",
+      "code": {
+        "file": "packages/vite/src/node/server/index.ts",
+        "lines": [
+          966,
+          984
+        ],
+        "mark": [
+          977
+        ]
+      },
+      "calls": "environment.moduleGraph.onFileChange(file)"
+    },
+    {
+      "id": "notify",
+      "from": "watcher",
+      "to": "hmr",
+      "num": 3,
+      "label": "handleHMRUpdate",
+      "packet": "'update'",
+      "code": {
+        "file": "packages/vite/src/node/server/index.ts",
+        "lines": [
+          966,
+          984
+        ],
+        "mark": [
+          979
+        ]
+      },
+      "calls": "onHMRUpdate('update', file)"
+    },
+    {
+      "id": "propagate",
+      "from": "hmr",
+      "to": "graph",
+      "num": 4,
+      "label": "walk importers",
+      "packet": "importers",
+      "code": {
+        "file": "packages/vite/src/node/server/hmr.ts",
+        "lines": [
+          831,
+          892
+        ],
+        "mark": [
+          861,
+          864
+        ]
+      },
+      "calls": [
+        "for (const importer of node.importers)",
+        "importer.acceptedHmrDeps.has(node)"
+      ]
+    },
+    {
+      "id": "send",
+      "from": "hmr",
+      "to": "ws",
+      "num": 5,
+      "label": "hot.send",
+      "packet": "update",
+      "code": {
+        "file": "packages/vite/src/node/server/hmr.ts",
+        "lines": [
+          783,
+          794
+        ],
+        "mark": [
+          790,
+          791
+        ]
+      },
+      "calls": [
+        "hot.send({",
+        "type: 'update'"
+      ]
+    },
+    {
+      "id": "push",
+      "from": "ws",
+      "to": "client",
+      "num": 6,
+      "label": "JSON frame",
+      "packet": "updates[]",
+      "code": {
+        "file": "packages/vite/src/node/server/ws.ts",
+        "lines": [
+          393,
+          399
+        ],
+        "mark": [
+          397
+        ]
+      },
+      "calls": [
+        "JSON.stringify(payload)",
+        "client.send(stringified)"
+      ]
+    },
+    {
+      "id": "fetch",
+      "from": "client",
+      "to": "transform",
+      "num": 7,
+      "label": "re-import",
+      "packet": "?t=timestamp",
+      "code": {
+        "file": "packages/vite/src/client/client.ts",
+        "lines": [
+          153,
+          167
+        ],
+        "mark": [
+          161,
+          165
+        ]
+      },
+      "calls": [
+        "import(",
+        "t=${timestamp}"
+      ]
+    },
+    {
+      "id": "run",
+      "from": "client",
+      "to": "accept",
+      "num": 8,
+      "label": "runs callback",
+      "packet": "new module",
+      "tone": "ok",
+      "code": {
+        "file": "packages/vite/src/shared/hmr.ts",
+        "lines": [
+          286,
+          310
+        ],
+        "mark": [
+          304,
+          305
+        ]
+      },
+      "calls": "for (const { deps, fn } of qualifiedCallbacks)"
+    }
+  ],
+  "steps": [
+    {
+      "title": "You hit save",
+      "say": "The dev server watches your project with **chokidar**, so the moment the editor writes the file, Vite gets its path.",
+      "show": [
+        "save"
+      ],
+      "flow": [
+        "save"
+      ]
+    },
+    {
+      "title": "Forget the old result",
+      "say": "`onFileChange` sets that module's cached `transformResult` to null. The next request for it must run the plugins again.",
+      "show": [
+        "invalidate"
+      ],
+      "flow": [
+        "invalidate"
+      ],
+      "notes": [
+        {
+          "on": "graph",
+          "text": "plus importers that don't accept it",
+          "side": "bottom"
+        }
+      ]
+    },
+    {
+      "title": "Hand it to HMR",
+      "say": "`handleHMRUpdate` checks what changed first: a config or `.env` file restarts the server instead of patching the page.",
+      "show": [
+        "notify"
+      ],
+      "flow": [
+        "notify"
+      ],
+      "focus": [
+        "hmr"
+      ]
+    },
+    {
+      "title": "Find the boundary",
+      "say": "`propagateUpdate` climbs the importers until a module accepts the change. If it reaches a module nobody imports, the page reloads.",
+      "show": [
+        "propagate"
+      ],
+      "flow": [
+        "propagate",
+        {
+          "edge": "propagate",
+          "reverse": true,
+          "packet": "boundary"
+        }
+      ],
+      "notes": [
+        {
+          "on": "hmr",
+          "kind": "tag",
+          "text": "dead end: full-reload",
+          "tone": "warn"
+        }
+      ]
+    },
+    {
+      "title": "One message out",
+      "say": "The boundaries leave as one `update` JSON message, sent to every open tab on the `vite-hmr` WebSocket. No code travels yet.",
+      "show": [
+        "send",
+        "push"
+      ],
+      "flow": [
+        "send",
+        "push"
+      ]
+    },
+    {
+      "title": "Fetch the fresh module",
+      "say": "The client re-imports the accepted path with a new `?t=` stamp. A new URL is a new ES module, so the browser can't reuse the old one.",
+      "show": [
+        "server",
+        "fetch"
+      ],
+      "flow": [
+        "fetch",
+        {
+          "edge": "fetch",
+          "reverse": true,
+          "packet": "fresh JS"
+        }
+      ],
+      "notes": [
+        {
+          "on": "transform",
+          "text": "re-runs plugins: cache was cleared",
+          "side": "bottom"
+        }
+      ]
+    },
+    {
+      "title": "Swap it in",
+      "say": "`fetchUpdate` hands the new module to each matching `hot.accept` callback. Only the chain up to the boundary re-runs; the rest of the page keeps its state.",
+      "show": [
+        "browser",
+        "run"
+      ],
+      "flow": [
+        "run"
+      ],
+      "focus": [
+        "accept"
+      ]
+    },
+    {
+      "title": "The whole trip",
+      "say": "Watch, invalidate, propagate, notify, re-import, accept. Click any arrow to see the line of Vite that makes the hop.",
+      "recap": true,
+      "flow": [
+        "save",
+        "invalidate",
+        "notify",
+        "propagate",
+        "send",
+        "push",
+        "fetch",
+        "run"
+      ]
+    }
+  ]
+}

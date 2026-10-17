@@ -1,0 +1,359 @@
+{
+  "title": "Chunked responses get their ETag back",
+  "subtitle": "what PR #7459 changes inside res.send()",
+  "eyebrow": "Change walkthrough",
+  "lang": "en",
+  "root": "../../../chalk-gallery-src/express-pr7459",
+  "diff": {
+    "title": "PR #7459 · fix(res.send): preserve ETag generation with Transfer-Encoding",
+    "base": "3ce6d0eb86e9d93529ff3191c6bb5db8ce6e72c8",
+    "head": "9a34acf03cb818ff3f8bc40e44176e277a25cbb9",
+    "url": "https://github.com/expressjs/express/pull/7459"
+  },
+  "nodes": [
+    {
+      "id": "client",
+      "kind": "browser",
+      "label": "HTTP client",
+      "sub": "GET /",
+      "at": [
+        0,
+        1
+      ]
+    },
+    {
+      "id": "handler",
+      "label": "Route handler",
+      "sub": "test/res.send.js",
+      "icon": "code",
+      "at": [
+        1,
+        1
+      ],
+      "change": "added",
+      "code": {
+        "file": "test/res.send.js",
+        "lines": [
+          620,
+          633
+        ],
+        "mark": [
+          624,
+          624
+        ]
+      }
+    },
+    {
+      "id": "measure",
+      "label": "Measure the body",
+      "sub": "len = chunk.length",
+      "icon": "search",
+      "at": [
+        2,
+        1
+      ],
+      "change": "changed",
+      "code": {
+        "file": "lib/response.js",
+        "lines": [
+          161,
+          185
+        ],
+        "mark": [
+          165,
+          178
+        ]
+      }
+    },
+    {
+      "id": "cl",
+      "kind": "pill",
+      "label": "Content-Length guard",
+      "sub": "lib/response.js",
+      "icon": "shield",
+      "color": "teal",
+      "at": [
+        2,
+        2
+      ],
+      "change": "changed",
+      "code": {
+        "file": "lib/response.js",
+        "lines": [
+          180,
+          185
+        ],
+        "mark": [
+          182,
+          184
+        ]
+      }
+    },
+    {
+      "id": "etag",
+      "label": "ETag",
+      "sub": "etagFn(chunk, encoding)",
+      "icon": "key",
+      "at": [
+        3,
+        1
+      ],
+      "code": {
+        "file": "lib/response.js",
+        "lines": [
+          187,
+          193
+        ],
+        "mark": [
+          189,
+          191
+        ]
+      }
+    },
+    {
+      "id": "fresh",
+      "kind": "pill",
+      "label": "Freshness check",
+      "sub": "req.fresh",
+      "icon": "refresh",
+      "color": "violet",
+      "at": [
+        3,
+        0
+      ],
+      "code": {
+        "file": "lib/request.js",
+        "lines": [
+          469,
+          486
+        ],
+        "mark": [
+          478,
+          482
+        ]
+      }
+    }
+  ],
+  "groups": [
+    {
+      "id": "send",
+      "label": "res.send()",
+      "members": [
+        "measure",
+        "cl",
+        "etag"
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "id": "req",
+      "from": "client",
+      "to": "handler",
+      "num": 1,
+      "label": "GET /",
+      "packet": "GET /",
+      "inferred": "Node's http server and the router package dispatch it; no single line in this repo"
+    },
+    {
+      "id": "call",
+      "from": "handler",
+      "to": "measure",
+      "num": 2,
+      "label": "send()",
+      "packet": "'hello'",
+      "change": "added",
+      "code": {
+        "file": "test/res.send.js",
+        "lines": [
+          623,
+          625
+        ]
+      },
+      "calls": "res.set('Transfer-Encoding', 'chunked').send('hello')"
+    },
+    {
+      "id": "guard",
+      "from": "measure",
+      "to": "cl",
+      "num": 3,
+      "label": "header check",
+      "packet": "len = 5",
+      "change": "changed",
+      "code": {
+        "file": "lib/response.js",
+        "lines": [
+          180,
+          185
+        ]
+      },
+      "calls": "if (!this.get('Transfer-Encoding'))"
+    },
+    {
+      "id": "hash",
+      "from": "measure",
+      "to": "etag",
+      "num": 4,
+      "label": "len is set",
+      "packet": "Buffer(5)",
+      "change": "changed",
+      "code": {
+        "file": "lib/response.js",
+        "lines": [
+          187,
+          193
+        ]
+      },
+      "calls": [
+        "generateETag && len !== undefined",
+        "etagFn(chunk, encoding)"
+      ]
+    },
+    {
+      "id": "check",
+      "from": "etag",
+      "to": "fresh",
+      "num": 5,
+      "label": "if (req.fresh)",
+      "packet": "ETag",
+      "code": {
+        "file": "lib/response.js",
+        "lines": [
+          195,
+          196
+        ]
+      },
+      "calls": "if (req.fresh) this.status(304)"
+    },
+    {
+      "id": "reply",
+      "from": "fresh",
+      "to": "client",
+      "num": 6,
+      "label": "200 + ETag",
+      "packet": "hello",
+      "tone": "ok",
+      "code": {
+        "file": "lib/response.js",
+        "lines": [
+          198,
+          219
+        ]
+      },
+      "calls": "this.end(chunk, encoding)"
+    }
+  ],
+  "steps": [
+    {
+      "title": "A chunked response",
+      "say": "A client asks for `/`. The handler, from the test this PR adds, sets **Transfer-Encoding: chunked** itself before sending.",
+      "show": [
+        "req"
+      ],
+      "flow": [
+        "req"
+      ],
+      "focus": [
+        "handler"
+      ]
+    },
+    {
+      "title": "Always measure",
+      "say": "`res.send('hello')` now **always** measures the body. Before this PR, a Transfer-Encoding header skipped the whole block and `len` stayed undefined.",
+      "show": [
+        "call"
+      ],
+      "flow": [
+        "call"
+      ],
+      "focus": [
+        "measure"
+      ],
+      "notes": [
+        {
+          "on": "measure",
+          "text": "'hello' becomes a Buffer",
+          "side": "bottom"
+        }
+      ]
+    },
+    {
+      "title": "Content-Length stays out",
+      "say": "The header check moved down so it guards only `Content-Length`. HTTP forbids sending it next to Transfer-Encoding, so it is still skipped.",
+      "show": [
+        "guard"
+      ],
+      "flow": [
+        "guard"
+      ],
+      "notes": [
+        {
+          "on": "cl",
+          "kind": "tag",
+          "text": "skipped",
+          "tone": "warn"
+        }
+      ]
+    },
+    {
+      "title": "The ETag is back",
+      "say": "With `len` defined, `etagFn` hashes the 5 bytes into a **weak ETag**. Before the fix, chunked responses never got one.",
+      "show": [
+        "hash",
+        "send"
+      ],
+      "flow": [
+        "hash"
+      ],
+      "focus": [
+        "etag"
+      ],
+      "notes": [
+        {
+          "on": "etag",
+          "text": "W/\"5-qvTG…\": weak by default",
+          "side": "right"
+        }
+      ]
+    },
+    {
+      "title": "Revalidation can work",
+      "say": "`req.fresh` compares that ETag with the client's `If-None-Match`. On a repeat visit they match, so `res.send` answers **304**.",
+      "show": [
+        "check"
+      ],
+      "flow": [
+        "check"
+      ],
+      "focus": [
+        "fresh"
+      ]
+    },
+    {
+      "title": "The answer",
+      "say": "`res.end` sends 200 with the ETag. A 304 goes out empty, with Content-Type and Transfer-Encoding stripped.",
+      "show": [
+        "reply"
+      ],
+      "flow": [
+        "reply"
+      ],
+      "focus": [
+        "client"
+      ]
+    },
+    {
+      "title": "One moved if",
+      "say": "Measure, guard, hash, compare, answer. Moving one `if` from the length block to the header brought caching back for chunked responses.",
+      "recap": true,
+      "flow": [
+        "req",
+        "call",
+        "guard",
+        "hash",
+        "check",
+        "reply"
+      ]
+    }
+  ]
+}

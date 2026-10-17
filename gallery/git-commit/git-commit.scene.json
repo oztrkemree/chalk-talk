@@ -1,0 +1,109 @@
+{
+  "title": "What git commit writes to disk",
+  "subtitle": "trees, one commit object, a moved branch and a reflog line",
+  "lang": "en",
+  "root": "../../../chalk-gallery-src/git",
+  "nodes": [
+    { "id": "you", "kind": "actor", "label": "You", "sub": "git commit -m", "at": [0, 1] },
+    { "id": "commit", "label": "git commit", "sub": "cmd_commit", "icon": "code", "at": [1, 1],
+      "code": { "file": "builtin/commit.c", "lines": [1838, 1949], "mark": [1938, 1949] } },
+    { "id": "index", "kind": "file", "label": "Staging index", "sub": ".git/index", "icon": "file", "color": "blue", "at": [1, 0],
+      "code": { "file": "builtin/commit.c", "lines": [476, 494], "mark": [483, 490] } },
+    { "id": "trees", "kind": "pill", "label": "Tree builder", "sub": "cache_tree_update", "icon": "gear", "color": "teal", "at": [2, 0],
+      "code": { "file": "cache-tree.c", "lines": [486, 516], "mark": [489, 491] } },
+    { "id": "cobj", "kind": "pill", "label": "Commit builder", "sub": "commit_tree_extended", "icon": "code", "color": "teal", "at": [0, 2],
+      "code": { "file": "commit.c", "lines": [1686, 1724], "mark": [1699, 1715] } },
+    { "id": "objects", "kind": "db", "label": "Object store", "sub": ".git/objects/ab/cdef…", "at": [2, 2],
+      "code": { "file": "odb/source-loose.c", "lines": [771, 831], "mark": [787, 791] } },
+    { "id": "refs", "label": "Ref transaction", "sub": "update_head_with_reflog", "icon": "lock", "at": [3, 1],
+      "code": { "file": "sequencer.c", "lines": [1289, 1324], "mark": [1312, 1316] } },
+    { "id": "branch", "kind": "file", "label": "Branch ref", "sub": ".git/refs/heads/<branch>", "icon": "flag", "color": "amber", "at": [3, 2],
+      "code": { "file": "refs/files-backend.c", "lines": [1863, 1891], "mark": [1888, 1889] } },
+    { "id": "reflog", "kind": "file", "label": "Reflog", "sub": ".git/logs/HEAD", "icon": "clock", "color": "violet", "at": [3, 0],
+      "code": { "file": "refs/files-backend.c", "lines": [1986, 2006], "mark": [1996, 2002] } }
+  ],
+  "edges": [
+    { "id": "run", "from": "you", "to": "commit", "num": 1, "label": "dispatch", "packet": "argv",
+      "code": { "file": "git.c", "lines": [556, 564], "mark": [560, 560] }, "calls": "{ \"commit\", cmd_commit" },
+    { "id": "lock", "from": "commit", "to": "index", "num": 2, "label": "lock + refresh", "packet": "index.lock",
+      "code": { "file": "builtin/commit.c", "lines": [482, 491], "mark": [483, 485] },
+      "calls": ["repo_hold_locked_index(", "write_locked_index("] },
+    { "id": "fold", "from": "index", "to": "trees", "num": 3, "label": "staged paths", "packet": "path + blob id",
+      "code": { "file": "builtin/commit.c", "lines": [486, 488], "mark": [488, 488] },
+      "calls": "cache_tree_update(the_repository->index, WRITE_TREE_SILENT)" },
+    { "id": "wtree", "from": "trees", "to": "objects", "num": 4, "label": "tree objects", "packet": "tree",
+      "code": { "file": "cache-tree.c", "lines": [507, 514], "mark": [510, 511] },
+      "calls": ["odb_write_object_ext(repo->objects", "OBJ_TREE"] },
+    { "id": "build", "from": "commit", "to": "cobj", "num": 5, "label": "root tree + parent", "packet": "tree id",
+      "code": { "file": "builtin/commit.c", "lines": [1938, 1943], "mark": [1938, 1940] },
+      "calls": ["commit_tree_extended(", "cache_tree->oid"] },
+    { "id": "wcommit", "from": "cobj", "to": "objects", "num": 6, "label": "commit object", "packet": "commit",
+      "code": { "file": "commit.c", "lines": [1848, 1849] },
+      "calls": ["odb_write_object_ext(", "OBJ_COMMIT"] },
+    { "id": "move", "from": "commit", "to": "refs", "num": 7, "label": "move HEAD", "packet": "new id",
+      "code": { "file": "builtin/commit.c", "lines": [1945, 1949], "mark": [1945, 1946] },
+      "calls": "update_head_with_reflog(current_head, &oid" },
+    { "id": "wref", "from": "refs", "to": "branch", "num": 8, "label": "write the lock", "packet": "commit id",
+      "code": { "file": "refs/files-backend.c", "lines": [2856, 2870], "mark": [2867, 2869] },
+      "calls": "write_ref_to_lockfile(" },
+    { "id": "wlog", "from": "refs", "to": "reflog", "num": 9, "label": "append a line", "packet": "old → new",
+      "code": { "file": "refs/files-backend.c", "lines": [3355, 3363], "mark": [3359, 3359] },
+      "calls": "parse_and_write_reflog(refs, update, lock, err)" }
+  ],
+  "steps": [
+    {
+      "title": "You run git commit",
+      "say": "`git.c` maps the word *commit* to `cmd_commit`. Your file contents are already in `.git/objects`: `git add` stored them as blobs.",
+      "show": ["run"],
+      "flow": ["run"]
+    },
+    {
+      "title": "Lock the staging area",
+      "say": "The index lists every staged path with its blob id. `cmd_commit` takes `index.lock`, so no other git command can stage mid-commit.",
+      "show": ["lock"],
+      "flow": ["lock"],
+      "focus": ["index"]
+    },
+    {
+      "title": "One tree per folder",
+      "say": "`cache_tree_update` folds that flat list into **tree objects**, one per folder. Folders you didn't touch keep their cached id and are skipped.",
+      "show": ["fold", "wtree"],
+      "flow": ["fold", "wtree"],
+      "notes": [{ "on": "objects", "text": "file name = hash of content", "side": "bottom" }]
+    },
+    {
+      "title": "The commit object",
+      "say": "`commit_tree_extended` writes a few lines of text: root `tree`, `parent`, author, committer, then your message. Its hash is the commit id.",
+      "show": ["build", "wcommit"],
+      "flow": ["build", "wcommit"],
+      "focus": ["cobj"]
+    },
+    {
+      "title": "Write once, by hash",
+      "say": "Each object is zlib-compressed into a temp file, then hard-linked (or renamed) to `objects/ab/cdef…`. Same bytes, same name: a known object is never rewritten.",
+      "flow": ["wcommit"],
+      "focus": ["objects"],
+      "notes": [{ "on": "objects", "text": "exists already? only touch mtime", "side": "bottom" }]
+    },
+    {
+      "title": "Move the branch",
+      "say": "A ref transaction updates `HEAD`, which points at your branch. The new id goes into the branch's `.lock` file, only if it still holds the old parent.",
+      "show": ["move", "wref"],
+      "flow": ["move", "wref"],
+      "focus": ["branch"]
+    },
+    {
+      "title": "Leave a trail",
+      "say": "Before the lock is renamed into place, git appends one line to the reflogs of HEAD and the branch: old id, new id, who, when.",
+      "show": ["wlog"],
+      "flow": ["wlog"],
+      "notes": [{ "on": "reflog", "text": "what git reflog reads", "side": "top" }]
+    },
+    {
+      "title": "The whole write",
+      "say": "Objects first, the branch last. So a branch only ever points at a commit whose trees are already on disk.",
+      "recap": true,
+      "flow": ["run", "lock", "fold", "wtree", "build", "wcommit", "move", "wref", "wlog"]
+    }
+  ]
+}
