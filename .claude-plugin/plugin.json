@@ -1,7 +1,7 @@
 {
   "name": "chalk-talk",
-  "version": "0.1.0",
-  "description": "Explains how a system or code path works as a step-by-step animated isometric diorama (light or dark) in one HTML page.",
+  "version": "0.2.0",
+  "description": "Ask how your code works and watch the journey: a step-by-step animated walkthrough in one HTML page, every arrow traced to a real line of code.",
   "author": { "name": "Emre Ozturk" },
   "homepage": "https://github.com/oztrkemree/chalk-talk",
   "repository": "https://github.com/oztrkemree/chalk-talk",

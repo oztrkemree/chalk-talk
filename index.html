@@ -1,0 +1,441 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>chalk-talk — watch your codebase explain itself</title>
+<meta name="description" content="Ask your coding agent how something works and get a step-by-step animated walkthrough of the real code path, in one HTML file. Every arrow is traced to a real line of code, or honestly marked as a guess. Free, MIT, offline.">
+<meta name="theme-color" content="#F3F6FA" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0B1221" media="(prefers-color-scheme: dark)">
+<link rel="canonical" href="https://oztrkemree.github.io/chalk-talk/">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 2.5l8.5 4.9-8.5 4.9-8.5-4.9z' fill='%23C9F2DC'/%3E%3Cpath d='M3.5 7.4v9.8l8.5 4.9v-9.8z' fill='%238CD8B0'/%3E%3Cpath d='M20.5 7.4v9.8l-8.5 4.9v-9.8z' fill='%236CC096'/%3E%3Ccircle cx='12' cy='7.4' r='1.8' fill='%23FF5D73'/%3E%3C/svg%3E">
+
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="chalk-talk">
+<meta property="og:title" content="chalk-talk — watch your codebase explain itself">
+<meta property="og:description" content="Don't read the map. Watch the journey. Animated walkthroughs of real code paths, every arrow traced to a line of code. One HTML file, free and MIT.">
+<meta property="og:url" content="https://oztrkemree.github.io/chalk-talk/">
+<meta property="og:image" content="https://oztrkemree.github.io/chalk-talk/site/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="chalk-talk: an isometric walkthrough of how Vite hot-updates a module, with every hop traced to code">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="chalk-talk — watch your codebase explain itself">
+<meta name="twitter:description" content="Ask your coding agent how something works. Get an animated walkthrough of the real code path, every arrow traced to a line of code.">
+<meta name="twitter:image" content="https://oztrkemree.github.io/chalk-talk/site/og.png">
+<meta name="twitter:image:alt" content="chalk-talk: an isometric walkthrough of how Vite hot-updates a module, with every hop traced to code">
+
+<script>try{var t=localStorage.getItem('chalk-talk-theme')}catch(e){}document.documentElement.dataset.theme=t==='dark'||t==='light'?t:matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400..700&family=Geist+Mono:wght@400..600&display=swap">
+<link rel="stylesheet" href="site/style.css">
+<script src="site/main.js" defer></script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-check" viewBox="0 0 16 16"><path d="M3.5 8.5l3 3 6-7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-gh" viewBox="0 0 16 16"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></symbol>
+  <symbol id="i-repo" viewBox="0 0 16 16"><path fill="currentColor" d="M2 2.5A2.5 2.5 0 014.5 0h8.75a.75.75 0 01.75.75v12.5a.75.75 0 01-.75.75h-2.5a.75.75 0 010-1.5h1.75v-2h-8a1 1 0 00-.71 1.71.75.75 0 01-1.06 1.06A2.5 2.5 0 012 11.5zm10.5-1h-8a1 1 0 00-1 1v6.71A2.5 2.5 0 014.5 9h8zM5 12.25a.25.25 0 01.25-.25h3.5a.25.25 0 01.25.25v3.25a.25.25 0 01-.4.2l-1.45-1.09a.25.25 0 00-.3 0L5.4 15.7a.25.25 0 01-.4-.2z"/></symbol>
+  <symbol id="i-copy" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><rect x="8.5" y="8.5" width="12" height="12" rx="2.5"/><path d="M15.5 8.5V6a2.5 2.5 0 00-2.5-2.5H6A2.5 2.5 0 003.5 6v7A2.5 2.5 0 006 15.5h2.5"/></g></symbol>
+  <symbol id="i-theme" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.25" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M12 3.75a8.25 8.25 0 010 16.5z" fill="currentColor"/></symbol>
+  <symbol id="i-cube" viewBox="0 0 24 24"><path d="M12 2.5l8.5 4.9-8.5 4.9-8.5-4.9z" fill="var(--mint-top)"/><path d="M3.5 7.4v9.8l8.5 4.9v-9.8z" fill="var(--mint-l)"/><path d="M20.5 7.4v9.8l-8.5 4.9v-9.8z" fill="var(--mint-r)"/><circle cx="12" cy="7.4" r="1.8" fill="var(--accent)"/></symbol>
+</svg>
+
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="#top" aria-label="chalk-talk, back to top"><svg aria-hidden="true"><use href="#i-cube"/></svg>chalk-talk <small>v0.2</small></a>
+    <nav class="nav" aria-label="Sections">
+      <a href="#proof">Proof</a>
+      <a href="#gallery">Gallery</a>
+      <a href="#chalk">Chalk</a>
+      <a href="#how">How it works</a>
+      <a href="#faq">FAQ</a>
+    </nav>
+    <div class="top-end">
+      <a class="gh" href="https://github.com/oztrkemree/chalk-talk"><svg aria-hidden="true"><use href="#i-gh"/></svg><span>GitHub</span><img src="https://img.shields.io/github/stars/oztrkemree/chalk-talk?style=flat&amp;label=%E2%98%85&amp;color=555" alt="GitHub stars" width="46" height="20" loading="lazy"></a>
+      <button class="icon-btn" id="theme" type="button" aria-label="Toggle light and dark theme"><svg aria-hidden="true"><use href="#i-theme"/></svg></button>
+    </div>
+  </div>
+</header>
+
+<main id="main">
+<!-- ======================= hero ======================= -->
+<div class="hero" id="top">
+  <div class="wrap">
+    <a class="pill" href="#proof"><b>NEW</b> v0.2: every arrow now has a receipt</a>
+    <h1>Don't read the map. <em>Watch the journey.</em></h1>
+    <p class="lede">Ask your coding agent how something works. Get a <strong>step-by-step animated walkthrough of the real code path</strong> in one HTML file, where every arrow is traced to a real line of code, or honestly marked as a guess.</p>
+
+    <div class="install" id="install">
+      <div class="tabs" role="tablist" aria-label="Install">
+        <button class="tab" role="tab" id="t-cc" aria-controls="p-cc" aria-selected="true">Claude Code</button>
+        <button class="tab" role="tab" id="t-any" aria-controls="p-any" aria-selected="false" tabindex="-1">Any agent</button>
+        <button class="tab" role="tab" id="t-man" aria-controls="p-man" aria-selected="false" tabindex="-1">Manual</button>
+      </div>
+      <div class="panel" role="tabpanel" id="p-cc" aria-labelledby="t-cc">
+<pre><span data-cmd>/plugin marketplace add oztrkemree/chalk-talk</span>
+<span data-cmd>/plugin install chalk-talk@chalk-talk</span></pre>
+        <button class="icon-btn copy" type="button" aria-label="Copy install commands"><svg class="cp" aria-hidden="true"><use href="#i-copy"/></svg><svg class="ok" aria-hidden="true"><use href="#i-check"/></svg></button>
+      </div>
+      <div class="panel" role="tabpanel" id="p-any" aria-labelledby="t-any" hidden>
+<pre><span class="p">$ </span><span data-cmd>npx skills add oztrkemree/chalk-talk</span></pre>
+        <button class="icon-btn copy" type="button" aria-label="Copy install command"><svg class="cp" aria-hidden="true"><use href="#i-copy"/></svg><svg class="ok" aria-hidden="true"><use href="#i-check"/></svg></button>
+      </div>
+      <div class="panel" role="tabpanel" id="p-man" aria-labelledby="t-man" hidden>
+<pre><span class="p">$ </span><span data-cmd>git clone https://github.com/oztrkemree/chalk-talk</span>
+<span class="p">$ </span><span data-cmd>cp -r chalk-talk/skills/chalk-talk ~/.claude/skills/</span>
+<span class="c"># or your agent's skills folder</span></pre>
+        <button class="icon-btn copy" type="button" aria-label="Copy install commands"><svg class="cp" aria-hidden="true"><use href="#i-copy"/></svg><svg class="ok" aria-hidden="true"><use href="#i-check"/></svg></button>
+      </div>
+      <p class="install-foot">Then just ask: <code>how does auth work in this repo?</code> <span class="sr-only" aria-live="polite"></span></p>
+    </div>
+
+    <p class="agents"><span class="lbl">Works with</span><span>Claude Code</span><span>Codex</span><span>Cursor</span><span>Gemini CLI</span><span>OpenCode</span><span>Copilot</span><span class="lbl">via the Agent Skills standard</span></p>
+  </div>
+
+  <div class="stage">
+    <div class="frame">
+      <picture class="l"><source media="(max-width: 699px)" srcset="site/img/hero-m-light.webp" width="670" height="1418"><img src="site/img/hero-light.webp" width="1280" height="800" alt="Step 1 of the talk How Vite hot-updates a module: you save a file in your editor" fetchpriority="high"></picture>
+      <picture class="d"><source media="(max-width: 699px)" srcset="site/img/hero-m-dark.webp" width="670" height="1418"><img src="site/img/hero-dark.webp" width="1280" height="800" alt="Step 1 of the talk How Vite hot-updates a module: you save a file in your editor" loading="lazy"></picture>
+      <iframe data-src="gallery/vite-hmr/vite-hmr.html?play=loop" data-eager title="Live talk: How Vite hot-updates a module. Use the arrow keys to step, click a block or arrow label to read its code."></iframe>
+    </div>
+    <p class="stage-cap">
+      <span class="live">LIVE</span>
+      <span><strong>How Vite hot-updates a module</strong> · vitejs/vite · 7 of 8 hops traced</span>
+      <span class="sp"></span>
+      <span class="keys"><kbd>→</kbd> step &nbsp;<kbd>P</kbd> play &nbsp;<kbd>V</kbd> proof view &nbsp;click a block for its code</span>
+      <a href="gallery/vite-hmr/vite-hmr.html">Open full page ↗</a>
+    </p>
+  </div>
+</div>
+
+<!-- ======================= proof ======================= -->
+<section id="proof" class="alt" aria-labelledby="proof-h">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="eyebrow">Proof</span>
+      <h2 id="proof-h">Every arrow has a receipt.</h2>
+      <p>Diagram tools draw what <em>might</em> connect. chalk-talk only draws a hop when it can point at the line that makes it. The build opens the cited file, finds the call inside the cited lines, and marks the result on the arrow.</p>
+    </div>
+
+    <div class="proof-grid">
+      <ul class="marks">
+        <li class="mark">
+          <span class="glyph g-ok" aria-hidden="true"><svg><use href="#i-check"/></svg></span>
+          <div><h3>Verified <code>✓</code></h3>
+          <p>The file and lines exist, and the call that proves the hop was found in them, like <code>hot.send({</code> in <code>server/hmr.ts:783-794</code>. Click the arrow and that line is highlighted.</p></div>
+        </li>
+        <li class="mark">
+          <span class="glyph g-warn" aria-hidden="true">?</span>
+          <div><h3>Inferred <code>?</code></h3>
+          <p>Some hops have no single line: a network boundary, an OS event, framework magic. The agent says so and says why. In proof view these turn dotted.</p></div>
+        </li>
+        <li class="mark">
+          <span class="glyph g-err" aria-hidden="true">!</span>
+          <div><h3>Broken <code>!</code></h3>
+          <p>Cited code that isn't there, or doesn't contain the call. The build prints a warning, the arrow turns red, and the agent fixes the scene before you ever see it.</p></div>
+        </li>
+      </ul>
+
+      <figure class="shot">
+        <div class="pic">
+          <img class="l" src="site/img/proof-light.webp" width="1280" height="800" loading="lazy" alt="Proof view of the Vite talk: seven arrows carry a green check, the first hop from you to the file watcher is dotted with a question mark, and a chip reads Proof: 7 traced, 1 inferred">
+          <img class="d" src="site/img/proof-dark.webp" width="1280" height="800" loading="lazy" alt="Proof view of the Vite talk: seven arrows carry a green check, the first hop from you to the file watcher is dotted with a question mark, and a chip reads Proof: 7 traced, 1 inferred">
+        </div>
+        <figcaption>Proof view (press <kbd>V</kbd>). The one guess, “your editor writes the file; the OS event reaches chokidar outside Vite's code”, is labelled as one. <a href="gallery/vite-hmr/vite-hmr.html?proof#8">Open it live</a></figcaption>
+        <pre class="term" aria-label="Build output"><span class="dim">$ node build.mjs vite-hmr.scene.json</span>
+proof: <span class="okc">7/8 hops traced to code</span> (7 verified, 0 cited) · 1 inferred · 0 broken
+<span class="dim">$ node build.mjs my-talk.scene.json</span>
+<span class="errc">WARNING proof: edge reply -> calls "res.send(" not found in src/app.js:10-20</span></pre>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= gallery ======================= -->
+<section id="gallery" aria-labelledby="gallery-h">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="eyebrow">Gallery</span>
+      <h2 id="gallery-h">Real repos, real code paths.</h2>
+      <p>Each of these was written by an agent reading the actual source, pinned to a commit. Open one, step through it, click any block or arrow label to read the code it stands for.</p>
+    </div>
+
+    <div class="grid">
+      <article class="card">
+        <div class="thumb"><img class="l" src="site/posters/vite-hmr-light.webp" width="960" height="505" loading="lazy" alt="The whole trip of a Vite hot update: file watcher, module graph, HMR engine, WebSocket server, browser"><img class="d" src="site/posters/vite-hmr-dark.webp" width="960" height="505" loading="lazy" alt="The whole trip of a Vite hot update: file watcher, module graph, HMR engine, WebSocket server, browser"></div>
+        <div class="card-body">
+          <div class="meta"><span class="repo"><svg aria-hidden="true"><use href="#i-repo"/></svg>vitejs/vite</span><span class="badge b-ok" title="1 hop is an honest guess"><svg aria-hidden="true"><use href="#i-check"/></svg>7/8 hops traced<span class="inf">? 1<span class="sr-only"> inferred</span></span></span></div>
+          <h3><a href="gallery/vite-hmr/vite-hmr.html">How Vite hot-updates a module</a></h3>
+          <p>From saving a file to new code running in the tab, without a reload.</p>
+        </div>
+      </article>
+
+      <article class="card">
+        <div class="thumb"><img class="l" src="site/posters/codex-exec-light.webp" width="960" height="505" loading="lazy" alt="Codex CLI running a shell command: model, tool router, approval, sandbox, output"><img class="d" src="site/posters/codex-exec-dark.webp" width="960" height="505" loading="lazy" alt="Codex CLI running a shell command: model, tool router, approval, sandbox, output"></div>
+        <div class="card-body">
+          <div class="meta"><span class="repo"><svg aria-hidden="true"><use href="#i-repo"/></svg>openai/codex</span><span class="badge b-ok"><svg aria-hidden="true"><use href="#i-check"/></svg>10/10 hops traced</span></div>
+          <h3><a href="gallery/codex-exec/codex-exec.html">How Codex CLI runs a shell command</a></h3>
+          <p>From the model's tool call through approval and the sandbox, back to the output it reads.</p>
+        </div>
+      </article>
+
+      <article class="card">
+        <div class="thumb"><img class="l" src="site/posters/redis-set-light.webp" width="960" height="505" loading="lazy" alt="Redis handling SET greeting hello: event loop, socket reader, RESP parser, command table, keyspace, reply buffer"><img class="d" src="site/posters/redis-set-dark.webp" width="960" height="505" loading="lazy" alt="Redis handling SET greeting hello: event loop, socket reader, RESP parser, command table, keyspace, reply buffer"></div>
+        <div class="card-body">
+          <div class="meta"><span class="repo"><svg aria-hidden="true"><use href="#i-repo"/></svg>redis/redis</span><span class="badge b-ok" title="1 hop is an honest guess"><svg aria-hidden="true"><use href="#i-check"/></svg>8/9 hops traced<span class="inf">? 1<span class="sr-only"> inferred</span></span></span></div>
+          <h3><a href="gallery/redis-set/redis-set.html">What Redis does with SET greeting hello</a></h3>
+          <p>One command, from socket bytes to <code>+OK</code>, through the real redis source.</p>
+        </div>
+      </article>
+
+
+      <article class="card">
+        <div class="thumb"><img class="l" src="site/posters/git-commit-light.webp" width="960" height="505" loading="lazy" alt="git commit writing to disk: index lock, trees, commit object, object store, branch ref, reflog"><img class="d" src="site/posters/git-commit-dark.webp" width="960" height="505" loading="lazy" alt="git commit writing to disk: index lock, trees, commit object, object store, branch ref, reflog"></div>
+        <div class="card-body">
+          <div class="meta"><span class="repo"><svg aria-hidden="true"><use href="#i-repo"/></svg>git/git</span><span class="badge b-ok"><svg aria-hidden="true"><use href="#i-check"/></svg>9/9 hops traced</span></div>
+          <h3><a href="gallery/git-commit/git-commit.html">What git commit writes to disk</a></h3>
+          <p>Trees, one commit object, a moved branch and a reflog line.</p>
+          <p class="modes"><a href="gallery/git-commit/git-commit.html">Clean</a><a href="gallery/git-commit/git-commit.html?style=chalk">Chalkboard</a></p>
+        </div>
+      </article>
+
+      <article class="card">
+        <div class="thumb"><img class="l" src="site/posters/fastapi-request-light.webp" width="960" height="505" loading="lazy" alt="FastAPI calling your function: ASGI server, middleware, router, dependencies, validation, your endpoint, JSON response"><img class="d" src="site/posters/fastapi-request-dark.webp" width="960" height="505" loading="lazy" alt="FastAPI calling your function: ASGI server, middleware, router, dependencies, validation, your endpoint, JSON response"></div>
+        <div class="card-body">
+          <div class="meta"><span class="repo"><svg aria-hidden="true"><use href="#i-repo"/></svg>fastapi/fastapi</span><span class="badge b-ok" title="1 hop is an honest guess"><svg aria-hidden="true"><use href="#i-check"/></svg>8/9 hops traced<span class="inf">? 1<span class="sr-only"> inferred</span></span></span></div>
+          <h3><a href="gallery/fastapi-request/fastapi-request.html">How FastAPI calls your function</a></h3>
+          <p>From one ASGI call to a JSON response, through fastapi and starlette.</p>
+        </div>
+      </article>
+
+      <article class="card">
+        <div class="thumb"><img class="l" src="site/posters/express-request-light.webp" width="960" height="505" loading="lazy" alt="A request hitting app.get() in Express 5: router, layers, route, your handler, response"><img class="d" src="site/posters/express-request-dark.webp" width="960" height="505" loading="lazy" alt="A request hitting app.get() in Express 5: router, layers, route, your handler, response"></div>
+        <div class="card-body">
+          <div class="meta"><span class="repo"><svg aria-hidden="true"><use href="#i-repo"/></svg>expressjs/express</span><span class="badge b-ok" title="2 hops are honest guesses"><svg aria-hidden="true"><use href="#i-check"/></svg>7/9 hops traced<span class="inf">? 2<span class="sr-only"> inferred</span></span></span></div>
+          <h3><a href="gallery/express-request/express-request.html">What happens when a request hits app.get()</a></h3>
+          <p><code>GET /users/42</code> through Express 5 and its router, and back to the socket.</p>
+        </div>
+      </article>
+
+      <article class="card wide">
+        <div class="thumb"><img class="l" src="site/posters/express-pr-light.webp" width="960" height="505" loading="lazy" alt="Change walkthrough of Express PR 7459: blocks tagged NEW and CHANGED inside res.send()"><img class="d" src="site/posters/express-pr-dark.webp" width="960" height="505" loading="lazy" alt="Change walkthrough of Express PR 7459: blocks tagged NEW and CHANGED inside res.send()"></div>
+        <div class="card-body">
+          <div class="meta"><span class="repo"><svg aria-hidden="true"><use href="#i-repo"/></svg>expressjs/express</span><span class="badge b-chg">PR #7459 · change mode</span><span class="badge b-ok" title="1 hop is an honest guess"><svg aria-hidden="true"><use href="#i-check"/></svg>5/6 hops traced<span class="inf">? 1<span class="sr-only"> inferred</span></span></span></div>
+          <h3><a href="gallery/express-pr/express-pr.html">Chunked responses get their ETag back</a></h3>
+          <p>What one pull request changes inside <code>res.send()</code>. Change mode tags each part <b class="t-new">NEW</b>, <b class="t-chg">CHANGED</b> or <b class="t-rem">REMOVED</b> on the journey, and <kbd>D</kbd> flips between the code before and after the PR.</p>
+          <p class="modes"><a href="gallery/express-pr/express-pr.html">After the PR</a><a href="gallery/express-pr/express-pr.html?diff=before">Before</a></p>
+        </div>
+      </article>
+    </div>
+
+    <div class="sub-h"><h3>Examples</h3><p>chalk-talk explaining itself, plus concept talks that need no repo: an idea, a protocol, a plan, in any language.</p></div>
+    <div class="grid small">
+      <article class="card">
+        <div class="thumb"><img class="l" src="site/posters/build-light.webp" width="960" height="505" loading="lazy" alt="How chalk-talk proves every arrow: your agent, scene file, builder, proof checker, engine, one HTML file"><img class="d" src="site/posters/build-dark.webp" width="960" height="505" loading="lazy" alt="How chalk-talk proves every arrow: your agent, scene file, builder, proof checker, engine, one HTML file"></div>
+        <div class="card-body">
+          <div class="meta"><span class="repo"><svg aria-hidden="true"><use href="#i-repo"/></svg>chalk-talk</span><span class="badge b-ok" title="1 hop is an honest guess"><svg aria-hidden="true"><use href="#i-check"/></svg>6/7 traced<span class="inf">? 1<span class="sr-only"> inferred</span></span></span></div>
+          <h3><a href="skills/chalk-talk/examples/build.html">How chalk-talk proves every arrow</a></h3>
+          <p>This repo explaining itself.</p>
+        </div>
+      </article>
+      <article class="card">
+        <div class="thumb"><img class="l" src="site/posters/login-light.webp" width="960" height="505" loading="lazy" alt="How logging in works: web app, auth API, users table, session store"><img class="d" src="site/posters/login-dark.webp" width="960" height="505" loading="lazy" alt="How logging in works: web app, auth API, users table, session store"></div>
+        <div class="card-body">
+          <div class="meta"><span class="badge b-plain">concept</span></div>
+          <h3><a href="skills/chalk-talk/examples/login.html">How logging in works</a></h3>
+          <p>Password, hash check, session, cookie.</p>
+        </div>
+      </article>
+      <article class="card">
+        <div class="thumb"><img class="l" src="site/posters/oauth-light.webp" width="960" height="505" loading="lazy" alt="Sign in with Google as a sequence diagram: you, your app, Google, your server"><img class="d" src="site/posters/oauth-dark.webp" width="960" height="505" loading="lazy" alt="Sign in with Google as a sequence diagram: you, your app, Google, your server"></div>
+        <div class="card-body">
+          <div class="meta"><span class="badge b-plain">sequence layout</span></div>
+          <h3><a href="skills/chalk-talk/examples/oauth.html">Sign in with Google</a></h3>
+          <p>OAuth 2.0, message by message.</p>
+        </div>
+      </article>
+      <article class="card">
+        <div class="thumb"><img class="l" src="site/posters/siparis-light.webp" width="960" height="505" loading="lazy" alt="An order flow in Turkish: app, API, payment, database, queue, mail and stock workers"><img class="d" src="site/posters/siparis-dark.webp" width="960" height="505" loading="lazy" alt="An order flow in Turkish: app, API, payment, database, queue, mail and stock workers"></div>
+        <div class="card-body">
+          <div class="meta"><span class="badge b-plain">Türkçe</span></div>
+          <h3><a href="skills/chalk-talk/examples/siparis.html" hreflang="tr">Sipariş verince ne olur?</a></h3>
+          <p>An order flow with a queue and workers.</p>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= chalk style ======================= -->
+<section id="chalk" class="alt" aria-labelledby="chalk-h">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="eyebrow">New in v0.2</span>
+      <h2 id="chalk-h">Same talk, on a chalkboard.</h2>
+      <p>One scene file, several looks. Add <code>?style=chalk</code> to any talk (or <code>"style": "chalk"</code> to the scene) and it is drawn by hand on a green board, proof marks and all. Flip it here:</p>
+    </div>
+    <div class="seg" role="group" aria-label="Talk style">
+      <button type="button" class="seg-b" data-style="" aria-pressed="false">Clean</button>
+      <button type="button" class="seg-b" data-style="chalk" aria-pressed="true">Chalkboard</button>
+    </div>
+  </div>
+  <div class="stage">
+    <div class="frame" id="chalk-frame">
+      <picture class="l"><source media="(max-width: 699px)" srcset="site/img/chalk-m-light.webp" width="670" height="1418"><img src="site/img/chalk-light.webp" width="1280" height="800" loading="lazy" alt="What git commit writes to disk, drawn in chalk on a green board: every block and arrow sketched by hand"></picture>
+      <picture class="d"><source media="(max-width: 699px)" srcset="site/img/chalk-m-dark.webp" width="670" height="1418"><img src="site/img/chalk-dark.webp" width="1280" height="800" loading="lazy" alt="What git commit writes to disk, drawn in chalk on a dark board: every block and arrow sketched by hand"></picture>
+      <iframe data-src="gallery/git-commit/git-commit.html?style=chalk&amp;play=loop" title="Live talk: What git commit writes to disk, in the chalkboard style."></iframe>
+    </div>
+    <p class="stage-cap">
+      <span class="live">LIVE</span>
+      <span><strong>What git commit writes to disk</strong> · git/git · 9 of 9 hops traced</span>
+      <span class="sp"></span>
+      <a href="gallery/git-commit/git-commit.html?style=chalk" id="chalk-open">Open full page ↗</a>
+    </p>
+  </div>
+</section>
+
+<!-- ======================= how it works ======================= -->
+<section id="how" aria-labelledby="how-h">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="eyebrow">How it works</span>
+      <h2 id="how-h">The agent tells the story. The engine draws it.</h2>
+      <p>Your agent never writes SVG. It writes a short scene file; a dependency-free engine does layout, routing, labels and proof, and hands back one HTML page.</p>
+    </div>
+
+    <ol class="flow">
+      <li><h3>You ask</h3><p>“How does a hot update reach the browser?” In plain words, in any language.</p></li>
+      <li><h3>The agent reads the code</h3><p>It picks one journey and writes <code>scene.json</code>: blocks, arrows, steps, and the file and lines behind each one.</p></li>
+      <li><h3>The build checks it</h3><p><code>build.mjs</code> opens every cited range, verifies the calls, embeds the snippets with GitHub permalinks.</p></li>
+      <li><h3>One HTML file</h3><p><code>check.mjs</code> screenshots every step so the agent looks before you do. Then it opens for you.</p></li>
+    </ol>
+
+    <div class="how-code">
+      <div class="codecard">
+        <header><span>vite-hmr.scene.json</span><span>one edge</span></header>
+<pre><code>{ <span class="k">"id"</span>: <span class="s">"send"</span>, <span class="k">"from"</span>: <span class="s">"hmr"</span>, <span class="k">"to"</span>: <span class="s">"ws"</span>,
+  <span class="k">"label"</span>: <span class="s">"hot.send"</span>, <span class="k">"packet"</span>: <span class="s">"update"</span>,
+  <span class="k">"code"</span>: { <span class="k">"file"</span>: <span class="s">"packages/vite/src/node/server/hmr.ts"</span>,
+            <span class="k">"lines"</span>: [<span class="n">783</span>, <span class="n">794</span>] },
+  <span class="k">"calls"</span>: [<span class="s">"hot.send({"</span>, <span class="s">"type: 'update'"</span>] }
+
+{ <span class="k">"id"</span>: <span class="s">"save"</span>, <span class="k">"from"</span>: <span class="s">"you"</span>, <span class="k">"to"</span>: <span class="s">"watcher"</span>,
+  <span class="k">"inferred"</span>: <span class="s">"the OS file event reaches chokidar
+               outside Vite's code"</span> }</code></pre>
+      </div>
+      <ul class="points">
+        <li><svg aria-hidden="true"><use href="#i-check"/></svg><span><b>Builds up.</b> Each step adds one thing and makes one point; the last step replays the whole trip.</span></li>
+        <li><svg aria-hidden="true"><use href="#i-check"/></svg><span><b>Shows movement.</b> Named packets like <code>update</code> or <code>SELECT</code> travel the arrows in order.</span></li>
+        <li><svg aria-hidden="true"><use href="#i-check"/></svg><span><b>Opens the code.</b> Click a block or an arrow label: highlighted lines, a permalink to the exact commit, open in VS Code or Cursor.</span></li>
+        <li><svg aria-hidden="true"><use href="#i-check"/></svg><span><b>Clean by construction.</b> Isometric blocks, routed paths, no overlapping labels, light and dark, portrait on phones.</span></li>
+        <li><svg aria-hidden="true"><use href="#i-check"/></svg><span><b>One file.</b> No server, no account, no build step on the reader's side. Send it, commit it, attach it to a PR.</span></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= use it for ======================= -->
+<section id="use" class="alt" aria-labelledby="use-h">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="eyebrow">Use it for</span>
+      <h2 id="use-h">Whenever “how does this work?” deserves a better answer than a wall of text.</h2>
+    </div>
+    <div class="uses">
+      <div class="use">
+        <span class="ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-4.5-7-11a7 7 0 0114 0c0 6.5-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg></span>
+        <h3>Onboarding</h3>
+        <p>A new teammate gets the request path, the job queue and the auth flow as walkthroughs they can click into, not a stale wiki diagram.</p>
+        <blockquote>walk me through what happens when a webhook arrives</blockquote>
+      </div>
+      <div class="use">
+        <span class="ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.8 4.9L19 9.7l-4.2 3 1.4 5.3L12 15l-4.2 3 1.4-5.3L5 9.7l5.2-1.8z"/></svg></span>
+        <h3>Understanding AI-written code</h3>
+        <p>Your agent wrote 2,000 lines this afternoon. Ask it to show you how they fit together, with every claim pinned to a line you can check.</p>
+        <blockquote>show me how the retry logic you just wrote actually runs</blockquote>
+      </div>
+      <div class="use">
+        <span class="ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="2.5"/><circle cx="6" cy="18" r="2.5"/><circle cx="18" cy="18" r="2.5"/><path d="M6 8.5v7M18 15.5V10a3 3 0 00-3-3h-4m0 0l2.5-2.5M11 7l2.5 2.5"/></svg></span>
+        <h3>Explaining a PR</h3>
+        <p>Change mode marks what a branch adds, changes and removes on the journey, with a before/after toggle. Attach the file to the review. <a href="gallery/express-pr/express-pr.html">See Express PR #7459</a></p>
+        <blockquote>explain this PR as a chalk talk</blockquote>
+      </div>
+      <div class="use">
+        <span class="ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5.5h18v11H3z"/><path d="M8 20.5h8M12 16.5v4"/></svg></span>
+        <h3>Teaching</h3>
+        <p>Step through a protocol, an algorithm or a framework's internals one point at a time, at your pace, in your language, on a projector or a phone.</p>
+        <blockquote>bu kuyruk sistemi nasıl çalışıyor, çizerek anlat</blockquote>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= faq ======================= -->
+<section id="faq" aria-labelledby="faq-h">
+  <div class="wrap">
+    <div class="sec-head center">
+      <span class="eyebrow">FAQ</span>
+      <h2 id="faq-h">Questions</h2>
+    </div>
+    <div class="faq">
+      <details>
+        <summary>How accurate is it?</summary>
+        <div class="a"><p>As accurate as the code it cites, and it shows you which is which. Every arrow is either verified (the build found the cited lines and the call inside them), inferred (the agent explains why there's no single line), or broken (flagged red, with a build warning). The page sums it up, for example “7 of 8 hops traced to code · 1 inferred”.</p><p>Captions are still written by a model, so read them like a colleague's explanation: the receipts are one click away.</p></div>
+      </details>
+      <details>
+        <summary>Does my code leave my machine?</summary>
+        <div class="a"><p>No. chalk-talk is a skill your agent runs locally: it reads files from your checkout, the build runs on your machine, and the result is a local HTML file. There is no chalk-talk service, account or telemetry; nothing is uploaded. (Your agent talks to its own model provider as it always does.)</p><p>Sharing a talk? <code>CHALK_SHARE=1</code> leaves your local file paths out of the page; GitHub permalinks stay.</p></div>
+      </details>
+      <details>
+        <summary>What about big repos?</summary>
+        <div class="a"><p>chalk-talk doesn't map the whole repo, on purpose. Each talk follows one journey (“a request hits the router”, “an order becomes an email”) in six to ten steps. Ask for as many talks as you need; the agent only reads the files on that path.</p></div>
+      </details>
+      <details>
+        <summary>Which agents and languages work?</summary>
+        <div class="a"><p>Any agent that supports the Agent Skills standard: Claude Code, Codex, Cursor, Gemini CLI, OpenCode, GitHub Copilot and others. The code can be in any programming language, and captions can be in any human language.</p></div>
+      </details>
+      <details>
+        <summary>Does the page need a server or internet?</summary>
+        <div class="a"><p>No. The output is one self-contained HTML file with the code snippets embedded. It works offline; it only fetches its web fonts when online and falls back to system fonts otherwise.</p></div>
+      </details>
+      <details>
+        <summary>Can I change a talk after it's made?</summary>
+        <div class="a"><p>Yes. Keep the <code>scene.json</code> next to the HTML and ask for changes (“split step 3”, “show the retry path”); the agent edits the scene and rebuilds. You can also build by hand: <code>node build.mjs my-talk.scene.json</code>.</p></div>
+      </details>
+      <details>
+        <summary>What does it cost?</summary>
+        <div class="a"><p>Nothing. It's open source under the MIT license. Use it, fork it, ship it.</p></div>
+      </details>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= cta ======================= -->
+<section class="cta" aria-labelledby="cta-h">
+  <div class="wrap">
+    <h2 id="cta-h">Ask your agent how something works.</h2>
+    <p>Free, MIT, offline. One install, then ask in your own words.</p>
+    <div class="btns">
+      <a class="btn primary" href="#install">Install chalk-talk</a>
+      <a class="btn" href="https://github.com/oztrkemree/chalk-talk"><svg aria-hidden="true"><use href="#i-gh"/></svg>Star on GitHub</a>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <a class="brand" href="#top" aria-label="chalk-talk, back to top"><svg aria-hidden="true"><use href="#i-cube"/></svg>chalk-talk</a>
+    <span>MIT licensed · one HTML file · no service</span>
+    <span class="sp"></span>
+    <a href="https://github.com/oztrkemree/chalk-talk/blob/main/skills/chalk-talk/references/scene-spec.md">Scene format</a>
+    <a href="https://github.com/oztrkemree/chalk-talk">GitHub</a>
+    <a href="https://github.com/oztrkemree/chalk-talk/stargazers"><img src="https://img.shields.io/github/stars/oztrkemree/chalk-talk?style=social" alt="Star chalk-talk on GitHub" width="88" height="20" loading="lazy"></a>
+  </div>
+</footer>
+</body>
+</html>

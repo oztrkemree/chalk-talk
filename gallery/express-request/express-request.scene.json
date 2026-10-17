@@ -1,0 +1,109 @@
+{
+  "title": "What happens when a request hits app.get()",
+  "subtitle": "GET /users/42 through Express 5 and its router, and back to the socket",
+  "lang": "en",
+  "root": "../../../chalk-gallery-src",
+  "nodes": [
+    { "id": "client", "kind": "browser", "label": "Client", "sub": "GET /users/42", "at": [0, 1] },
+    { "id": "server", "label": "Node http server", "sub": "http.createServer(app)", "icon": "server", "color": "stone", "at": [1, 0],
+      "code": { "file": "express/lib/application.js", "lines": [598, 606], "mark": [599, 599] } },
+    { "id": "app", "label": "app.handle", "sub": "express/lib/application.js", "icon": "bolt", "at": [2, 0],
+      "code": { "file": "express/lib/application.js", "lines": [152, 178], "mark": [168, 170] } },
+    { "id": "router", "label": "Router", "sub": "router/index.js", "icon": "refresh", "color": "teal", "at": [3, 0],
+      "code": { "file": "router/index.js", "lines": [230, 301], "mark": [235, 237] } },
+    { "id": "layer", "kind": "pill", "label": "Layer", "sub": "path: /users/:id", "icon": "search", "color": "teal", "at": [3, 1],
+      "code": { "file": "router/lib/layer.js", "lines": [314, 345], "mark": [339, 342] } },
+    { "id": "route", "kind": "pill", "label": "Route", "sub": "methods.get", "icon": "flag", "color": "teal", "at": [3, 2],
+      "code": { "file": "router/lib/route.js", "lines": [98, 162], "mark": [143, 147] } },
+    { "id": "handler", "label": "Your handler", "sub": "(req, res) => { … }", "icon": "code", "color": "orange", "at": [2, 2],
+      "code": { "file": "router/lib/layer.js", "lines": [176, 203], "mark": [188, 198] } },
+    { "id": "json", "kind": "pill", "label": "res.json", "sub": "express/lib/response.js", "icon": "file", "at": [1, 2],
+      "code": { "file": "express/lib/response.js", "lines": [236, 250], "mark": [242, 249] } },
+    { "id": "send", "label": "res.send", "sub": "express/lib/response.js", "icon": "mail", "at": [0, 2],
+      "code": { "file": "express/lib/response.js", "lines": [161, 221], "mark": [195, 219] } }
+  ],
+  "groups": [
+    { "id": "pkg", "label": "router package", "members": ["router", "layer", "route"] }
+  ],
+  "edges": [
+    { "id": "arrive", "from": "client", "to": "server", "num": 1, "label": "TCP + HTTP parse", "packet": "GET /users/42",
+      "inferred": "network boundary: Node's http core parses the socket and emits 'request'; not Express code" },
+    { "id": "call", "from": "server", "to": "app", "num": 2, "label": "app(req, res)", "packet": "req, res",
+      "code": { "file": "express/lib/express.js", "lines": [36, 39], "mark": [38, 38] }, "calls": "app.handle(req, res, next)" },
+    { "id": "walk", "from": "app", "to": "router", "num": 3, "label": "handle()", "packet": "req, res, done",
+      "code": { "file": "express/lib/application.js", "lines": [172, 178], "mark": [177, 177] }, "calls": "this.router.handle(req, res, done)" },
+    { "id": "match", "from": "router", "to": "layer", "num": 4, "label": "match(path)", "packet": "/users/42",
+      "code": { "file": "router/index.js", "lines": [230, 247], "mark": [235, 237] }, "calls": "matchLayer(layer, path)" },
+    { "id": "dispatch", "from": "layer", "to": "route", "num": 5, "label": "route.dispatch", "packet": "req, res",
+      "code": { "file": "router/index.js", "lines": [425, 442], "mark": [434, 436] }, "calls": "route.dispatch(req, res, next)" },
+    { "id": "run", "from": "route", "to": "handler", "num": 6, "label": "handleRequest", "packet": "req, res, next",
+      "code": { "file": "router/lib/route.js", "lines": [143, 158], "mark": [146, 157] }, "calls": ["layer.method === method", "layer.handleRequest(req, res, next)"] },
+    { "id": "respond", "from": "handler", "to": "json", "num": 7, "label": "res.json(user)", "packet": "{ id: '42' }",
+      "inferred": "this call is in your handler, which is your code, not in the Express repo" },
+    { "id": "tosend", "from": "json", "to": "send", "num": 8, "label": "this.send(body)", "packet": "JSON string",
+      "code": { "file": "express/lib/response.js", "lines": [242, 249], "mark": [249, 249] }, "calls": "return this.send(body)" },
+    { "id": "write", "from": "send", "to": "client", "num": 9, "label": "res.end()", "packet": "200 + JSON", "tone": "ok",
+      "code": { "file": "express/lib/response.js", "lines": [213, 219], "mark": [218, 218] }, "calls": "this.end(chunk, encoding)" }
+  ],
+  "steps": [
+    {
+      "title": "A request arrives",
+      "say": "`GET /users/42` reaches Node's own **http server**. `app.listen()` built it with `http.createServer(this)`, so your app is just its request callback.",
+      "show": ["arrive"],
+      "flow": ["arrive"],
+      "focus": ["server"]
+    },
+    {
+      "title": "Express takes over",
+      "say": "`app.handle` swaps the prototypes of Node's plain `req` and `res`. That swap is why `res.json` and `req.params` exist at all.",
+      "show": ["call"],
+      "flow": ["call"],
+      "focus": ["app"],
+      "notes": [{ "on": "app", "text": "also sets X-Powered-By", "side": "top" }]
+    },
+    {
+      "title": "One list, in order",
+      "say": "Every `app.use` and `app.get` became a **Layer** in one `stack`. The router walks it top to bottom; `next()` moves on to the next one.",
+      "show": ["walk"],
+      "flow": ["walk"],
+      "focus": ["router"]
+    },
+    {
+      "title": "Match, and capture :id",
+      "say": "Each Layer tests the path with a regexp compiled from `/users/:id`. A hit returns `{ id: '42' }`, which the router stores as `req.params`.",
+      "show": ["match"],
+      "flow": ["match", { "edge": "match", "reverse": true, "packet": "{ id: '42' }" }],
+      "focus": ["layer"],
+      "notes": [{ "on": "layer", "text": "bad %-escape in :id → 400", "side": "bottom-left" }]
+    },
+    {
+      "title": "Right path, right method",
+      "say": "The layer only counts if its **Route** handles `GET`. Then `route.dispatch` runs the handlers you registered for that method.",
+      "show": ["dispatch", "pkg"],
+      "flow": ["dispatch"],
+      "focus": ["route"],
+      "notes": [{ "on": "route", "text": "HEAD falls back to GET", "side": "bottom-left" }]
+    },
+    {
+      "title": "Your handler runs",
+      "say": "Your function finally runs with `req.params.id` already `'42'`. If it returns a rejected promise, Express 5 calls `next(err)` for you.",
+      "show": ["run"],
+      "flow": ["run"],
+      "focus": ["handler"],
+      "notes": [{ "on": "handler", "kind": "tag", "text": "async errors caught", "tone": "ok" }]
+    },
+    {
+      "title": "Writing the answer",
+      "say": "`res.json` stringifies and sets `application/json`. `res.send` adds Content-Length and an ETag, then `res.end` writes to the socket.",
+      "show": ["respond", "tosend", "write"],
+      "flow": ["respond", "tosend", "write"],
+      "notes": [{ "on": "send", "text": "fresh ETag → 304, no body", "side": "left" }]
+    },
+    {
+      "title": "The whole trip",
+      "say": "Nine hops, one loop. The reply never climbs back up through the router: your handler writes straight to the socket.",
+      "recap": true,
+      "flow": ["arrive", "call", "walk", "match", "dispatch", "run", "respond", "tosend", "write"]
+    }
+  ]
+}

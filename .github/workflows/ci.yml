@@ -1,0 +1,28 @@
+name: ci
+on:
+  push:
+  pull_request:
+jobs:
+  build:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Build examples
+        shell: bash
+        run: |
+          for s in skills/chalk-talk/examples/*.scene.json; do
+            node skills/chalk-talk/scripts/build.mjs "$s" "$RUNNER_TEMP/$(basename "$s" .scene.json).html"
+          done
+      - name: Check examples (layout + proof)
+        if: matrix.os == 'ubuntu-latest'
+        shell: bash
+        run: |
+          for s in skills/chalk-talk/examples/*.scene.json; do
+            node skills/chalk-talk/scripts/check.mjs "$RUNNER_TEMP/$(basename "$s" .scene.json).html" "$RUNNER_TEMP/snaps-$(basename "$s")"
+          done

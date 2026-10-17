@@ -3,12 +3,12 @@
   "owner": {
     "name": "Emre Ozturk"
   },
-  "description": "chalk-talk: explain any system as a step-by-step animated isometric diorama, with every block one click away from its code.",
+  "description": "chalk-talk: watch your codebase explain itself. Step-by-step animated walkthroughs where every arrow is traced to a real line of code, or marked as a guess.",
   "plugins": [
     {
       "name": "chalk-talk",
       "source": "./",
-      "description": "Explains how a system or code path works as a step-by-step animated isometric diorama (light or dark) in one HTML page."
+      "description": "Ask how your code works and watch the journey: a step-by-step animated walkthrough in one HTML page, every arrow traced to a real line of code."
     }
   ]
 }

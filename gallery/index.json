@@ -1,0 +1,203 @@
+{
+  "version": 1,
+  "about": "Gallery manifest for the chalk-talk landing page. Paths are relative to the repo root. proof = the build's proofSummary over the hops shown in the talk; null for concept examples without code. Every talk also takes ?style=chalk (chalkboard look), ?play / ?play=loop (autoplay), ?proof and ?theme=light|dark.",
+  "talks": [
+    {
+      "slug": "vite-hmr",
+      "title": "How Vite hot-updates a module",
+      "hook": "From saving a file to new code running in the tab, without a reload.",
+      "repo": "vitejs/vite",
+      "repoUrl": "https://github.com/vitejs/vite",
+      "proof": {
+        "total": 8,
+        "verified": 7,
+        "cited": 0,
+        "inferred": 1,
+        "unproven": 0,
+        "broken": 0,
+        "summary": "7/8 hops traced"
+      },
+      "html": "gallery/vite-hmr/vite-hmr.html",
+      "poster": "site/posters/vite-hmr-light.webp",
+      "posterDark": "site/posters/vite-hmr-dark.webp",
+      "snaps": "gallery/vite-hmr/vite-hmr-snaps/"
+    },
+    {
+      "slug": "codex-exec",
+      "title": "How Codex CLI runs a shell command",
+      "hook": "From the model's tool call through approval and the sandbox, back to the output it reads.",
+      "repo": "openai/codex",
+      "repoUrl": "https://github.com/openai/codex",
+      "proof": {
+        "total": 10,
+        "verified": 10,
+        "cited": 0,
+        "inferred": 0,
+        "unproven": 0,
+        "broken": 0,
+        "summary": "10/10 hops traced"
+      },
+      "html": "gallery/codex-exec/codex-exec.html",
+      "poster": "site/posters/codex-exec-light.webp",
+      "posterDark": "site/posters/codex-exec-dark.webp",
+      "snaps": "gallery/codex-exec/codex-exec-snaps/"
+    },
+    {
+      "slug": "redis-set",
+      "title": "What Redis does with SET greeting hello",
+      "hook": "One command, from socket bytes to +OK, through the real redis source.",
+      "repo": "redis/redis",
+      "repoUrl": "https://github.com/redis/redis",
+      "proof": {
+        "total": 9,
+        "verified": 8,
+        "cited": 0,
+        "inferred": 1,
+        "unproven": 0,
+        "broken": 0,
+        "summary": "8/9 hops traced"
+      },
+      "html": "gallery/redis-set/redis-set.html",
+      "poster": "site/posters/redis-set-light.webp",
+      "posterDark": "site/posters/redis-set-dark.webp",
+      "snaps": "gallery/redis-set/redis-set-snaps/"
+    },
+    {
+      "slug": "express-pr",
+      "title": "Chunked responses get their ETag back",
+      "hook": "What PR #7459 changes inside res.send(), with before and after.",
+      "repo": "expressjs/express",
+      "repoUrl": "https://github.com/expressjs/express/pull/7459",
+      "change": {
+        "title": "PR #7459",
+        "before": "gallery/express-pr/express-pr.html?diff=before"
+      },
+      "proof": {
+        "total": 6,
+        "verified": 5,
+        "cited": 0,
+        "inferred": 1,
+        "unproven": 0,
+        "broken": 0,
+        "summary": "5/6 hops traced"
+      },
+      "html": "gallery/express-pr/express-pr.html",
+      "poster": "site/posters/express-pr-light.webp",
+      "posterDark": "site/posters/express-pr-dark.webp",
+      "snaps": null
+    },
+    {
+      "slug": "git-commit",
+      "title": "What git commit writes to disk",
+      "hook": "Trees, one commit object, a moved branch and a reflog line.",
+      "repo": "git/git",
+      "repoUrl": "https://github.com/git/git",
+      "proof": {
+        "total": 9,
+        "verified": 9,
+        "cited": 0,
+        "inferred": 0,
+        "unproven": 0,
+        "broken": 0,
+        "summary": "9/9 hops traced"
+      },
+      "html": "gallery/git-commit/git-commit.html",
+      "poster": "site/posters/git-commit-light.webp",
+      "posterDark": "site/posters/git-commit-dark.webp",
+      "snaps": "gallery/git-commit/git-commit-snaps/",
+      "chalk": "gallery/git-commit/git-commit.html?style=chalk",
+      "chalkPoster": "site/img/chalk-light.webp"
+    },
+    {
+      "slug": "fastapi-request",
+      "title": "How FastAPI calls your function",
+      "hook": "From one ASGI call to a JSON response, through fastapi and starlette.",
+      "repo": "fastapi/fastapi",
+      "repoUrl": "https://github.com/fastapi/fastapi",
+      "proof": {
+        "total": 9,
+        "verified": 8,
+        "cited": 0,
+        "inferred": 1,
+        "unproven": 0,
+        "broken": 0,
+        "summary": "8/9 hops traced"
+      },
+      "html": "gallery/fastapi-request/fastapi-request.html",
+      "poster": "site/posters/fastapi-request-light.webp",
+      "posterDark": "site/posters/fastapi-request-dark.webp",
+      "snaps": "gallery/fastapi-request/fastapi-request-snaps/"
+    },
+    {
+      "slug": "express-request",
+      "title": "What happens when a request hits app.get()",
+      "hook": "GET /users/42 through Express 5 and its router, and back to the socket.",
+      "repo": "expressjs/express",
+      "repoUrl": "https://github.com/expressjs/express",
+      "proof": {
+        "total": 9,
+        "verified": 7,
+        "cited": 0,
+        "inferred": 2,
+        "unproven": 0,
+        "broken": 0,
+        "summary": "7/9 hops traced"
+      },
+      "html": "gallery/express-request/express-request.html",
+      "poster": "site/posters/express-request-light.webp",
+      "posterDark": "site/posters/express-request-dark.webp",
+      "snaps": "gallery/express-request/express-request-snaps/"
+    }
+  ],
+  "examples": [
+    {
+      "slug": "build",
+      "title": "How chalk-talk proves every arrow",
+      "hook": "This repo explaining itself: from a scene file to a page you can trust.",
+      "repo": "oztrkemree/chalk-talk",
+      "repoUrl": "https://github.com/oztrkemree/chalk-talk",
+      "proof": {
+        "total": 7,
+        "verified": 6,
+        "cited": 0,
+        "inferred": 1,
+        "unproven": 0,
+        "broken": 0,
+        "summary": "6/7 hops traced"
+      },
+      "html": "skills/chalk-talk/examples/build.html",
+      "poster": "site/posters/build-light.webp",
+      "posterDark": "site/posters/build-dark.webp"
+    },
+    {
+      "slug": "login",
+      "title": "How logging in works",
+      "hook": "Password, hash check, session, cookie.",
+      "repo": null,
+      "proof": null,
+      "html": "skills/chalk-talk/examples/login.html",
+      "poster": "site/posters/login-light.webp",
+      "posterDark": "site/posters/login-dark.webp"
+    },
+    {
+      "slug": "oauth",
+      "title": "Sign in with Google",
+      "hook": "The OAuth 2.0 authorization code flow as a sequence, message by message.",
+      "repo": null,
+      "proof": null,
+      "html": "skills/chalk-talk/examples/oauth.html",
+      "poster": "site/posters/oauth-light.webp",
+      "posterDark": "site/posters/oauth-dark.webp"
+    },
+    {
+      "slug": "siparis",
+      "title": "Sipariş verince ne olur?",
+      "hook": "An order flow with a queue and workers, told in Turkish.",
+      "repo": null,
+      "proof": null,
+      "html": "skills/chalk-talk/examples/siparis.html",
+      "poster": "site/posters/siparis-light.webp",
+      "posterDark": "site/posters/siparis-dark.webp"
+    }
+  ]
+}

@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <!-- one stylesheet declares every family; browsers only download the files a style actually uses -->
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400..700&family=Geist+Mono:wght@400..600&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&family=Inter+Tight:wght@400..700&family=Newsreader:ital,opsz,wght@0,6..72,400..700;1,6..72,400..600&display=block">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400..700&family=Geist+Mono:wght@400..600&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&family=Inter+Tight:wght@400..700&family=Newsreader:ital,opsz,wght@0,6..72,400..700;1,6..72,400..600&family=Caveat:wght@500..700&family=Patrick+Hand&display=block">
 <style>
 
 
@@ -174,6 +174,7 @@
   --num-bg:#14243A; --num-fg:#FFFFFF;
   --pill:#FFFFFF; --pill-line:rgba(20,36,58,.07); --pill-shadow:rgba(20,36,58,.14);
   --shade:rgba(20,36,58,.17); --hl:rgba(255,255,255,.75); --groove:rgba(20,36,58,.16); --led:#2BD48B;
+  --edge-ln:rgba(20,36,58,.10); --contact:rgba(20,36,58,.26); --ao:#14243A; --ao-o:.10;
   --screen:#8ED2FF; --skin:#FFD4C2;
   --zone-top:rgba(255,255,255,.6); --zone-side:#D2DCE9; --zone-line:#C9D5E3;
   --w-top:#FFFFFF; --w-l:#E3E9F1; --w-r:#CCD6E3;
@@ -200,6 +201,7 @@
   --num-bg:#EAF1FB; --num-fg:#0B1221;
   --pill:#17243A; --pill-line:rgba(255,255,255,.06); --pill-shadow:rgba(0,0,0,.45);
   --shade:rgba(0,0,0,.42); --hl:rgba(255,255,255,.28); --groove:rgba(0,0,0,.25); --led:#3DF0A0;
+  --edge-ln:rgba(0,0,0,.30); --contact:rgba(0,0,0,.6); --ao:#000; --ao-o:.22;
   --screen:#5FC6FF; --skin:#F2BCA6;
   --zone-top:rgba(255,255,255,.035); --zone-side:#070D18; --zone-line:#22314A;
   --w-top:#E6ECF5; --w-l:#A8B4C6; --w-r:#8995A8;
@@ -216,6 +218,55 @@
   --c-white-top:#E3E9F2; --c-white-l:#9AA7BA; --c-white-r:#7B889B; --c-white-ink:#2E3A4D;
   --c-none-top:#E3E9F2; --c-none-l:#9AA7BA; --c-none-r:#7B889B; --c-none-ink:#2E3A4D;
   color-scheme:dark;
+}
+
+/* ---------- chalk: a great teacher's chalkboard (iso geometry, drawn in chalk) ----------
+   light = the classic green slate, dark = a black slate. Faces are shaded by hatching, lines are
+   roughened by an SVG filter, labels are handwritten. */
+[data-style="chalk"]{
+  --bg:#22352E;
+  --bg-image:radial-gradient(ellipse 55% 42% at 24% 34%, rgba(255,255,255,.045), transparent 70%), radial-gradient(ellipse 48% 36% at 76% 66%, rgba(255,255,255,.035), transparent 70%), radial-gradient(ellipse 90% 75% at 50% 45%, transparent 55%, rgba(0,0,0,.28));
+  --bg-size:auto;
+  --card:#2A3F37; --line:#3E554C; --line-2:#5C7469; --chip:#2E443C;
+  --ink:#F3F5EF; --ink-2:#D2DAD0; --muted:#93A69B; --edge:#E8ECE4; --track:rgba(255,255,255,.05); --grid-line:rgba(255,255,255,.035);
+  --accent:#F8DA70; --on-accent:#22352E; --accent-soft:rgba(248,218,112,.14);
+  --num-bg:#F3F5EF; --num-fg:#22352E;
+  --pill:var(--bg); --pill-line:transparent; --pill-shadow:transparent;
+  --shade:transparent; --hl:rgba(255,255,255,.6); --groove:rgba(255,255,255,.4); --led:#9DF0B8;
+  --edge-ln:transparent; --contact:transparent;
+  --screen:#A9D0FF; --skin:#FFC9AE;
+  --zone-top:rgba(255,255,255,.025); --zone-side:transparent; --zone-line:rgba(255,255,255,.38);
+  --w-top:#EEF1EA; --w-l:#EEF1EA; --w-r:#EEF1EA;
+  --ok:#A7EBBC; --error:#FFA7A7; --warn:#FFCD88; --info:#AAD0FF;
+  --ok-bg:rgba(167,235,188,.15); --error-bg:rgba(255,167,167,.15); --warn-bg:rgba(255,205,136,.15); --info-bg:rgba(170,208,255,.15);
+  --c-sky-top:#AAD0FF; --c-sky-l:#AAD0FF; --c-sky-r:#AAD0FF; --c-mint-top:#AAEBC5; --c-mint-l:#AAEBC5; --c-mint-r:#AAEBC5;
+  --c-butter-top:#F7E192; --c-butter-l:#F7E192; --c-butter-r:#F7E192; --c-lilac-top:#CFBEFF; --c-lilac-l:#CFBEFF; --c-lilac-r:#CFBEFF;
+  --c-peach-top:#FFC6A4; --c-peach-l:#FFC6A4; --c-peach-r:#FFC6A4; --c-rose-top:#FFB2C6; --c-rose-l:#FFB2C6; --c-rose-r:#FFB2C6;
+  --c-sage-top:#A5E8DA; --c-sage-l:#A5E8DA; --c-sage-r:#A5E8DA; --c-sand-top:#DED4BF; --c-sand-l:#DED4BF; --c-sand-r:#DED4BF;
+  --c-white-top:#EEF1EA; --c-white-l:#EEF1EA; --c-white-r:#EEF1EA; --c-none-top:#EEF1EA; --c-none-l:#EEF1EA; --c-none-r:#EEF1EA;
+  --c-sky-ink:#F6F8F3; --c-mint-ink:#F6F8F3; --c-butter-ink:#F6F8F3; --c-lilac-ink:#F6F8F3; --c-peach-ink:#F6F8F3;
+  --c-rose-ink:#F6F8F3; --c-sage-ink:#F6F8F3; --c-sand-ink:#F6F8F3; --c-white-ink:#F6F8F3; --c-none-ink:#F6F8F3;
+  --hand:"Patrick Hand","Segoe Print","Comic Sans MS",cursive;
+  --sans:var(--hand);
+  --mono:"Geist Mono",ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+  --display:"Caveat",var(--hand);
+  --label-f:var(--hand); --label-s:19.5px; --label-w:400; --label-lh:22px;
+  --sub-f:var(--mono); --sub-s:12px; --sub-w:400; --sub-lh:15px;
+  --edge-f:var(--hand); --edge-s:15.5px; --edge-w:400; --edge-lh:19px;
+  --num-f:var(--mono); --num-s:12px; --num-w:600;
+  --note-f:var(--hand); --note-s:19px; --note-w:400; --note-lh:23px;
+  --tag-f:var(--mono); --tag-s:11.5px; --tag-w:600; --tag-ls:.06em; --tag-u:upper;
+  --title-f:var(--display); --title-s:56px; --title-w:700;
+  --subtitle-f:var(--hand); --subtitle-s:22px; --subtitle-w:400;
+  --eyebrow-f:var(--mono); --eyebrow-s:13px; --eyebrow-w:600; --eyebrow-ls:.16em; --eyebrow-u:upper;
+  --group-f:var(--mono); --group-s:12px; --group-w:600; --group-ls:.14em; --group-u:upper;
+  --packet-f:var(--mono); --packet-s:12.5px; --packet-w:600;
+  --ui-f:var(--hand); --ui-title-f:var(--display); --ui-mono:var(--mono); --btn-r:12px;
+  color-scheme:dark;
+}
+[data-style="chalk"][data-theme="dark"]{
+  --bg:#171C1B; --card:#1F2624; --line:#323C39; --line-2:#4D5955; --chip:#222A28;
+  --muted:#8C9893; --on-accent:#171C1B; --num-fg:#171C1B;
 }
 
 /* ---------- page ---------- */
@@ -326,6 +377,86 @@ body{background-color:var(--bg); background-image:var(--bg-image); background-si
 .pk-ball{fill:var(--accent); stroke:var(--pill); stroke-width:2.5}
 .pk-shine{fill:#fff; opacity:.55}
 .packet.t-ok .pk-ball{fill:var(--ok)} .packet.t-error .pk-ball{fill:var(--error)} .packet.t-warn .pk-ball{fill:var(--warn)} .packet.t-info .pk-ball{fill:var(--info)}
+/* craft: crisp edges, contact shadows, small hardware */
+.iso-top,.iso-l,.iso-r{stroke:var(--edge-ln); stroke-width:.9; stroke-linejoin:round}
+.k-cloud :is(.iso-top,.iso-l),.k-actor :is(.iso-l,.iso-r){stroke:none}
+.iso-contact{fill:var(--contact)}
+.iso-ao{fill:url(#iso-ao-g); stroke:none} .ao-0{stop-color:var(--ao); stop-opacity:0} .ao-1{stop-color:var(--ao); stop-opacity:var(--ao-o)}
+.iso-hl-v{fill:none; stroke:var(--hl); stroke-width:1; stroke-linecap:round; opacity:.55}
+.iso-hair{fill:none; stroke:var(--hl); stroke-width:1; stroke-linecap:round; opacity:.65}
+.iso-vent{fill:none; stroke:var(--groove); stroke-width:1.7; stroke-linecap:round}
+.iso-rail{fill:none; stroke:var(--groove); stroke-width:1.2; stroke-linecap:round}
+.iso-rim{fill:none; stroke:var(--groove); stroke-width:1.2}
+.iso-screw,.iso-bezel,.iso-bay{fill:var(--groove)}
+.iso-bay-lit,.iso-led-glow{fill:var(--led)}
+.iso-screen-bar{fill:#fff; opacity:.38}
+.iso-screen-ui{fill:none; stroke:#fff; stroke-width:2.2; stroke-linecap:round; opacity:.55}
+.iso-glow{fill:var(--accent)}
+.iso-flash{fill:#fff}
+.iso-ripple{fill:none; stroke:var(--accent); stroke-width:2.4}
+.floor-ripple{fill:none; stroke:var(--accent); stroke-width:2.2}
+.fx{opacity:0}
+.fx-t{transform-box:fill-box; transform-origin:center}
+.pk-glow{fill:var(--accent); opacity:.5}
+.pk-tail circle{fill:var(--accent)}
+.packet.t-ok :is(.pk-glow,.pk-tail circle){fill:var(--ok)} .packet.t-error :is(.pk-glow,.pk-tail circle){fill:var(--error)}
+.packet.t-warn :is(.pk-glow,.pk-tail circle){fill:var(--warn)} .packet.t-info :is(.pk-glow,.pk-tail circle){fill:var(--info)}
+.hx{display:none}
+
+/* ---------- chalk: the iso shapes, drawn instead of painted ---------- */
+[data-style="chalk"] .iso-obj,[data-style="chalk"] :is(.iso-path,.iso-head,.iso-ring,.floor-ripple,.zone-top,.chg-ring,.pk-ball,.pk-bg,.numc){filter:url(#chalk)}
+[data-style="chalk"] :is(.edge-line,.edge-head,.lifeline,.note-bar,.note-lead){filter:url(#chalk-u)}
+[data-style="chalk"] text{filter:url(#chalk-fine)}
+[data-style="chalk"] .iso-top{fill:color-mix(in srgb, var(--ctop) 9%, var(--bg)); stroke:var(--ctop); stroke-width:2.1}
+[data-style="chalk"] .iso-l{fill:color-mix(in srgb, var(--cl) 13%, var(--bg)); stroke:var(--cl); stroke-width:2.1}
+[data-style="chalk"] .iso-r{fill:color-mix(in srgb, var(--cr) 19%, var(--bg)); stroke:var(--cr); stroke-width:2.1}
+[data-style="chalk"] .iso-top.w{fill:color-mix(in srgb, var(--w-top) 9%, var(--bg)); stroke:var(--w-top); stroke-width:1.7}
+[data-style="chalk"] .iso-l.w{fill:color-mix(in srgb, var(--w-l) 13%, var(--bg)); stroke:var(--w-l); stroke-width:1.7}
+[data-style="chalk"] .iso-r.w{fill:color-mix(in srgb, var(--w-r) 19%, var(--bg)); stroke:var(--w-r); stroke-width:1.7}
+[data-style="chalk"] .hx{display:inline; stroke:none}
+[data-style="chalk"] .iso-l.hx{fill:var(--cl); mask:url(#m-hatch-a); opacity:.7}
+[data-style="chalk"] .iso-r.hx{fill:var(--cr); mask:url(#m-hatch-b); opacity:.75}
+[data-style="chalk"] .iso-l.w.hx{fill:var(--w-l)} [data-style="chalk"] .iso-r.w.hx{fill:var(--w-r)}
+[data-style="chalk"] .iso-screen{fill:color-mix(in srgb, var(--screen) 14%, var(--bg)); stroke:var(--screen); stroke-width:1.6}
+[data-style="chalk"] .iso-screen.hx{fill:var(--screen); mask:url(#m-hatch-c); opacity:.55}
+[data-style="chalk"] .iso-shadow{opacity:0}
+[data-style="chalk"] .iso-shadow.hx{fill:var(--ink); opacity:.16; mask:url(#m-hatch-c)}
+[data-style="chalk"] .k-actor .iso-l,[data-style="chalk"] .k-cloud :is(.iso-l,.iso-top):not(.cloud-ol){stroke:none}
+[data-style="chalk"] .cloud-ol{fill:none !important; stroke-width:4.2 !important}
+[data-style="chalk"] .iso-skin{fill:color-mix(in srgb, var(--skin) 12%, var(--bg)); stroke:var(--skin); stroke-width:2.1}
+[data-style="chalk"] .iso-ink{stroke:var(--cink); stroke-width:2.3}
+[data-style="chalk"] :is(.iso-groove,.iso-band,.iso-vent,.iso-rail,.iso-rim){stroke:var(--ctop); opacity:.6}
+[data-style="chalk"] :is(.iso-hair,.iso-hl-v,.pk-shine,.iso-contact,.iso-ao){display:none}
+[data-style="chalk"] .iso-hl{stroke:var(--hl); stroke-width:1.2; opacity:.5}
+[data-style="chalk"] :is(.iso-screw,.iso-bezel,.iso-bay){fill:var(--ctop); opacity:.45}
+[data-style="chalk"] .iso-screen-bar{fill:var(--screen); opacity:.45}
+[data-style="chalk"] .iso-screen-ui{stroke:var(--ink); stroke-width:1.8; opacity:.7}
+[data-style="chalk"] :is(.iso-pill,.zone-tag){fill:color-mix(in srgb, var(--bg) 95%, #fff); stroke:none; filter:url(#chalk-erase)}   /* labels sit on a freshly wiped patch */
+[data-style="chalk"] .packet{color:var(--accent)} [data-style="chalk"] .packet.t-ok{color:var(--ok)} [data-style="chalk"] .packet.t-error{color:var(--error)}
+[data-style="chalk"] .packet.t-warn{color:var(--warn)} [data-style="chalk"] .packet.t-info{color:var(--info)}
+[data-style="chalk"] .packet .pk-bg{fill:var(--bg); stroke:currentColor; stroke-width:1.7}
+[data-style="chalk"] .t-packet{fill:currentColor}
+[data-style="chalk"] .el.dim{opacity:.32}
+[data-style="chalk"] .iso-track{stroke:var(--track); stroke-width:15}
+[data-style="chalk"] .iso-path{stroke-width:2.7}
+[data-style="chalk"] .edge.hot .iso-path{stroke-width:3.4}
+[data-style="chalk"] .iso-head.open,[data-style="chalk"] .edge-head.open{fill:none; stroke:currentColor; stroke-width:2.7; stroke-linecap:round; stroke-linejoin:round}
+[data-style="chalk"] .edge-line{stroke-width:2.4}
+[data-style="chalk"] .iso-ring{stroke-width:3}
+[data-style="chalk"] .iso-ring-halo{fill:var(--accent); opacity:.4; mask:url(#m-hatch-c)}
+[data-style="chalk"] .pk-ball{stroke:none}
+[data-style="chalk"] .pk-glow{opacity:.28}
+[data-style="chalk"] .numc{fill:none; stroke:var(--ink); stroke-width:1.6}
+[data-style="chalk"] .t-num{fill:var(--ink)}
+[data-style="chalk"] .zone-top{stroke-width:1.6; stroke-dasharray:7 7}
+[data-style="chalk"] .hud-bg{stroke:rgba(255,255,255,.22); filter:none}
+[data-style="chalk"] .chalk-haze{opacity:.05}
+[data-style="chalk"] .chalk-dust{opacity:.07}
+[data-style="chalk"] .t-title{letter-spacing:0}
+[data-style="chalk"] .txt h2{font-size:28px; font-weight:700; letter-spacing:0; line-height:1.1}
+[data-style="chalk"] .txt p{font-size:19px; line-height:1.45}
+[data-style="chalk"] .txt code{font-size:13.5px; background:rgba(255,255,255,.06)}
+[data-style="chalk"] .count{padding-top:8px}
 
 /* ---------- states ---------- */
 .el{transition:opacity .45s ease}
@@ -360,6 +491,8 @@ body{background-color:var(--bg); background-image:var(--bg-image); background-si
 .ctl button:focus-visible{outline:2px solid var(--accent); outline-offset:3px}
 .ctl button[disabled]{opacity:.35; cursor:default}
 .ctl button.primary{background:var(--ink); color:var(--bg); border-color:var(--ink)}
+.ctl button[hidden]{display:none}
+.ctl button[aria-pressed="true"]{border-color:var(--accent); color:var(--accent); background:var(--accent-soft)}
 .ctl svg{width:17px; height:17px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round}
 [data-style="editorial"] .txt h2{font-size:23px; font-weight:600; letter-spacing:0}
 [data-style="editorial"] .count{font:600 30px/1 var(--display); color:var(--accent); letter-spacing:0; padding-top:0}
@@ -395,6 +528,54 @@ body{background-color:var(--bg); background-image:var(--bg-image); background-si
 #code-body .ln.mark{background:var(--accent-soft); box-shadow:inset 3px 0 0 var(--accent)}
 #code-body .missing{padding:8px 18px; color:var(--ink-2); font-family:var(--ui-f)}
 .tk-c{color:var(--muted); font-style:italic} .tk-s{color:var(--ok)} .tk-k{color:var(--accent); font-weight:500} .tk-n{color:var(--warn)}
+#code-body .ln.hit{background:var(--ok-bg); box-shadow:inset 3px 0 0 var(--ok)}
+#code-proof{font:500 12.5px/1.4 var(--ui-f); margin-top:3px; white-space:normal; color:var(--pm-c, var(--ink-2))}
+#code-proof[hidden]{display:none}
+
+/* ---------- proof: every arrow is backed by a real line of code, or honestly marked as a guess ---------- */
+.pm-ok{color:var(--ok); --pm-c:var(--ok); --pm-bg:var(--ok-bg)} .pm-warn{color:var(--warn); --pm-c:var(--warn); --pm-bg:var(--warn-bg)}
+.pm-error{color:var(--error); --pm-c:var(--error); --pm-bg:var(--error-bg)} .pm-muted{color:var(--muted); --pm-c:var(--muted); --pm-bg:var(--chip)}
+.pmark circle,.pl-mark circle{fill:var(--pm-bg); stroke:none}
+.pmark path,.pl-mark path{fill:none; stroke:currentColor; stroke-width:1.7; stroke-linecap:round; stroke-linejoin:round}
+.pmark text,.pl-mark text{font:700 11.5px var(--mono); fill:currentColor; text-anchor:middle; dominant-baseline:central}
+.pmid{display:none}
+.pmid circle{fill:var(--bg); stroke:currentColor; stroke-width:1.2}
+:is([data-style="iso"],[data-style="chalk"]) .pmid circle{fill:var(--pill)}
+.proof-view .pmid{display:inline}
+.proof-view .el.dim{opacity:1}
+.proof-view .edge:is(.pf-verified,.pf-cited) :is(.edge-line,.iso-path){stroke-dasharray:none !important}
+.proof-view .edge:is(.pf-inferred,.pf-unproven) .edge-line{stroke-dasharray:.1 5 !important}
+.proof-view .edge:is(.pf-inferred,.pf-unproven) .iso-path{stroke-dasharray:.1 7 !important}
+.proof-view .edge.pf-unproven{color:var(--muted)}
+.proof-view .edge.pf-broken{color:var(--error)}
+.proofline{display:flex; align-items:center; gap:8px; margin:8px 0 0; font:500 13px/1.4 var(--ui-mono); color:var(--ink-2); letter-spacing:.01em}
+.proofline[hidden]{display:none}
+.pl-mark{width:16px; height:16px; flex:none; overflow:visible}
+
+/* ---------- change mode: what a PR / branch adds, changes or removes ---------- */
+.chg-added{--chg:var(--ok); --chg-bg:var(--ok-bg)} .chg-changed{--chg:var(--warn); --chg-bg:var(--warn-bg)} .chg-removed{--chg:var(--error); --chg-bg:var(--error-bg)}
+.chg-ring{fill:none; stroke:var(--chg); stroke-width:1.8}
+.chg-glow{fill:none; stroke:var(--chg); stroke-width:7; opacity:.16; stroke-linecap:round; stroke-linejoin:round}
+.chg-halo{fill:var(--chg-bg); stroke:none}
+.chg-removed .chg-ring{stroke-dasharray:5 4}
+.chg-removed .chg-halo{fill:none}
+.chg-tag rect{fill:var(--chg-bg)} .chg-tag .chg-tag-base{fill:var(--card)} .chg-tag .t-tag{fill:var(--chg)}
+.edge:is(.chg-added,.chg-changed) .iso-track{stroke:var(--chg); opacity:.24}
+html:not(.diff-before) .chg-removed > .node{opacity:.42}
+html:is([data-style="iso"],[data-style="chalk"]):not(.diff-before) .chg-removed > .node{filter:grayscale(1)}
+html:not(.diff-before) .edge.chg-removed{color:var(--error)}
+html:not(.diff-before) .edge.chg-removed :is(.edge-line,.iso-path){stroke-dasharray:4 6; opacity:.7}
+
+/* ---------- header chips (top right): change summary and the proof legend ---------- */
+.hud-bg{fill:var(--card); stroke:var(--line-2); stroke-width:1}
+:is([data-style="iso"],[data-style="chalk"]) .hud-bg{fill:var(--pill); stroke:var(--pill-line)}
+.hud .t-sub{fill:var(--ink-2)}
+.hud .h-ink{fill:var(--ink)} .hud .h-add{fill:var(--ok)} .hud .h-chg{fill:var(--warn)} .hud .h-rem{fill:var(--error)}
+.hud-sep{stroke:var(--line-2); stroke-width:1}
+#hud-proof{display:none}
+.proof-view #hud-proof{display:inline}
+#hud-diff{cursor:pointer}
+.seeking *{transition:none !important}
 
 .mtitle{display:none}
 .fatal{font:15px/1.5 ui-monospace,Menlo,monospace; color:#DC3B3B; padding:24px; white-space:pre-wrap}
@@ -424,11 +605,13 @@ body{background-color:var(--bg); background-image:var(--bg-image); background-si
     <nav class="progress" aria-label="Step list"></nav>
     <div class="cap">
       <div class="count" aria-hidden="true"><span id="n">1</span><span class="of"> / <span id="of">1</span></span></div>
-      <div class="txt" aria-live="polite"><h2 id="h"></h2><p id="p"></p></div>
+      <div class="txt" aria-live="polite"><h2 id="h"></h2><p id="p"></p><p id="pl" class="proofline" hidden></p></div>
       <div class="ctl">
         <button id="prev" aria-label="Previous step" title="Previous (←)"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>
         <button id="play" class="primary" aria-label="Play" title="Play (P)"><svg viewBox="0 0 24 24"><path id="play-i" d="M8 5.5v13l10.5-6.5z"/></svg></button>
         <button id="next" aria-label="Next step" title="Next (→ / space)"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button>
+        <button id="proof" aria-label="Proof view: which arrows are backed by code" aria-pressed="false" title="Proof view (V)" hidden><svg viewBox="0 0 24 24"><path d="M12 3l7.5 3v6c0 4.5-3.2 7.8-7.5 9-4.3-1.2-7.5-4.5-7.5-9V6z"/><path d="M8.8 12.2l2.3 2.3 4.3-4.6"/></svg></button>
+        <button id="diff" aria-label="Before / after the change" aria-pressed="false" title="Before / after (D)" hidden><svg viewBox="0 0 24 24"><path d="M12 3.5v9M7.5 8h9M7.5 18.5h9"/></svg></button>
         <button id="theme" aria-label="Switch light / dark" title="Light / dark (T)"><svg viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 0 18z" fill="currentColor"/><circle cx="12" cy="12" r="9"/></svg></button>
       </div>
     </div>
@@ -436,7 +619,7 @@ body{background-color:var(--bg); background-image:var(--bg-image); background-si
 </div>
 <aside id="code" class="code" aria-label="Source code" aria-hidden="true">
   <header>
-    <div class="code-t"><strong id="code-label"></strong><span id="code-file"></span></div>
+    <div class="code-t"><strong id="code-label"></strong><span id="code-file"></span><span id="code-proof" hidden></span></div>
     <nav id="code-links"></nav>
     <button id="code-close" aria-label="Close code" title="Close (Esc)"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
   </header>
@@ -446,15 +629,15 @@ body{background-color:var(--bg); background-image:var(--bg-image); background-si
 
 <script id="scene" type="application/json">
 {
- "title": "How a chalk talk gets built",
- "subtitle": "from a scene file to a page you can step through",
+ "title": "How chalk-talk proves every arrow",
+ "subtitle": "from a scene file to a page you can trust",
  "lang": "en",
  "root": "..",
  "nodes": [
   {
-   "id": "claude",
+   "id": "agent",
    "kind": "actor",
-   "label": "Claude",
+   "label": "Your agent",
    "at": [
     0,
     1
@@ -472,43 +655,57 @@ body{background-color:var(--bg); background-image:var(--bg-image); background-si
   },
   {
    "id": "build",
-   "label": "build.sh",
-   "sub": "scripts/build.sh",
+   "label": "Builder",
+   "sub": "scripts/build.mjs",
    "icon": "gear",
    "at": [
     2,
     1
    ],
    "code": {
-    "file": "scripts/build.sh",
-    "start": 42,
-    "end": 57,
-    "text": "# Nodes and edges with a \"code\" field get the real snippet embedded, so clicking them in the\n# page shows the code. That needs python3; without it the page shows the file name only.\nsrc=\"$scene\"\nif grep -q '\"code\"' \"$scene\"; then\n  if command -v python3 >/dev/null 2>&1; then\n    tmp=\"$(mktemp \"${TMPDIR:-/tmp}/chalk-scene.XXXXXX\")\"\n    trap 'rm -f \"$tmp\"' EXIT\n    python3 -I \"$here/embed.py\" \"$scene\" \"$tmp\" || { echo \"build: could not embed code snippets\" >&2; exit 1; }\n    src=\"$tmp\"\n  else\n    echo \"build: no python3 found, code snippets not embedded (the page shows file names only)\" >&2\n  fi\nfi\n\nawk -v f=\"$src\" '$0 == \"__SCENE__\" { while ((getline line < f) > 0) print line; next } { print }' \"$tpl\" > \"$out\"\necho \"$out\"",
-    "url": "https://github.com/oztrkemree/chalk-talk/blob/c4df32a56460e37cd9e40b216ab77a5256319674/skills/chalk-talk/scripts/build.sh#L42-L57"
+    "file": "scripts/build.mjs",
+    "start": 146,
+    "end": 174,
+    "text": "const nodes = items('nodes'), edges = items('edges');\nconst proofOn = scene.proof !== false && (scene.proof === true ||\n  [...nodes, ...edges].some(x => 'code' in x) || edges.some(e => e.inferred != null));\nlet text = raw.replace(/\\r?\\n$/, '');\nif (raw.includes('\"code\"') || proofOn) {\n  const sources = new Map();\n  nodes.forEach((n, i) => { if ('code' in n) n.code = resolve(n.id || `nodes[${i}]`, n.code).code; });\n  edges.forEach((e, i) => {\n    if ('code' in e) { const r = resolve(e.id || `edges[${i}]`, e.code); e.code = r.code; sources.set(e, r.src); }\n    else if (e.calls != null && proofOn) warnings.push(`${e.id || `edges[${i}]`}: \"calls\" needs a \"code\" range to check against; ignored`);\n  });\n  for (const w of warnings) console.error('build: warn ' + w);\n\n  if (proofOn) {\n    const ids = new Map(edges.map((e, i) => [String(e.id || `e${i + 1}`), e]));\n    edges.forEach(e => { e.proof = proofOf(e, sources.get(e)); });\n    for (const [id, e] of ids) if (e.proof.status === 'broken') console.error(`WARNING proof: edge ${id} -> ${e.proof.why}`);\n    const flowed = new Set(items('steps').flatMap(st => arr(st.flow).map(f => String(typeof f === 'string' ? f : f && f.edge))));\n    const counted = [...ids].filter(([id]) => flowed.has(id)).map(([, e]) => e);\n    const pool = counted.length ? counted : edges;\n    const sum = { total: pool.length, verified: 0, cited: 0, inferred: 0, unproven: 0, broken: 0 };\n    pool.forEach(e => sum[e.proof.status]++);\n    scene.proofSummary = sum;\n    const traced = sum.verified + sum.cited;\n    console.error(`proof: ${traced}/${sum.total} hops traced to code (${sum.verified} verified, ${sum.cited} cited) · ${sum.inferred} inferred` +\n      (sum.unproven ? ` · ${sum.unproven} unproven` : '') + ` · ${sum.broken} broken`);\n  }\n  text = JSON.stringify(scene, null, 1);\n}",
+    "mark": [
+     159,
+     161
+    ]
    }
   },
   {
-   "id": "embed",
+   "id": "proof",
    "kind": "pill",
-   "label": "Code embedder",
-   "sub": "scripts/embed.py",
-   "icon": "code",
+   "label": "Proof checker",
+   "sub": "proofOf()",
+   "icon": "shield",
    "color": "teal",
    "at": [
-    2,
+    1,
     0
    ],
    "code": {
-    "file": "scripts/embed.py",
-    "start": 77,
-    "end": 106,
-    "text": "def resolve(where, spec):\n    p = parse(spec)\n    if not p:\n        warnings.append(f'{where}: \"code\" should be \"path:start-end\" or {{\"file\", \"lines\"}}')\n        return None\n    file, a, b, mark = p\n    abs_path = next((os.path.join(r, file) for r in roots() if os.path.isfile(os.path.join(r, file))), None)\n    if not abs_path:\n        warnings.append(f\"{where}: code file not found: {file}\")\n        return {\"file\": file, \"missing\": True}\n    with open(abs_path, encoding=\"utf-8\", errors=\"replace\") as f:\n        lines = f.read().splitlines()\n    start = max(1, a or 1)\n    end = min(len(lines), b or (start + TOP_LINES - 1))\n    if end < start:\n        warnings.append(f\"{where}: {file} has {len(lines)} lines, asked for {start}-{b}\")\n        start, end = 1, min(len(lines), TOP_LINES)\n    if end - start + 1 > MAX_LINES:\n        warnings.append(f\"{where}: {file}:{start}-{end} is long; showing the first {MAX_LINES} lines\")\n        end = start + MAX_LINES - 1\n    out = {\"file\": file, \"start\": start, \"end\": end, \"text\": \"\\n\".join(lines[start - 1:end])}\n    if mark:\n        out[\"mark\"] = mark\n    if not share:\n        out[\"abs\"] = os.path.abspath(abs_path)\n    link = git_permalink(os.path.abspath(abs_path))\n    if link:\n        out[\"url\"] = f\"{link}#L{start}-L{end}\"\n    return out\n",
+    "file": "scripts/build.mjs",
+    "start": 109,
+    "end": 143,
+    "text": "// Where does `needle` occur in lines[start-1..end-1], ignoring all whitespace? -> 1-based line or 0.\nfunction findCall(src, needle) {\n  const want = String(needle).replace(/\\s+/g, '');\n  if (!want) return 0;\n  let flat = '';\n  const lineOf = [];\n  for (let ln = src.start; ln <= src.end; ln++) {\n    const s = src.lines[ln - 1].replace(/\\s+/g, '');\n    flat += s;\n    for (let i = 0; i < s.length; i++) lineOf.push(ln);\n  }\n  const at = flat.indexOf(want);\n  return at < 0 ? 0 : lineOf[at];\n}\n\nfunction proofOf(edge, src) {\n  if (src) {\n    const range = src.start ? `${src.file}:${src.start}-${src.end}` : src.file;\n    if (src.bad) return { status: 'broken', why: 'code is not \"path:start-end\" or {\"file\", \"lines\"}' };\n    if (src.missing) return { status: 'broken', file: src.file, why: `file ${src.file} not found` };\n    if (src.outOfRange) return { status: 'broken', file: src.file, why: `lines ${src.start}-${src.asked} not in ${src.file} (${src.lines.length} lines)` };\n    const at = { file: src.file, start: src.start, end: src.end };\n    const calls = arr(edge.calls);\n    if (!calls.length) return { status: 'cited', ...at };\n    let hit = 0;\n    for (const c of calls) {\n      const ln = findCall(src, c);\n      if (!ln) return { status: 'broken', ...at, why: `calls ${JSON.stringify(String(c))} not found in ${range}` };\n      hit = hit || ln;      // the line of the first calls string\n    }\n    return { status: 'verified', ...at, hit };\n  }\n  if (typeof edge.inferred === 'string' && edge.inferred.trim()) return { status: 'inferred', why: edge.inferred };\n  return { status: 'unproven' };\n}",
     "mark": [
-     83,
-     88
-    ],
-    "url": "https://github.com/oztrkemree/chalk-talk/blob/c4df32a56460e37cd9e40b216ab77a5256319674/skills/chalk-talk/scripts/embed.py#L77-L106"
+     133,
+     139
+    ]
    }
+  },
+  {
+   "id": "repo",
+   "kind": "file",
+   "label": "Your code",
+   "sub": "src/**",
+   "icon": "code",
+   "color": "amber",
+   "at": [
+    3,
+    0
+   ]
   },
   {
    "id": "tpl",
@@ -520,14 +717,7 @@ body{background-color:var(--bg); background-image:var(--bg-image); background-si
    "at": [
     2,
     2
-   ],
-   "code": {
-    "file": "assets/template.html",
-    "start": 1497,
-    "end": 1519,
-    "text": "function draw() {\n  board.innerHTML = '';\n  L = {};\n  const defs = el('defs', null, board);\n  const f = el('filter', { id: 'ct-shadow', x: '-30%', y: '-30%', width: '160%', height: '190%' }, defs);\n  el('feDropShadow', { dx: 0, dy: 1, stdDeviation: 1.2, class: 'sh-drop' }, f);\n  el('feDropShadow', { dx: 0, dy: 8, stdDeviation: 14, class: 'sh-drop' }, f);\n  if (ISO) isoDefs(defs);\n  L.world = el('g', { id: 'world' }, board);\n  ['floor', 'groups', 'edges', 'floorfx', 'nodes', 'labels', 'notes', 'focus', 'packets', 'debug'].forEach(k => L[k] = el('g', { id: 'L-' + k }, L.world));\n  L.title = el('g', { id: 'L-title' }, board);\n  drawTitle();\n  if (ISO) el('rect', { x: -1200, y: -900, width: 4000, height: 2700, fill: 'url(#iso-grid)', mask: 'url(#iso-mask)' }, L.floor);\n  const isoMap = ISO && !SEQ;\n  groups.forEach(isoMap ? drawGroupIso : drawGroup);\n  edges.forEach(isoMap ? drawEdgeIso : drawEdge);\n  // painter's order: what stands further back is drawn first\n  const order = [...nodes.values()];\n  if (isoMap) order.sort((a, b) => (a.fu + a.fv) - (b.fu + b.fv) || (a.fu - a.fv) - (b.fu - b.fv));\n  order.forEach(ISO ? drawNodeIso : drawNode);\n  drawCodeBadges();\n  if (DEBUG) drawDebug();\n}",
-    "url": "https://github.com/oztrkemree/chalk-talk/blob/c4df32a56460e37cd9e40b216ab77a5256319674/skills/chalk-talk/assets/template.html#L1497-L1519"
-   }
+   ]
   },
   {
    "id": "page",
@@ -537,62 +727,160 @@ body{background-color:var(--bg); background-image:var(--bg-image); background-si
    "at": [
     3,
     1
-   ],
-   "code": {
-    "file": "assets/template.html",
-    "start": 2118,
-    "end": 2147,
-    "text": "async function boot() {\n  if (S.title) { document.title = S.title; $('sr-title').textContent = S.title + (S.subtitle ? ' - ' + S.subtitle : ''); }\n  document.documentElement.lang = LANG;\n  if (!ANIM) document.documentElement.classList.add('still');\n  if (!SNAP) { try { const saved = localStorage.getItem('chalk-talk-theme'); if (saved === 'light' || saved === 'dark') themeChoice = saved; } catch (_) {} }\n  if (qs.get('theme')) themeChoice = THEME_ALIAS[qs.get('theme')] || null;\n  applyTheme();\n  if (S.title) { $('mtitle').textContent = S.title; if (S.subtitle) { const sm = document.createElement('small'); sm.textContent = S.subtitle; $('mtitle').appendChild(sm); } }\n  readMetrics();\n  // measure text only once the fonts are in, or the layout drifts\n  const sample = JSON.stringify(S).slice(0, 4000);\n  const loaded = Promise.all(ROLES.map(r => document.fonts.load(fontOf(r), sample).catch(() => null)));\n  let timedOut = false;\n  await Promise.race([loaded, new Promise(r => setTimeout(() => { timedOut = true; r(); }, 3500))]);\n  if (timedOut) issue('warn', 'fonts', 'fonts did not load in time (offline?); fallback fonts used');\n  computeTitleBox();\n  layout();\n  draw();\n  buildBar();\n  publishReport();\n  const fromHash = parseInt(location.hash.slice(1), 10) - 1;\n  const start = fromHash >= 0 && fromHash < steps.length ? fromHash : 0;\n  if (ANIM && start === 0) L.title.querySelectorAll('text').forEach((t, i) => fade(t, i * 120, 520, 4));\n  cur = start - 1;\n  L.world.style.transition = 'none';                // the first frame is placed, not flown to\n  go(start, { instant: start !== 0 || !ANIM, keepHash: true });\n  requestAnimationFrame(() => requestAnimationFrame(() => { L.world.style.transition = ''; }));\n  wire();\n  document.documentElement.dataset.chalk = 'ready';\n  if (timedOut) loaded.then(() => { readMetrics(); computeTitleBox(); layout(); draw(); const k = cur; cur = -1; go(k, { instant: true, keepHash: true }); });",
-    "url": "https://github.com/oztrkemree/chalk-talk/blob/c4df32a56460e37cd9e40b216ab77a5256319674/skills/chalk-talk/assets/template.html#L2118-L2147"
-   }
+   ]
   }
  ],
  "edges": [
   {
    "id": "write",
-   "from": "claude",
+   "from": "agent",
    "to": "scene",
    "num": 1,
    "label": "writes the story",
-   "packet": "steps"
+   "packet": "steps",
+   "inferred": "your agent writes this file; there is no chalk-talk code to point at",
+   "proof": {
+    "status": "inferred",
+    "why": "your agent writes this file; there is no chalk-talk code to point at"
+   }
   },
   {
    "id": "run",
    "from": "scene",
    "to": "build",
    "num": 2,
-   "label": "build.sh",
-   "packet": "scene"
+   "label": "build.mjs",
+   "packet": "scene",
+   "code": {
+    "file": "scripts/build.mjs",
+    "start": 34,
+    "end": 36,
+    "text": "const raw = fs.readFileSync(scenePath, 'utf8');\nlet scene;\ntry { scene = JSON.parse(raw); } catch (err) { die(`${scenePath} is not valid JSON: ${err.message}`); }"
+   },
+   "calls": "JSON.parse(raw)",
+   "proof": {
+    "status": "verified",
+    "file": "scripts/build.mjs",
+    "start": 34,
+    "end": 36,
+    "hit": 36
+   }
   },
   {
-   "id": "snip",
+   "id": "read",
    "from": "build",
-   "to": "embed",
-   "label": "\"code\" fields",
+   "to": "repo",
+   "num": 3,
+   "label": "reads cited lines",
    "packet": "file:12-40",
-   "style": "dashed"
+   "code": {
+    "file": "scripts/build.mjs",
+    "start": 84,
+    "end": 89,
+    "text": "function resolve(where, spec) {\n  const p = parse(spec);\n  if (!p) { warnings.push(`${where}: \"code\" should be \"path:start-end\" or {\"file\", \"lines\"}`); return { code: null, src: { bad: true } }; }\n  const abs = roots.map(r => path.resolve(r, p.file)).find(f => { try { return fs.statSync(f).isFile(); } catch { return false; } });\n  if (!abs) { warnings.push(`${where}: code file not found: ${p.file}`); return { code: { file: p.file, missing: true }, src: { file: p.file, missing: true } }; }\n  const lines = fileLines(abs);"
+   },
+   "calls": "fileLines(abs)",
+   "proof": {
+    "status": "verified",
+    "file": "scripts/build.mjs",
+    "start": 84,
+    "end": 89,
+    "hit": 89
+   }
+  },
+  {
+   "id": "check",
+   "from": "build",
+   "to": "proof",
+   "num": 4,
+   "label": "every arrow",
+   "packet": "calls",
+   "code": {
+    "file": "scripts/build.mjs",
+    "start": 159,
+    "end": 161,
+    "text": "  if (proofOn) {\n    const ids = new Map(edges.map((e, i) => [String(e.id || `e${i + 1}`), e]));\n    edges.forEach(e => { e.proof = proofOf(e, sources.get(e)); });"
+   },
+   "calls": "proofOf(e, sources.get(e))",
+   "proof": {
+    "status": "verified",
+    "file": "scripts/build.mjs",
+    "start": 159,
+    "end": 161,
+    "hit": 161
+   }
+  },
+  {
+   "id": "match",
+   "from": "proof",
+   "to": "repo",
+   "label": "is the call there?",
+   "packet": "res.send(",
+   "style": "dashed",
+   "code": {
+    "file": "scripts/build.mjs",
+    "start": 133,
+    "end": 139,
+    "text": "    let hit = 0;\n    for (const c of calls) {\n      const ln = findCall(src, c);\n      if (!ln) return { status: 'broken', ...at, why: `calls ${JSON.stringify(String(c))} not found in ${range}` };\n      hit = hit || ln;      // the line of the first calls string\n    }\n    return { status: 'verified', ...at, hit };"
+   },
+   "calls": "findCall(src, c)",
+   "proof": {
+    "status": "verified",
+    "file": "scripts/build.mjs",
+    "start": 133,
+    "end": 139,
+    "hit": 135
+   }
   },
   {
    "id": "fill",
    "from": "tpl",
    "to": "build",
    "label": "__SCENE__ slot",
-   "packet": "engine"
+   "packet": "engine",
+   "code": {
+    "file": "scripts/build.mjs",
+    "start": 179,
+    "end": 183,
+    "text": "const tpl = fs.readFileSync(path.join(here, '..', 'assets', 'template.html'), 'utf8').replace(/\\r\\n/g, '\\n');\nconst at = tpl.search(/^__SCENE__$/m);\nif (at < 0) die('template has no __SCENE__ line');\nfs.mkdirSync(path.dirname(path.resolve(out)), { recursive: true });\nfs.writeFileSync(out, tpl.slice(0, at) + text.replace(/\\r\\n?/g, '\\n') + tpl.slice(at + '__SCENE__'.length));"
+   },
+   "calls": "tpl.search(/^__SCENE__$/m)",
+   "proof": {
+    "status": "verified",
+    "file": "scripts/build.mjs",
+    "start": 179,
+    "end": 183,
+    "hit": 180
+   }
   },
   {
    "id": "out",
    "from": "build",
    "to": "page",
-   "num": 3,
+   "num": 5,
    "label": "one HTML file",
    "packet": "talk.html",
-   "tone": "ok"
+   "tone": "ok",
+   "code": {
+    "file": "scripts/build.mjs",
+    "start": 182,
+    "end": 184,
+    "text": "fs.mkdirSync(path.dirname(path.resolve(out)), { recursive: true });\nfs.writeFileSync(out, tpl.slice(0, at) + text.replace(/\\r\\n?/g, '\\n') + tpl.slice(at + '__SCENE__'.length));\nconsole.log(out);"
+   },
+   "calls": "fs.writeFileSync(out",
+   "proof": {
+    "status": "verified",
+    "file": "scripts/build.mjs",
+    "start": 182,
+    "end": 184,
+    "hit": 183
+   }
   }
  ],
  "steps": [
   {
    "title": "It starts as a story",
-   "say": "Claude never draws. It writes a short **scene file**: what to show, what moves, what to say.",
+   "say": "Your agent never draws. It writes a short **scene file**: what to show, what moves, what to say, and which lines of code back each arrow.",
    "show": [
     "write"
    ],
@@ -602,7 +890,7 @@ body{background-color:var(--bg); background-image:var(--bg-image); background-si
   },
   {
    "title": "One script builds it",
-   "say": "`build.sh` checks the JSON and refuses a stray `<\/script`, the one string that would break the page.",
+   "say": "`build.mjs` reads the scene. Plain Node, no dependencies, the same on Windows, macOS and Linux.",
    "show": [
     "run"
    ],
@@ -615,29 +903,54 @@ body{background-color:var(--bg); background-image:var(--bg-image); background-si
   },
   {
    "title": "Real code comes along",
-   "say": "Nodes can point at real lines. The embedder copies them in, so a click on a block shows its code.",
+   "say": "Every `code` field points at real lines. The builder copies them in, so a click on a block or an arrow shows the code.",
    "show": [
-    "snip"
+    "read"
    ],
    "flow": [
-    "snip",
+    "read",
     {
-     "edge": "snip",
+     "edge": "read",
      "reverse": true,
      "packet": "snippet"
     }
    ],
    "notes": [
     {
-     "on": "embed",
+     "on": "repo",
      "text": "plus a GitHub permalink",
      "side": "top"
     }
    ]
   },
   {
+   "title": "Every arrow gets checked",
+   "say": "For each arrow, the checker looks for its `calls` text inside the cited lines. Found: a **✓**. Missing: the build warns and the arrow turns red.",
+   "show": [
+    "check",
+    "match"
+   ],
+   "flow": [
+    "check",
+    "match"
+   ],
+   "focus": [
+    "proof"
+   ]
+  },
+  {
+   "title": "Guesses stay guesses",
+   "say": "The first arrow has no line of code behind it, so it carries a **?** instead of pretending. Press `V` to see which hops are proven.",
+   "active": [
+    "write"
+   ],
+   "focus": [
+    "write"
+   ]
+  },
+  {
    "title": "Into the engine",
-   "say": "The scene drops into the engine's `__SCENE__` slot. Layout, routing and 3D drawing all happen in the browser.",
+   "say": "The checked scene drops into the engine's `__SCENE__` slot. Layout, routing and 3D drawing happen in the browser.",
    "show": [
     "fill"
    ],
@@ -647,7 +960,7 @@ body{background-color:var(--bg); background-image:var(--bg-image); background-si
   },
   {
    "title": "A page you can send",
-   "say": "Out comes **one HTML file**. Click any block with a code badge, or press `C`, to see the code behind it.",
+   "say": "Out comes **one HTML file**. It works offline and opens the exact lines behind every part.",
    "show": [
     "out"
    ],
@@ -660,16 +973,25 @@ body{background-color:var(--bg); background-image:var(--bg-image); background-si
   },
   {
    "title": "The whole trip",
-   "say": "Story, build, embed, page. Every block with a `<\/>` badge opens the code it stands for.",
+   "say": "Story, build, read, check, page. Six hops traced to a line, one honest guess.",
    "recap": true,
    "flow": [
     "write",
     "run",
-    "snip",
+    "read",
+    "check",
     "out"
    ]
   }
- ]
+ ],
+ "proofSummary": {
+  "total": 7,
+  "verified": 6,
+  "cited": 0,
+  "inferred": 1,
+  "unproven": 0,
+  "broken": 0
+ }
 }
 </script>
 
@@ -696,6 +1018,7 @@ const TONES = new Set(['ink', 'muted', 'accent', 'error', 'ok', 'info', 'warn'])
 /* drawing rules per style; colors, fonts and sizes live in the CSS tokens */
 const STYLES = {
   iso:       { radius: 14, tileR: 10, bend: 10, pill: 99, head: 'solid', corners: false, shadow: false, theme: null, iso: true },
+  chalk:     { radius: 14, tileR: 10, bend: 10, pill: 99, head: 'open',  corners: false, shadow: false, theme: null, iso: true, chalk: true },
   studio:    { radius: 18, tileR: 12, bend: 22, pill: 99, head: 'solid', corners: false, shadow: true,  theme: null },
   blueprint: { radius: 8,  tileR: 6,  bend: 14, pill: 6,  head: 'open',  corners: true,  shadow: false, theme: 'dark' },
   editorial: { radius: 6,  tileR: 5,  bend: 12, pill: 4,  head: 'solid', corners: false, shadow: false, theme: null },
@@ -706,11 +1029,14 @@ const CARD = { pad: 14, tile: 36, gap: 12 };
 const qs = new URLSearchParams(location.search);
 const SNAP = qs.has('snap');
 const DEBUG = qs.has('debug');
+const LOOP = qs.get('play') === 'loop';      // ?play starts autoplay, ?play=loop starts over after the recap
 const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
-const ANIM = !SNAP && !REDUCED;
+let ANIM = !SNAP && !REDUCED;   // seek() turns it on for recorders
 
 const board = document.getElementById('board');
 const report = { ok: true, steps: 0, issues: [] };
+let readyResolve;
+window.chalk = { report, ready: new Promise(r => { readyResolve = r; }) };
 const issue = (level, where, msg) => report.issues.push({ level, where, msg });
 const debugBoxes = [];
 
@@ -722,6 +1048,7 @@ const STYLE_NAME = STYLES[qs.get('style')] ? qs.get('style') : STYLES[S.style] ?
 if (S.style && !STYLES[S.style]) issue('warn', 'scene', `unknown style "${S.style}" (known: ${Object.keys(STYLES).join(', ')}); using iso`);
 const ST = STYLES[STYLE_NAME];
 const ISO = !!ST.iso;
+const CHALK = !!ST.chalk;   // chalk is the iso geometry drawn as a teacher's board
 document.documentElement.dataset.style = STYLE_NAME;
 const LANG = S.lang || 'en';
 
@@ -946,9 +1273,52 @@ steps.forEach(st => {
   if (o.code == null) return;
   if (typeof o.code === 'string' || (o.code.file && o.code.text == null && !o.code.missing)) {
     o.code = { file: typeof o.code === 'string' ? o.code.replace(/:\d+(-\d+)?$/, '') : o.code.file, missing: true };
-    issue('warn', o.id, 'code snippet not embedded; build with scripts/build.sh (needs python3)');
+    issue('warn', o.id, 'code snippet not embedded; build with scripts/build.sh (needs Node 18+)');
   } else if (o.code.missing) issue('warn', o.id, `code file not found at build time: ${o.code.file}`);
 });
+/* ---------- proof and change mode ----------
+   Every edge carries a proof status. The build verifies cited lines and injects edge.proof; a raw
+   scene falls back to: has code -> cited, has inferred -> inferred, else unproven. */
+const PROOF_ST = new Set(['verified', 'cited', 'inferred', 'unproven', 'broken']);
+const CHANGES = new Set(['added', 'changed', 'removed']);
+edges.forEach(e => {
+  const p = e.proof && typeof e.proof === 'object' && PROOF_ST.has(e.proof.status) ? { ...e.proof }
+    : { status: e.code != null ? 'cited' : e.inferred ? 'inferred' : 'unproven' };
+  if (p.status === 'inferred' && !p.why && e.inferred) p.why = String(e.inferred);
+  e.proof = p;
+  if (p.status === 'broken') issue('error', e.id, `proof: ${p.why || 'the cited code was not found'}`);
+});
+[...nodes.values(), ...edges.values()].forEach(o => {
+  if (o.change != null && !CHANGES.has(o.change)) { issue('warn', o.id, `unknown change "${o.change}" (known: added, changed, removed)`); delete o.change; }
+  if (o.type === 'edge') o.ghost = o.change === 'removed';
+});
+const PROOF = S.proof !== false && (S.proof === true || [...nodes.values(), ...edges.values()].some(o => o.code != null) || [...edges.values()].some(e => e.inferred));
+const CHANGE = !!S.diff || [...nodes.values(), ...edges.values()].some(o => o.change);
+const proofSummary = (() => {
+  if (S.proofSummary && typeof S.proofSummary.total === 'number') return S.proofSummary;
+  const flowed = new Set(); steps.forEach(st => st.flow.forEach(f => edges.has(f.edge) && flowed.add(f.edge)));
+  const ids = flowed.size ? [...flowed] : [...edges.keys()], s = { total: ids.length, verified: 0, cited: 0, inferred: 0, unproven: 0, broken: 0 };
+  ids.forEach(id => s[edges.get(id).proof.status]++);
+  return s;
+})();
+report.proof = { ...proofSummary, shown: PROOF };
+const TX = Object.assign({ traced: (a, b) => `${a} of ${b} hops traced to code`, traced1: 'traced', inferred: 'inferred', unproven: 'unproven', broken: 'broken',
+  proof: 'Proof', changes: 'Changes', added: 'new', changed: 'changed', removed: 'removed', before: 'before', after: 'after' },
+  { tr: { traced: (a, b) => `${b} adımın ${a} tanesi koda bağlı`, traced1: 'koda bağlı', inferred: 'tahmini', unproven: 'kanıtsız', broken: 'kırık',
+    proof: 'Kanıt', changes: 'Değişiklikler', added: 'yeni', changed: 'değişti', removed: 'silindi', before: 'önce', after: 'sonra' } }[LANG.slice(0, 2)] || {});
+// the tiny mark an edge carries: [tone, glyph, tooltip]; unproven edges carry none outside proof view
+function proofMark(e) {
+  if (!PROOF) return null;
+  const p = e.proof, src = p.file ? p : e.code && e.code.file ? e.code : null;
+  const at = src ? ` in ${src.file}${src.start ? ':' + src.start + (src.end > src.start ? '-' + src.end : '') : ''}` : '';
+  const calls = arr(e.calls).map(c => `"${c}"`).join(', ');
+  if (p.status === 'verified') return ['ok', 'check', `Verified: ${calls || 'the call'} found${p.hit ? ' on line ' + p.hit : ''}${at}`];
+  if (p.status === 'cited') return ['ok', 'check', `Cited${at}`];
+  if (p.status === 'inferred') return ['warn', '?', `Inferred: ${p.why || 'no line of code shows this hop'}`];
+  if (p.status === 'broken') return ['error', '!', `Broken: ${p.why || 'the cited code was not found'}`];
+  return null;
+}
+
 if (nodes.size > 12) issue('warn', 'scene', `${nodes.size} nodes; above ~12 a talk gets crowded, consider two talks`);
 if (steps.length > 10) issue('warn', 'scene', `${steps.length} steps; 4-8 usually tells it better`);
 const MODEL_ISSUES = report.issues.length;
@@ -1038,7 +1408,9 @@ function fitGaps(sizes, gaps, avail, lo = 0.45, hi = 1.45) {
   return k;
 }
 function trackCenters(sizes, gaps) { const o = [sizes[0] / 2]; for (let i = 1; i < sizes.length; i++) o[i] = o[i - 1] + sizes[i - 1] / 2 + gaps[i - 1] + sizes[i] / 2; return o; }
-function labelWidth(e) { return (e.label ? Math.min(230, tw(e.label, 'edge')) + 16 : 0) + (e.num != null ? 30 : 0); }
+function labelWidth(e) { const w = (e.label ? Math.min(230, tw(e.label, 'edge')) + 16 : 0) + (e.num != null ? 30 : 0); return w ? w + labelExtra(e) : 0; }
+// room an edge label needs besides its text: a change chip in front, a proof mark at the end
+function labelExtra(e) { return (proofMark(e) ? 20 : 0) + (e.change ? tw(TX[e.change], 'tag') + 16 : 0); }
 
 function gridTracks(list) {
   const col = n => Math.round(n.at[0]), row = n => Math.round(n.at[1]);
@@ -1306,10 +1678,10 @@ function zoneBox(fb, ox, oy) {
   return rect(b.x, b.y, b.w, b.h + 6);
 }
 // a floor-projected rounded rectangle, used for zones and focus rings
-function floorRR(b, r, lift = 0) {
+function floorRR(b, r, lift = 0, P = floorP) {
   const pts = [], k = 6;
   [[b.x + b.w - r, b.y + r, -Math.PI / 2], [b.x + b.w - r, b.y + b.h - r, 0], [b.x + r, b.y + b.h - r, Math.PI / 2], [b.x + r, b.y + r, Math.PI]]
-    .forEach(([cx, cy, a0]) => { for (let i = 0; i <= k; i++) { const a = a0 + Math.PI / 2 * i / k; pts.push(floorP(cx + r * Math.cos(a), cy + r * Math.sin(a), lift)); } });
+    .forEach(([cx, cy, a0]) => { for (let i = 0; i <= k; i++) { const a = a0 + Math.PI / 2 * i / k; pts.push(P(cx + r * Math.cos(a), cy + r * Math.sin(a), lift)); } });
   return 'M' + pts.map(p => f1(p[0]) + ' ' + f1(p[1])).join('L') + 'Z';
 }
 function layoutIso(list) {
@@ -1420,6 +1792,11 @@ const dLine = pts => 'M' + pts.map(p => f1(p[0]) + ' ' + f1(p[1])).join('L');
 function isoDefs(defs) {
   const fb = el('filter', { id: 'iso-blur', x: '-50%', y: '-50%', width: '200%', height: '200%' }, defs);
   el('feGaussianBlur', { stdDeviation: 4 }, fb);
+  const ao = el('linearGradient', { id: 'iso-ao-g', x1: 0, y1: 0, x2: 0, y2: 1 }, defs);
+  el('stop', { offset: 0.5, class: 'ao-0' }, ao); el('stop', { offset: 1, class: 'ao-1' }, ao);
+  const fs = el('filter', { id: 'iso-soft', x: '-50%', y: '-50%', width: '200%', height: '200%' }, defs);
+  el('feGaussianBlur', { stdDeviation: 1.3 }, fs);
+  if (CHALK) chalkDefs(defs);
   const fp = el('filter', { id: 'iso-pill', x: '-20%', y: '-40%', width: '140%', height: '220%' }, defs);
   el('feDropShadow', { dx: 0, dy: 3, stdDeviation: 4, class: 'iso-pill-sh' }, fp);
   const G = SEQ ? 36 : ISO_K / 4, pw = 2 * G * IC, ph = 2 * G * IS;
@@ -1430,6 +1807,36 @@ function isoDefs(defs) {
   const mk = el('mask', { id: 'iso-mask', maskUnits: 'userSpaceOnUse', x: -1200, y: -900, width: 4000, height: 2700 }, defs);
   el('rect', { x: -1200, y: -900, width: 4000, height: 2700, fill: 'url(#iso-fade)' }, mk);
 }
+/* chalk: one filter roughens and grains every stroke (seeded noise, so every frame is the same),
+   hatch patterns used as masks shade the faces, and a dust layer sits on the board */
+function chalkDefs(defs) {
+  const rough = (id, scale, grain, box = { x: '-8%', y: '-8%', width: '116%', height: '116%' }) => {
+    const f = el('filter', { id, ...box }, defs);
+    el('feTurbulence', { type: 'fractalNoise', baseFrequency: 0.7, numOctaves: 2, seed: 4, result: 'n' }, f);
+    el('feDisplacementMap', { in: 'SourceGraphic', in2: 'n', scale, xChannelSelector: 'R', yChannelSelector: 'G', result: 'd' }, f);
+    el('feTurbulence', { type: 'fractalNoise', baseFrequency: 1.3, numOctaves: 1, seed: 11, result: 'g' }, f);
+    el('feColorMatrix', { in: 'g', type: 'matrix', values: `0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 ${-grain} 0 0 0 ${grain * 0.5 + 0.75}`, result: 'ga' }, f);
+    el('feComposite', { in: 'd', in2: 'ga', operator: 'in' }, f);
+  };
+  const er = el('filter', { id: 'chalk-erase', x: '-30%', y: '-60%', width: '160%', height: '220%' }, defs);
+  el('feGaussianBlur', { stdDeviation: 3.2 }, er);
+  rough('chalk', 2.6, 3.2);        // objects and arrows
+  rough('chalk-fine', 1.2, 2.4);   // writing
+  // the same filter for things whose box can be flat (straight lines): sized in board units instead
+  rough('chalk-u', 2.6, 3.2, { filterUnits: 'userSpaceOnUse', x: -100, y: -100, width: 1800, height: 1100 });
+  [['hatch-a', 6.5, 1.1, -58], ['hatch-b', 4.2, 1.1, -58], ['hatch-c', 5, 0.9, 32]].forEach(([id, gap, sw, rot]) => {
+    const p = el('pattern', { id, width: gap, height: gap, patternUnits: 'userSpaceOnUse', patternTransform: `rotate(${rot})` }, defs);
+    el('path', { d: `M-1 ${gap / 2}H${gap + 1}`, stroke: '#fff', 'stroke-width': sw }, p);
+    const m = el('mask', { id: 'm-' + id, maskUnits: 'userSpaceOnUse', x: -1200, y: -900, width: 4000, height: 2700 }, defs);
+    el('rect', { x: -1200, y: -900, width: 4000, height: 2700, fill: `url(#${id})` }, m);
+  });
+  const dust = el('filter', { id: 'chalk-dust', filterUnits: 'userSpaceOnUse', x: 0, y: 0, width: W, height: H }, defs);
+  el('feTurbulence', { type: 'fractalNoise', baseFrequency: 0.9, numOctaves: 1, seed: 3, result: 'n' }, dust);
+  el('feColorMatrix', { type: 'matrix', values: '0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 7 0 0 0 -4.1' }, dust);
+  const haze = el('filter', { id: 'chalk-haze', filterUnits: 'userSpaceOnUse', x: 0, y: 0, width: W, height: H }, defs);
+  el('feTurbulence', { type: 'fractalNoise', baseFrequency: '0.004 0.009', numOctaves: 3, seed: 8, result: 'n' }, haze);
+  el('feColorMatrix', { type: 'matrix', values: '0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 1.1 0 0 0 -0.45' }, haze);
+}
 function drawNodeIso(n) {
   const outer = el('g', { class: 'el k-' + n.kind + ' c-' + n.color, 'data-id': n.id }, L.nodes);
   if (n.lifePts) el('path', { class: 'lifeline', d: `M${f1(n.cx)} ${f1(n.lifePts[0][1])}V${f1(n.lifePts[n.lifePts.length - 1][1])}` }, outer);
@@ -1437,15 +1844,30 @@ function drawNodeIso(n) {
   n.g = outer; n.hg = g;
   const ax = n.ax, ay = n.ay, P = (u, v, z = 0) => isoP(ax, ay, u, v, z);
   const pg = g;   // the label pill is not scaled with the object
-  g = ISO_Z === 1 ? g : el('g', { transform: `translate(${f1(ax)} ${f1(ay)}) scale(${f1(ISO_Z * 100) / 100}) translate(${f1(-ax)} ${f1(-ay)})` }, g);
-  const face = (pts, cls) => el('path', { class: cls, d: dPoly(pts) }, g);
-  const shadow = (w, d) => el('path', { class: 'iso-shadow', filter: 'url(#iso-blur)', d: dPoly([P(-w / 2 + 4, -d / 2 + 4), P(w / 2 + 10, -d / 2 + 4), P(w / 2 + 10, d / 2 + 10), P(-w / 2 + 4, d / 2 + 10)]) }, g);
-  const block = (u0, v0, w, d, z0, h, x = '') => {
+  g = el('g', { class: 'iso-obj', transform: ISO_Z === 1 ? null : `translate(${f1(ax)} ${f1(ay)}) scale(${f1(ISO_Z * 100) / 100}) translate(${f1(-ax)} ${f1(-ay)})` }, g);
+  const face = (pts, cls, par = g) => el('path', { class: cls, d: dPoly(pts) }, par);
+  const line = (pts, cls, par = g) => el('path', { class: cls, d: dLine(pts) }, par);
+  const dot = (p, rx, ry, cls, par = g) => el('ellipse', { cx: f1(p[0]), cy: f1(p[1]), rx, ry, class: cls }, par);
+  const shadow = (w, d) => {
+    el('path', { class: 'iso-shadow', filter: 'url(#iso-blur)', d: dPoly([P(-w / 2 + 4, -d / 2 + 4), P(w / 2 + 10, -d / 2 + 4), P(w / 2 + 10, d / 2 + 10), P(-w / 2 + 4, d / 2 + 10)]) }, g);
+    // a tight contact shadow where the object meets the floor, so it stands instead of floating
+    el('path', { class: 'iso-contact', filter: 'url(#iso-soft)', d: dPoly([P(-w / 2 - 1, -d / 2), P(w / 2 + 2, -d / 2), P(w / 2 + 2, d / 2 + 2), P(-w / 2 - 1, d / 2 + 2)]) }, g);
+  };
+  const block = (u0, v0, w, d, z0, h, x = '', par = g) => {
     const A = [u0, v0], B = [u0 + w, v0], C = [u0 + w, v0 + d], D = [u0, v0 + d], t = z0 + h;
-    face([P(...B, t), P(...C, t), P(...C, z0), P(...B, z0)], 'iso-r' + x);
-    face([P(...D, t), P(...C, t), P(...C, z0), P(...D, z0)], 'iso-l' + x);
-    face([P(...A, t), P(...B, t), P(...C, t), P(...D, t)], 'iso-top' + x);
-    el('path', { class: 'iso-hl', d: dLine([P(...D, t), P(...C, t), P(...B, t)]) }, g);
+    const R = [P(...B, t), P(...C, t), P(...C, z0), P(...B, z0)], Lf = [P(...D, t), P(...C, t), P(...C, z0), P(...D, z0)];
+    face(R, 'iso-r' + x, par);
+    face(Lf, 'iso-l' + x, par);
+    if (h > 12) { face(R, 'iso-ao', par); face(Lf, 'iso-ao', par); }   // the sides darken a little toward the floor
+    face([P(...A, t), P(...B, t), P(...C, t), P(...D, t)], 'iso-top' + x, par);
+    line([P(...D, t), P(...C, t), P(...B, t)], 'iso-hl', par);
+    if (h > 12) line([P(...C, t - 1.5), P(...C, z0 + 1.5)], 'iso-hl-v', par);   // the lit front corner
+  };
+  // a status light with a dark bezel and a soft glow that only shows when something happens
+  const led = (p, r = 3.2) => {
+    n.ledGlow = dot(p, r * 3, r * 2.6, 'iso-led-glow fx', g); n.ledGlow.setAttribute('filter', 'url(#iso-soft)');
+    dot(p, f1(r + 1.5), f1(r + 1.2), 'iso-bezel');
+    n.led = dot(p, r, f1(r * 0.88), 'iso-led');
   };
   // an icon painted flat on a top face: upright, squashed the way the floor is
   const decal = (name, z, size = 30) => {
@@ -1459,38 +1881,67 @@ function drawNodeIso(n) {
     case 'box': case 'pill': {
       shadow(s.w, s.d);
       block(-s.w / 2, -s.d / 2, s.w, s.d, 0, s.h);
-      if (n.kind === 'box') {   // server slots on the right face, a status light on the left one
-        [0.3, 0.52].forEach(f => el('path', { class: 'iso-groove', d: dLine([P(s.w / 2, -s.d / 2 + 14, s.h * f), P(s.w / 2, s.d / 2 - 14, s.h * f)]) }, g));
-        const led = P(-s.w / 2 + 16, s.d / 2, s.h * 0.6);
-        el('ellipse', { cx: f1(led[0]), cy: f1(led[1]), rx: 3.4, ry: 3, class: 'iso-led' }, g);
+      const R = s.w / 2, V0 = -s.d / 2, V1 = s.d / 2;
+      if (n.kind === 'box') {   // a small server: drive bays with lights on the right face, vents and a status light on the left
+        n.bays = [0.27, 0.48, 0.69].map(f => {
+          const z = s.h * f;
+          line([P(R, V0 + 12, z), P(R, V1 - 24, z)], 'iso-groove');
+          line([P(R, V0 + 13, z - 2.6), P(R, V1 - 25, z - 2.6)], 'iso-hair');
+          dot(P(R, V1 - 14, z), 2.2, 2.6, 'iso-bay');
+          return dot(P(R, V1 - 14, z), 2.2, 2.6, 'iso-bay-lit fx');
+        });
+        for (let i = 0; i < 4; i++) line([P(R - 14 - i * 6, V1, s.h * 0.24), P(R - 14 - i * 6, V1, s.h * 0.6)], 'iso-vent');
+        led(P(-R + 16, V1, s.h * 0.6));
+        [[-1, -1], [1, -1], [1, 1], [-1, 1]].forEach(([a, b]) => dot(P(a * (R - 8), b * (V1 - 8), s.h), 1.9, 0.9, 'iso-screw'));
+      } else {   // a function: one status light, and a lit top when it runs
+        led(P(-R + 13, V1, s.h * 0.5), 2.6);
       }
       decal(n.icon2, s.h, n.kind === 'pill' ? 24 : 30);
+      if (n.kind === 'pill') n.glow = face([P(-R, V0, s.h), P(R, V0, s.h), P(R, V1, s.h), P(-R, V1, s.h)], 'iso-glow fx');
       break;
     }
     case 'db': {
       const rx = s.r * Math.SQRT2 * IC, ry = s.r * Math.SQRT2 * IS, top = ay - s.h;
+      const arc = (y, k = 1) => `M${f1(ax - rx * k)} ${f1(y)}A${f1(rx * k)} ${f1(ry * k)} 0 0 0 ${f1(ax + rx * k)} ${f1(y)}`;
       el('ellipse', { cx: f1(ax + 6), cy: f1(ay + 6), rx: f1(rx + 4), ry: f1(ry + 3), class: 'iso-shadow', filter: 'url(#iso-blur)' }, g);
+      el('ellipse', { cx: f1(ax + 1), cy: f1(ay + 1.5), rx: f1(rx + 1.5), ry: f1(ry + 1.5), class: 'iso-contact', filter: 'url(#iso-soft)' }, g);
       el('path', { class: 'iso-l', d: `M${f1(ax - rx)} ${f1(top)}V${f1(ay)}A${f1(rx)} ${f1(ry)} 0 0 0 ${f1(ax)} ${f1(ay + ry)}V${f1(top + ry)}A${f1(rx)} ${f1(ry)} 0 0 1 ${f1(ax - rx)} ${f1(top)}Z` }, g);
       el('path', { class: 'iso-r', d: `M${f1(ax)} ${f1(ay + ry)}A${f1(rx)} ${f1(ry)} 0 0 0 ${f1(ax + rx)} ${f1(ay)}V${f1(top)}A${f1(rx)} ${f1(ry)} 0 0 1 ${f1(ax)} ${f1(top + ry)}Z` }, g);
-      [1 / 3, 2 / 3].forEach(f => { const y = ay - s.h * f; el('path', { class: 'iso-band', d: `M${f1(ax - rx)} ${f1(y)}A${f1(rx)} ${f1(ry)} 0 0 0 ${f1(ax + rx)} ${f1(y)}` }, g); });
+      [1 / 3, 2 / 3].forEach(f => { const y = ay - s.h * f; el('path', { class: 'iso-band', d: arc(y) }, g); el('path', { class: 'iso-hair', d: arc(y + 2.6) }, g); });
+      led([ax - rx * 0.5, ay + ry * 0.866 - s.h / 6], 2.6);
       el('ellipse', { cx: f1(ax), cy: f1(top), rx: f1(rx), ry: f1(ry), class: 'iso-top' }, g);
-      el('path', { class: 'iso-hl', d: `M${f1(ax - rx)} ${f1(top)}A${f1(rx)} ${f1(ry)} 0 0 0 ${f1(ax + rx)} ${f1(top)}` }, g);
+      el('ellipse', { cx: f1(ax), cy: f1(top), rx: f1(rx * 0.84), ry: f1(ry * 0.84), class: 'iso-rim' }, g);   // the lid's rim
+      el('path', { class: 'iso-hl', d: arc(top) }, g);
       decal(n.icon2, s.h, 26);
+      // a write: rings spread across the lid
+      n.rips = [0, 1].map(() => el('ellipse', { cx: f1(ax), cy: f1(top), rx: f1(rx * 0.84), ry: f1(ry * 0.84), class: 'iso-ripple fx fx-t' }, g));
       break;
     }
     case 'queue': {
       shadow(s.w, s.d);
       block(-s.w / 2, -s.d / 2, s.w, s.d, 0, s.h);
-      for (let i = 0; i < 4; i++) block(-s.w / 2 + 12 + i * 28, -9, 18, 18, s.h, 16, ' w');   // messages waiting in line
+      [-12, 12].forEach(v => line([P(-s.w / 2 + 6, v, s.h), P(s.w / 2 - 6, v, s.h)], 'iso-rail'));
+      // messages waiting in line: three in, one free slot at the tail that fills when a packet arrives;
+      // each slot slides (outer group) and pops in or out (inner group) without the two fighting
+      n.qSlots = []; n.qCubes = [];
+      for (let i = 0; i < 4; i++) {
+        const sg = el('g', null, g), ig = el('g', null, sg);
+        block(-s.w / 2 + 12 + i * 28, -9, 18, 18, s.h, 16, ' w', ig);
+        n.qSlots.push(sg); n.qCubes.push(ig);
+      }
+      n.qCubes[3].style.opacity = 0;
+      n.qStep = [-28 * IC, -28 * IS];
       break;
     }
     case 'cloud': {
       el('ellipse', { cx: f1(ax + 4), cy: f1(ay + 4), rx: 56, ry: 18, class: 'iso-shadow', filter: 'url(#iso-blur)' }, g);
       const base = ay - 28, puffs = [[-44, -12, 24], [-14, -28, 32], [22, -22, 28], [48, -8, 21], [0, -4, 28]];
-      puffs.forEach(([x, y, r]) => el('circle', { cx: f1(ax + x), cy: f1(base + y + 7), r, class: 'iso-l' }, g));
-      el('rect', { x: f1(ax - 62), y: f1(base - 8), width: 124, height: 22, rx: 11, class: 'iso-l' }, g);
-      puffs.forEach(([x, y, r]) => el('circle', { cx: f1(ax + x), cy: f1(base + y), r, class: 'iso-top' }, g));
-      el('rect', { x: f1(ax - 62), y: f1(base - 14), width: 124, height: 20, rx: 10, class: 'iso-top' }, g);
+      const low = cls => { puffs.forEach(([x, y, r]) => el('circle', { cx: f1(ax + x), cy: f1(base + y + 7), r, class: cls }, g)); el('rect', { x: f1(ax - 62), y: f1(base - 8), width: 124, height: 22, rx: 11, class: cls }, g); };
+      const high = cls => { puffs.forEach(([x, y, r]) => el('circle', { cx: f1(ax + x), cy: f1(base + y), r, class: cls }, g)); el('rect', { x: f1(ax - 62), y: f1(base - 14), width: 124, height: 20, rx: 10, class: cls }, g); };
+      if (CHALK) low('iso-l cloud-ol');   // chalk: a thick outline pass under the fill leaves only the silhouette
+      low('iso-l');
+      if (CHALK) high('iso-top cloud-ol');
+      high('iso-top');
       if (n.icon && ICONS[n.icon]) iconAt(g, n.icon, ax, base - 14, 22, 'iso-ink');
       break;
     }
@@ -1499,14 +1950,23 @@ function drawNodeIso(n) {
       block(-s.w / 2, -s.d / 2, s.w, s.d, 0, s.h);                       // the base
       block(-s.w / 2 + 6, -s.d / 2, s.w - 12, 6, s.h, 58);                // the lid, standing at the back
       const v = -s.d / 2 + 6;
-      face([P(-s.w / 2 + 12, v, s.h + 6), P(s.w / 2 - 12, v, s.h + 6), P(s.w / 2 - 12, v, s.h + 52), P(-s.w / 2 + 12, v, s.h + 52)], 'iso-screen');
+      const u0 = -s.w / 2 + 12, u1 = s.w / 2 - 12, z0 = s.h + 6, z1 = s.h + 52;
+      face([P(u0, v, z0), P(u1, v, z0), P(u1, v, z1), P(u0, v, z1)], 'iso-screen');
+      // a tiny page on the screen: an address bar and a few lines of text
+      face([P(u0, v, z1 - 9), P(u1, v, z1 - 9), P(u1, v, z1), P(u0, v, z1)], 'iso-screen-bar');
+      [[0, 0.62], [1, 0.8], [2, 0.45]].forEach(([i, k]) => line([P(u0 + 8, v, z1 - 18 - i * 8), P(u0 + 8 + (u1 - u0 - 16) * k, v, z1 - 18 - i * 8)], 'iso-screen-ui'));
+      n.flash = face([P(u0, v, z0), P(u1, v, z0), P(u1, v, z1), P(u0, v, z1)], 'iso-flash fx');
       [0, 1, 2].forEach(i => el('path', { class: 'iso-groove', d: dLine([P(-s.w / 2 + 18, -6 + i * 12, s.h), P(s.w / 2 - 18, -6 + i * 12, s.h)]) }, g));
       break;
     }
     case 'phone': {
       shadow(s.w, s.d + 10);
       block(-s.w / 2, -s.d / 2, s.w, s.d, 0, s.h);
-      face([P(-s.w / 2 + 5, s.d / 2, 9), P(s.w / 2 - 5, s.d / 2, 9), P(s.w / 2 - 5, s.d / 2, s.h - 8), P(-s.w / 2 + 5, s.d / 2, s.h - 8)], 'iso-screen');
+      const scr = [P(-s.w / 2 + 5, s.d / 2, 9), P(s.w / 2 - 5, s.d / 2, 9), P(s.w / 2 - 5, s.d / 2, s.h - 8), P(-s.w / 2 + 5, s.d / 2, s.h - 8)];
+      face(scr, 'iso-screen');
+      [0, 1, 2].forEach(i => line([P(-s.w / 2 + 10, s.d / 2, s.h - 20 - i * 8), P(s.w / 2 - 10 - (i % 2) * 8, s.d / 2, s.h - 20 - i * 8)], 'iso-screen-ui'));
+      line([P(-4, s.d / 2, s.h - 4), P(4, s.d / 2, s.h - 4)], 'iso-groove');   // the earpiece
+      n.flash = face(scr, 'iso-flash fx');
       break;
     }
     case 'file': {
@@ -1524,12 +1984,17 @@ function drawNodeIso(n) {
       break;
     }
   }
+  // chalk: every shaded face gets a hatched twin on top, so shading is drawn with strokes, not paint
+  if (CHALK) g.querySelectorAll('.iso-l:not(.cloud-ol), .iso-r, .iso-screen, .iso-shadow').forEach(f => { const c = f.cloneNode(); c.classList.add('hx'); c.removeAttribute('filter'); f.after(c); });
   const lab = M.label, sub = M.sub;
   if (n.kind === 'text') {
     let y = ay - (n.lines.length * lab.lh) / 2 + lab.lh / 2;
     n.lines.forEach(l => { text(pg, l, ax, y, 't-label'); y += lab.lh; });
     return;
   }
+  // a ring that spreads on the floor when a packet lands here (hidden until then)
+  const fP = n.fbox ? floorP : (u, v, z) => isoP(ax, ay, u, v, z);
+  n.ripple = el('path', { class: 'floor-ripple fx fx-t', d: floorRR(pad(n.fbox || rect(-n.geo.fw / 2, -n.geo.fd / 2, n.geo.fw, n.geo.fd), 10), 16, 0, fP) }, L.floorfx);
   if (n.pill) {
     const p = n.pill, lg = el('g', null, pg);
     el('rect', { x: f1(p.x), y: f1(p.y), width: f1(p.w), height: f1(p.h), rx: Math.min(14, p.h / 2), class: 'iso-pill', filter: 'url(#iso-pill)' }, lg);
@@ -1552,29 +2017,32 @@ function drawGroupIso(gp) {
   }
 }
 function drawEdgeIso(e) {
-  const g = el('g', { class: `el edge t-${e.tone}`, 'data-id': e.id }, L.edges);
+  const g = el('g', { class: edgeClass(e), 'data-id': e.id }, L.edges);
   e.g = g;
   const fc = e.fcorners, n = fc.length;
   let c = e.corners;
-  if (e.arrow !== false) c = shorten(c, true, 12);
-  if (e.both) c = shorten(c, false, 12);
+  const open = ST.head === 'open', cut = open ? 3 : 12;
+  if (e.arrow !== false) c = shorten(c, true, cut);
+  if (e.both) c = shorten(c, false, cut);
   el('path', { class: 'iso-track', d: roundedPath(e.corners, ST.bend) }, g);
   e.pathEl = el('path', { class: 'iso-path' + (e.dashed ? ' dashed' : ''), d: roundedPath(c, ST.bend) }, g);
   // arrowheads lie flat on the floor
   const floorHead = (tip, from) => {
     const dx = tip[0] - from[0], dy = tip[1] - from[1], l = Math.hypot(dx, dy) || 1, ux = dx / l, uy = dy / l;
     const len = 16, hw = 8, bx = tip[0] - ux * len, by = tip[1] - uy * len;
-    return dPoly([tip, [bx - uy * hw, by + ux * hw], [bx + uy * hw, by - ux * hw]].map(p => floorP(p[0], p[1])));
+    const pts = [[bx - uy * hw, by + ux * hw], tip, [bx + uy * hw, by - ux * hw]].map(p => floorP(p[0], p[1]));
+    return open ? dLine(pts) : dPoly(pts);
   };
   const heads = [];
   if (e.arrow !== false) heads.push(floorHead(fc[n - 1], fc[n - 2]));
   if (e.both) heads.push(floorHead(fc[0], fc[1]));
-  if (heads.length) el('path', { class: 'iso-head', d: heads.join('') }, g);
+  if (heads.length) el('path', { class: 'iso-head' + (open ? ' open' : ''), d: heads.join('') }, g);
+  proofMid(e, g);
   if (e.lbox) {
-    const lg = el('g', { class: 'el elabel-iso', 'data-id': e.id }, L.labels), b = e.lbox;
+    const lg = el('g', { class: 'el elabel-iso' + (e.change ? ' chg-' + e.change : ''), 'data-id': e.id }, L.labels), b = e.lbox;
     e.lg = lg;
     el('rect', { x: f1(b.x), y: f1(b.y), width: f1(b.w), height: f1(b.h), rx: f1(b.h / 2), class: 'iso-pill', filter: 'url(#iso-pill)' }, lg);
-    let x = b.x + (e.llines.length ? 7 : 2);
+    let x = labelExtras(lg, e, b.x + (e.llines.length ? 7 : 2));
     if (e.num != null) {
       el('circle', { cx: f1(x + 10), cy: f1(b.y + b.h / 2), r: 10, class: 'numc' }, lg);
       text(lg, String(e.num), x + 10, b.y + b.h / 2 + 0.5, 't-num');
@@ -1585,13 +2053,48 @@ function drawEdgeIso(e) {
   }
 }
 
+/* ---------- proof marks and change chips on edges ---------- */
+function edgeClass(e) { return `el edge t-${e.tone}` + (PROOF ? ' pf-' + e.proof.status : '') + (e.change ? ' chg-' + e.change : ''); }
+function markAt(parent, [tone, glyph, tip], cx, cy, cls = '') {
+  const g = el('g', { class: `pmark pm-${tone}${cls}`, transform: `translate(${f1(cx)} ${f1(cy)})` }, parent);
+  if (tip) el('title', null, g).textContent = tip;
+  el('circle', { r: 7 }, g);
+  if (glyph === 'check') el('path', { d: 'M-3.3 .2l2.2 2.2 4.3-4.5' }, g);
+  else el('text', { y: 0.5 }, g).textContent = glyph;
+  return g;
+}
+// inside a label box b: the change chip goes first (returns where the text starts), the proof mark last
+function labelExtras(lg, e, x) {
+  const b = e.lbox, m = proofMark(e);
+  if (m) markAt(lg, m, b.x + b.w - 7 - 7, b.y + b.h / 2);
+  if (!e.change) return x;
+  const w = tw(TX[e.change], 'tag') + 10, h = 17, cg = el('g', { class: 'chg-tag' }, lg);
+  el('rect', { x: f1(x), y: f1(b.y + b.h / 2 - h / 2), width: f1(w), height: h, rx: Math.min(h / 2, ST.pill) }, cg);
+  text(cg, caseFor(TX[e.change], 'tag'), x + w / 2, b.y + b.h / 2 + 0.5, 't-tag');
+  return x + w + 6;
+}
+// proof view: a mark on the path itself for hops whose label carries none (unproven, or no label)
+function proofMid(e, g) {
+  if (!PROOF || !e.pts || (e.lbox && proofMark(e))) return;
+  const m = e.proof.status === 'unproven' ? ['muted', '?', 'Unproven: no code cited for this hop'] : proofMark(e);
+  if (!m) return;
+  const busy = [...edges.values()].filter(o => o.lbox).map(o => pad(o.lbox, 5));
+  nodes.forEach(n => (ISO ? [n.objBox, n.pill] : [n.box]).forEach(b => b && busy.push(b)));
+  let pt = pointAt(e.pts, 0.5).pt;
+  for (const t of [0.5, 0.4, 0.6, 0.3, 0.7, 0.22, 0.78, 0.15, 0.85, 0.1, 0.9]) {
+    const q = pointAt(e.pts, t).pt;
+    if (!busy.some(b => hit(b, rect(q[0] - 8, q[1] - 8, 16, 16)))) { pt = q; break; }
+  }
+  markAt(g, m, pt[0], pt[1], ' pmid');
+}
+
 /* ---------- edge labels ---------- */
 function edgeLabelSize(e, maxW) {
   if (!e.label && e.num == null) { e.lsize = [0, 0]; e.llines = []; return null; }
   const lines = e.label ? wrapBalanced(e.label, 'edge', maxW) : [];
   const lw = widest(lines, 'edge'), lh = M.edge.lh;
   e.llines = lines;
-  e.lsize = [(e.num != null ? 28 : 0) + lw + (lines.length ? 14 : 6), Math.max(26, lines.length * lh + 8)];
+  e.lsize = [(e.num != null ? 28 : 0) + lw + (lines.length ? 14 : 6) + labelExtra(e), Math.max(26, lines.length * lh + 8)];
   return e.lsize;
 }
 function placeEdgeLabels() {
@@ -1600,7 +2103,7 @@ function placeEdgeLabels() {
   edges.forEach(e => {
     // on a short horizontal stretch, wrap the label so it can still sit on the line
     const longest = Math.max(0, ...segmentsOf(e).filter(s => s.dir[1] === 0).map(s => s.len));
-    const maxW = longest ? clamp(longest - 44 - (e.num != null ? 28 : 0), 64, 230) : 230;
+    const maxW = longest ? clamp(longest - 44 - (e.num != null ? 28 : 0) - labelExtra(e), 64, 230) : 230;
     const size = edgeLabelSize(e, maxW); if (!size) return;
     const [w, h] = size;
     const cands = [];   // [center, onLine]: on the longest straight stretch first, then beside it
@@ -1662,6 +2165,7 @@ function placeNotes(st) {
     if (o.type === 'edge' && o.lbox) r = pad(o.lbox, 3);
     if (o.type === 'group' && o.labelBox) r = o.labelBox;
     if (r) { obstacles.push(r); ownerOf.set(r, id); }
+    if (o.type === 'node' && o.change) obstacles.push(pad(chgTagBox(o), 3));
   });
   obstacles.push(titleBox);
   const lines = []; st.visible.forEach(id => { const o = all.get(id); if (o.type === 'edge') lines.push(o.pts); if (o.lifePts) lines.push(o.lifePts); });
@@ -1727,6 +2231,7 @@ function draw() {
   el('feDropShadow', { dx: 0, dy: 1, stdDeviation: 1.2, class: 'sh-drop' }, f);
   el('feDropShadow', { dx: 0, dy: 8, stdDeviation: 14, class: 'sh-drop' }, f);
   if (ISO) isoDefs(defs);
+  if (CHALK) ['haze', 'dust'].forEach(k => el('rect', { x: 0, y: 0, width: W, height: H, class: 'chalk-' + k, filter: `url(#chalk-${k})` }, board));   // old erasures and dust on the slate
   L.world = el('g', { id: 'world' }, board);
   ['floor', 'groups', 'edges', 'floorfx', 'nodes', 'labels', 'notes', 'focus', 'packets', 'debug'].forEach(k => L[k] = el('g', { id: 'L-' + k }, L.world));
   L.title = el('g', { id: 'L-title' }, board);
@@ -1738,9 +2243,87 @@ function draw() {
   // painter's order: what stands further back is drawn first
   const order = [...nodes.values()];
   if (isoMap) order.sort((a, b) => (a.fu + a.fv) - (b.fu + b.fv) || (a.fu - a.fv) - (b.fu - b.fv));
-  order.forEach(ISO ? drawNodeIso : drawNode);
+  order.forEach(n => { (ISO ? drawNodeIso : drawNode)(n); drawChange(n); });
   drawCodeBadges();
+  drawHud();
   if (DEBUG) drawDebug();
+}
+
+/* ---------- change mode: a ring around what the PR touched and a small tag on its label ---------- */
+function chgTagBox(n) {
+  const w = tw(TX[n.change], 'tag') + 12, h = 18;
+  if (ISO && n.pill) {   // a crown on the label pill, kept clear of the code badge
+    const p = n.pill, x = n.code ? Math.min(n.ax - w / 2, p.x + p.w - 17 - w) : n.ax - w / 2;
+    return rect(x, p.y - h + 5, w, h);
+  }
+  const b = n.box;
+  return ISO || n.kind === 'actor' || n.kind === 'text' ? rect(b.x + b.w / 2 - w / 2, b.y - h / 2, w, h) : rect(b.x + 14, b.y - h / 2, w, h);
+}
+function drawChange(n) {
+  if (!n.change || !n.g) return;
+  n.g.classList.add('chg-' + n.change);
+  if (n.kind !== 'text') {
+    if (ISO && n.geo) {   // on the floor, under everything that stands (sequence: around the node's own anchor)
+      const ring = el('g', { class: 'el chg-' + n.change, 'data-id': n.id }, L.floorfx);
+      const fb = pad(n.fbox || rect(-n.geo.fw / 2, -n.geo.fd / 2, n.geo.fw, n.geo.fd), 12), P = n.fbox ? floorP : (u, v, z) => isoP(n.ax, n.ay, u, v, z);
+      el('path', { class: 'chg-halo', d: floorRR(fb, 16, 0, P) }, ring);
+      el('path', { class: 'chg-ring', d: floorRR(fb, 16, 0, P) }, ring);
+      n.ring = n.lg = ring;   // lg: shown, hidden and dimmed with the node
+    } else {
+      const ring = el('g', null), ar = n.kind === 'actor';
+      const b = ar ? rect(n.cx - 30, n.box.y, 60, 60) : n.box, p = ar ? 6 : 7;
+      const r = ar ? 36 : (n.kind === 'pill' ? b.h / 2 : ST.radius) + p;
+      ['chg-glow', 'chg-ring'].forEach(cls => el('rect', { x: f1(b.x - p), y: f1(b.y - p), width: f1(b.w + 2 * p), height: f1(b.h + 2 * p), rx: f1(r), class: cls }, ring));
+      n.g.insertBefore(ring, n.hg);
+      n.ring = ring;
+    }
+  }
+  const B = chgTagBox(n), tg = el('g', { class: 'chg-tag' }, n.g);
+  ['chg-tag-base', null].forEach(cls => el('rect', { x: f1(B.x), y: f1(B.y), width: f1(B.w), height: B.h, rx: Math.min(B.h / 2, ST.pill), class: cls }, tg));   // an opaque base: the tints are see-through in dark themes
+  text(tg, caseFor(TX[n.change], 'tag'), B.x + B.w / 2, B.y + B.h / 2 + 0.5, 't-tag');
+  n.chgTag = tg;
+}
+
+/* ---------- header chips, top right: what the PR changed, and (proof view) the proof legend ---------- */
+let diffView = 'after', proofView = false;
+function drawHud() {
+  if (L.hud) L.hud.remove();
+  L.hud = null;
+  if (!PROOF && !CHANGE) return;
+  L.hud = el('g', { id: 'L-hud' }, L.title);
+  let right = W - 56;
+  const chip = (id, items) => {
+    const h = 30, y = 42, padX = 13, wOf = it => it.m ? 14 : it.sep ? 1 : tw(it.t, it.role);
+    const w = padX * 2 + items.reduce((a, it, i) => a + wOf(it) + (i ? (it.gap != null ? it.gap : 6) : 0), 0);
+    const g = el('g', { id, class: 'hud' }, L.hud), x0 = right - w;
+    el('rect', { x: f1(x0), y, width: f1(w), height: h, rx: Math.min(h / 2, ST.pill), class: 'hud-bg', filter: ISO ? 'url(#iso-pill)' : null }, g);
+    let x = x0 + padX;
+    items.forEach((it, i) => {
+      if (i) x += it.gap != null ? it.gap : 6;
+      if (it.m) markAt(g, it.m, x + 7, y + h / 2);
+      else if (it.sep) el('path', { class: 'hud-sep', d: `M${f1(x)} ${y + 8}v${h - 16}` }, g);
+      else text(g, caseFor(it.t, it.role), x, y + h / 2 + 0.5, `t-${it.role} ${it.cls || ''}`, 'start');
+      x += wOf(it);
+    });
+    right = x0 - 10;
+    return g;
+  };
+  if (CHANGE) {
+    const c = { added: 0, changed: 0, removed: 0 };
+    [...nodes.values(), ...edges.values()].forEach(o => o.change && c[o.change]++);
+    let title = S.diff && S.diff.title ? String(S.diff.title) : TX.changes;
+    if (title.length > 46) title = title.slice(0, 45) + '…';
+    const items = [{ t: title, role: 'sub', cls: 'h-ink' }];
+    [['added', '+', 'h-add'], ['changed', '~', 'h-chg'], ['removed', '−', 'h-rem']].forEach(([k, s, cls]) => c[k] && items.push({ t: s + c[k], role: 'sub', cls, gap: items.length > 1 ? 8 : 14 }));
+    items.push({ sep: true, gap: 12 }, { t: TX[diffView], role: 'group', gap: 12 });
+    const g = chip('hud-diff', items);
+    el('title', null, g).textContent = (S.diff && (S.diff.base || S.diff.head) ? `${S.diff.base || '?'}...${S.diff.head || '?'}\n` : '') + 'Before / after (D)';
+  }
+  if (PROOF) {
+    const s = proofSummary, items = [{ t: TX.proof, role: 'group' }, { m: ['ok', 'check'], gap: 12 }, { t: `${s.verified + s.cited} ${TX.traced1}`, role: 'sub' }];
+    [['inferred', ['warn', '?']], ['unproven', ['muted', '?']], ['broken', ['error', '!']]].forEach(([k, m]) => s[k] && items.push({ m, gap: 14 }, { t: `${s[k]} ${TX[k]}`, role: 'sub' }));
+    chip('hud-proof', items);
+  }
 }
 
 const eyebrowText = () => S.eyebrow != null ? String(S.eyebrow) : (EYEBROW[LANG.slice(0, 2)] || EYEBROW.en);
@@ -1829,21 +2412,23 @@ function headShape(tip, from) {
   return `M${f1(tip[0])} ${f1(tip[1])}L${f1(bx - uy * hw)} ${f1(by + ux * hw)}L${f1(bx + uy * hw)} ${f1(by - ux * hw)}Z`;
 }
 function drawEdge(e) {
-  const g = el('g', { class: `el edge t-${e.tone}`, 'data-id': e.id }, L.edges);
+  const g = el('g', { class: edgeClass(e), 'data-id': e.id }, L.edges);
   e.g = g;
   let c = e.corners;
   const solid = ST.head === 'solid';
   if (e.arrow !== false && solid) c = shorten(c, true, 6);
   if (e.both && solid) c = shorten(c, false, 6);
+  if (e.change && !e.ghost) el('path', { class: 'chg-glow', d: roundedPath(e.corners, ST.bend) }, g);
   e.pathEl = el('path', { class: 'edge-line' + (e.dashed ? ' dashed' : ''), d: roundedPath(c, ST.bend) }, g);
   const heads = [], cc = e.corners, n = cc.length;
   if (e.arrow !== false) heads.push(headShape(cc[n - 1], cc[n - 2]));
   if (e.both) heads.push(headShape(cc[0], cc[1]));
   if (heads.length) el('path', { class: 'edge-head' + (solid ? '' : ' open'), d: heads.join('') }, g);
+  proofMid(e, g);
   if (e.lbox) {
     const lg = el('g', { class: 'elabel' }, g), b = e.lbox;
     el('rect', { x: f1(b.x), y: f1(b.y), width: f1(b.w), height: f1(b.h), rx: Math.min(10, ST.radius), class: 'knock' }, lg);
-    let x = b.x + (e.llines.length ? 7 : 2);
+    let x = labelExtras(lg, e, b.x + (e.llines.length ? 7 : 2));
     if (e.num != null) {
       el('rect', { x: f1(x), y: f1(b.y + b.h / 2 - 10), width: 20, height: 20, rx: Math.min(10, ST.pill), class: 'numc' }, lg);
       text(lg, String(e.num), x + 10, b.y + b.h / 2 + 0.5, 't-num');
@@ -1890,6 +2475,9 @@ function drawDebug() {
    playback
    ===================================================================== */
 let cur = -1, running = [], dyn = [], flowRAF = 0, playing = false, playTimer = 0;
+let flowAt = null, flowItems = [], flowDelay = 0, flowSpan = 0;   // the current step's packets, as a function of time
+// before / after: "before" hides what the change adds (and anything attached to it)
+const diffHidden = o => diffView === 'before' && (o.change === 'added' || (o.type === 'edge' && (nodes.get(o.from).change === 'added' || nodes.get(o.to).change === 'added')));
 const easeInOut = t => t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
 
 function drawPath(p, delay, dur) {
@@ -1903,8 +2491,11 @@ function fade(node, delay, dur, dy = 0, scale = 1) {
   running.push(node.animate([{ opacity: 0, transform: `translateY(${dy}px) scale(${scale})` }, { opacity: to, transform: 'translateY(0) scale(1)' }], { duration: dur, delay, easing: 'cubic-bezier(.2,.7,.3,1)', fill: 'backwards' }));
 }
 function nodeIn(n, delay) {
+  if (n.ring) fade(n.ring, delay + 260, 520);
+  if (n.chgTag) fade(n.chgTag, delay + 420, 380, 4);
   if (ISO) {   // toy blocks drop onto the board and settle
-    running.push(n.hg.animate([{ opacity: 0, transform: 'translateY(-46px)' }, { opacity: 1, transform: 'translateY(4px)', offset: 0.72 }, { opacity: 1, transform: 'translateY(0)' }], { duration: 620, delay, easing: 'cubic-bezier(.3,.6,.4,1)', fill: 'backwards' }));
+    const to = parseFloat(getComputedStyle(n.hg).opacity) || 1;
+    running.push(n.hg.animate([{ opacity: 0, transform: 'translateY(-46px)' }, { opacity: to, transform: 'translateY(4px)', offset: 0.72 }, { opacity: to, transform: 'translateY(0)' }], { duration: 620, delay, easing: 'cubic-bezier(.3,.6,.4,1)', fill: 'backwards' }));
     const life = n.g.querySelector('.lifeline'); if (life) fade(life, delay + 200, 500);
     return;
   }
@@ -1914,23 +2505,60 @@ function nodeIn(n, delay) {
 function edgeIn(e, delay) {
   if (ISO && e.fcorners) {
     const track = e.g.querySelector('.iso-track'); if (track) fade(track, delay, 420);
-    if (e.dashed) fade(e.pathEl, delay, 520); else drawPath(e.pathEl, delay + 80, 520);
+    if (e.dashed || e.ghost) fade(e.pathEl, delay, 520); else drawPath(e.pathEl, delay + 80, 520);
     const head = e.g.querySelector('.iso-head'); if (head) fade(head, delay + 540, 180);
     if (e.lg) fade(e.lg, delay + 320, 380, 4);
     return;
   }
-  if (e.dashed) fade(e.pathEl, delay, 520); else drawPath(e.pathEl, delay, 520);
+  const glow = e.g.querySelector('.chg-glow'); if (glow) fade(glow, delay + 300, 520);
+  if (e.dashed || e.ghost) fade(e.pathEl, delay, 520); else drawPath(e.pathEl, delay, 520);
   const head = e.g.querySelector('.edge-head'); if (head) fade(head, delay + 470, 160);
   const lab = e.g.querySelector('.elabel'); if (lab) fade(lab, delay + 320, 380, 3);
 }
-function pulse(n) {
-  if (!n || !n.g || !ANIM) return;
-  if (ISO) { n.hg.animate([{ transform: 'translateY(0)' }, { transform: 'translateY(-8px)' }, { transform: 'translateY(0)' }], { duration: 420, easing: 'cubic-bezier(.3,.7,.4,1)' }); return; }
-  (n.hg || n.g).animate([{ transform: 'scale(1)' }, { transform: 'scale(1.03)' }, { transform: 'scale(1)' }], { duration: 440, easing: 'ease-out' });
+/* ---------- micro-life: how a node answers a packet ----------
+   A packet landing makes its target react (a bump, a ring on the floor, a status light, server bays,
+   a write ripple on a database, a message joining a queue); a packet leaving a queue takes the head
+   message with it. Every effect is a WAAPI animation started `delay` ms from now and returned, so
+   seek() freezes it like any other. `seen` keeps once-per-step effects (the queue) from repeating. */
+const blinkKF = [{ opacity: 1 }, { opacity: 0.15, offset: 0.18 }, { opacity: 1, offset: 0.36 }, { opacity: 0.15, offset: 0.54 }, { opacity: 1, offset: 0.72 }, { opacity: 1 }];
+const flashKF = peak => [{ opacity: 0 }, { opacity: peak, offset: 0.22 }, { opacity: 0 }];
+function fxArrive(n, delay = 0, seen = new Map()) {
+  if (!n || !n.g || !ANIM) return [];
+  const out = [], A = (e, kf, duration, x = {}) => { if (e) out.push(e.animate(kf, { duration, delay, easing: 'cubic-bezier(.3,.7,.4,1)', ...x })); };
+  if (!ISO) { A(n.hg || n.g, [{ transform: 'scale(1)' }, { transform: 'scale(1.03)' }, { transform: 'scale(1)' }], 440, { easing: 'ease-out' }); return out; }
+  A(n.hg, [{ transform: 'translateY(0)' }, { transform: 'translateY(-6px)', offset: 0.4 }, { transform: 'translateY(1px)', offset: 0.75 }, { transform: 'translateY(0)' }], 480);
+  A(n.ripple, [{ opacity: 0.75, transform: 'scale(.94)' }, { opacity: 0, transform: 'scale(1.2)' }], 820, { easing: 'cubic-bezier(.2,.7,.3,1)' });
+  A(n.led, blinkKF, 640, { easing: 'linear' });
+  A(n.ledGlow, flashKF(0.9), 900);
+  A(n.glow, flashKF(0.42), 820);
+  A(n.flash, flashKF(0.55), 700);
+  (n.bays || []).forEach((b, i) => A(b, flashKF(1), 1000, { delay: delay + 60 + i * 90 }));
+  (n.rips || []).forEach((r, i) => A(r, [{ opacity: 0.95, transform: 'scale(.2)' }, { opacity: 0, transform: 'scale(1.06)' }], 900, { delay: delay + i * 180, easing: 'cubic-bezier(.2,.6,.3,1)' }));
+  if (n.qCubes && !seen.has(n.id + '>')) {   // the message joins the tail of the queue and stays
+    seen.set(n.id + '>', 1);
+    A(n.qCubes[3], [{ opacity: 0, transform: 'translateY(-30px)' }, { opacity: 1, transform: 'translateY(2px)', offset: 0.7 }, { opacity: 1, transform: 'translateY(0)' }], 560, { fill: 'forwards' });
+  }
+  return out;
 }
+function fxDepart(n, delay = 0, seen = new Map()) {
+  if (!n || !n.g || !ANIM || !ISO) return [];
+  const out = [], A = (e, kf, duration, x = {}) => { if (e) out.push(e.animate(kf, { duration, delay, easing: 'cubic-bezier(.3,.7,.4,1)', ...x })); };
+  A(n.led, [{ opacity: 1 }, { opacity: 0.2, offset: 0.3 }, { opacity: 1 }], 380, { easing: 'linear' });
+  const k = seen.get(n.id + '<') || 0;
+  if (n.qCubes && k < 3) {   // the head message is taken, the rest move up one slot (k: messages taken before)
+    seen.set(n.id + '<', k + 1);
+    A(n.qCubes[k], [{ opacity: 1, transform: 'translateY(0)' }, { opacity: 0, transform: 'translateY(-24px)' }], 380, { fill: 'forwards', easing: 'cubic-bezier(.5,0,.75,0)' });
+    const [dx, dy] = n.qStep, T = j => `translate(${f1(dx * j)}px,${f1(dy * j)}px)`;
+    // each slide starts where the previous one left the slot, so the later animation can simply win
+    n.qSlots.slice(k + 1).forEach((q, i) => A(q, [{ transform: T(k) }, { transform: T(k + 1) }], 520, { delay: delay + 160 + i * 50, fill: 'forwards', easing: 'cubic-bezier(.3,.6,.3,1)' }));
+  }
+  return out;
+}
+let liveFx = [];   // reactions in the live loop, reset when the packets start over
 function clearStep() {
   running.forEach(a => a.cancel()); running = [];
-  cancelAnimationFrame(flowRAF); flowRAF = 0;
+  liveFx.forEach(a => a.cancel()); liveFx = [];
+  cancelAnimationFrame(flowRAF); flowRAF = 0; flowAt = null; flowItems = [];
   dyn.forEach(n => n.remove()); dyn = [];
   edges.forEach(e => e.g && e.g.classList.remove('hot'));
 }
@@ -1992,7 +2620,7 @@ function enter(k, animate) {
   const st = steps[k];
   frame(st);
   all.forEach((o, id) => {
-    const v = st.visible.has(id);
+    const v = st.visible.has(id) && !diffHidden(o);
     [o.g, o.lg].forEach(g => {
       if (!g) return;
       g.classList.toggle('off', !v);
@@ -2025,6 +2653,10 @@ function enter(k, animate) {
     if (!ANIM) return;
     const d = (animate ? t : 120) + i * 160;
     running.push(ring.animate([{ opacity: 0, transform: 'scale(1.06)' }, { opacity: 1, transform: 'scale(1)' }], { duration: 520, delay: d, easing: 'cubic-bezier(.2,.7,.3,1)', fill: 'backwards' }));
+    if (!ISO || o.type !== 'node') return;
+    // the focused block settles (one that just dropped in already did), then its light breathes slowly
+    if (!st.added.includes(id)) running.push(o.hg.animate([{ transform: 'translateY(0)' }, { transform: 'translateY(-7px)', offset: 0.35 }, { transform: 'translateY(1.5px)', offset: 0.72 }, { transform: 'translateY(0)' }], { duration: 640, delay: d + 60, easing: 'cubic-bezier(.3,.6,.4,1)' }));
+    if (o.led) running.push(o.led.animate([{ opacity: 1 }, { opacity: 0.3 }, { opacity: 1 }], { duration: 2800, delay: d + 700, iterations: Infinity, easing: 'ease-in-out' }));
   });
   if (animate && st.focus.length) t += 480;
   const flowT = startFlows(st, ANIM ? t + 200 : 0);
@@ -2046,7 +2678,7 @@ function focusRing(o) {
 }
 
 function startFlows(st, delay) {
-  const items = st.flow.map(f => ({ ...f, e: edges.get(f.edge) })).filter(i => i.e && i.e.pathEl);
+  const items = st.flow.map(f => ({ ...f, e: edges.get(f.edge) })).filter(i => i.e && i.e.pathEl && !diffHidden(i.e));
   if (!items.length) return 0;
   items.forEach(it => {
     it.len = it.e.pathEl.getTotalLength();
@@ -2055,8 +2687,14 @@ function startFlows(st, delay) {
     const tone = TONES.has(it.tone) ? it.tone : (it.e.tone !== 'ink' && it.e.tone !== 'muted' ? it.e.tone : '');
     const g = el('g', { class: 'packet' + (tone ? ' t-' + tone : '') }, L.packets);
     if (ISO && it.e.fcorners) {   // a ball hopping along the floor path, with its name above it
+      if (ANIM) {
+        it.tail = el('g', { class: 'packet pk-tail' + (tone ? ' t-' + tone : '') }, L.packets);
+        L.packets.insertBefore(it.tail, g); it.tail.style.opacity = 0; dyn.push(it.tail);
+        for (let j = 0; j < 5; j++) el('circle', { r: f1(6.4 - j * 0.9) }, it.tail);
+      }
       el('ellipse', { rx: 8, ry: 4, class: 'iso-shadow' }, g);
       const ball = el('g', { transform: 'translate(0 -12)' }, g);
+      el('circle', { r: 12, class: 'pk-glow', filter: 'url(#iso-blur)' }, ball);
       el('circle', { r: 8, class: 'pk-ball' }, ball);
       el('circle', { cx: -2.5, cy: -2.5, r: 2.4, class: 'pk-shine' }, ball);
       if (label) {
@@ -2082,10 +2720,21 @@ function startFlows(st, delay) {
   items.forEach(it => { it.start = st.together ? 0 : acc; acc += it.dur + 200; });
   const span = st.together ? Math.max(...items.map(i => i.dur)) : acc - 200;
   const cycle = span + 1400;
-  const placeAt = (it, p) => {
-    const q = it.reverse ? 1 - p : p, pt = it.e.pathEl.getPointAtLength(q * it.len);
+  const at = (it, p) => it.e.pathEl.getPointAtLength((it.reverse ? 1 - easeInOut(p) : easeInOut(p)) * it.len);
+  const hop = p => -10 - Math.sin(Math.PI * easeInOut(p)) * 9;
+  const placeAt = (it, p, op = 1) => {
+    const pt = at(it, p);
     it.g.setAttribute('transform', `translate(${f1(pt.x)} ${f1(pt.y)})`);
-    if (it.ball) it.ball.setAttribute('transform', `translate(0 ${f1(-10 - Math.sin(Math.PI * p) * 9)})`);
+    if (it.ball) it.ball.setAttribute('transform', `translate(0 ${f1(hop(p))})`);
+    if (!it.tail) return;
+    it.tail.style.opacity = 1;   // a short comet tail: where the ball just was, fading out
+    it.tail.childNodes.forEach((d, j) => {
+      const pj = p - (j + 1) * 0.02;
+      if (pj <= 0) { d.setAttribute('opacity', 0); return; }
+      const q = at(it, pj);
+      d.setAttribute('cx', f1(q.x)); d.setAttribute('cy', f1(q.y + hop(pj)));
+      d.setAttribute('opacity', f1(op * (0.4 - j * 0.07) * 100) / 100);
+    });
   };
   if (!ANIM) {
     // still frame: one packet per arrow, parked where it covers nothing (none in a recap)
@@ -2111,24 +2760,29 @@ function startFlows(st, delay) {
     });
     return span;
   }
-  const begin = performance.now() + delay;
-  const tick = now => {
-    const tt0 = now - begin;
-    if (tt0 >= 0) {
-      const c = Math.floor(tt0 / cycle), tt = tt0 % cycle;
-      items.forEach(it => {
-        const p = (tt - it.start) / it.dur;
-        if (p < 0 || p > 1) {
-          it.g.style.opacity = 0;
-          if (p > 1 && it.pulsed !== c) { it.pulsed = c; pulse(nodes.get(it.reverse ? it.e.from : it.e.to)); }
-          return;
-        }
-        it.g.style.opacity = Math.min(1, p * 9, (1 - p) * 9);
-        placeAt(it, easeInOut(p));
-      });
-    }
-    flowRAF = requestAnimationFrame(tick);
+  // where every packet is tt0 ms after the flows start: the live loop and seek() both draw from this
+  flowItems = items; flowDelay = delay; flowSpan = span;
+  let liveCycle = -1, liveSeen = new Map();
+  flowAt = (tt0, live) => {
+    if (tt0 < 0) { items.forEach(it => { it.g.style.opacity = 0; if (it.tail) it.tail.style.opacity = 0; }); return; }
+    const c = Math.floor(tt0 / cycle), tt = tt0 % cycle;
+    if (live && c !== liveCycle) { liveCycle = c; liveFx.forEach(a => a.cancel()); liveFx = []; liveSeen = new Map(); }
+    items.forEach(it => {
+      const p = (tt - it.start) / it.dur, src = nodes.get(it.reverse ? it.e.to : it.e.from), dst = nodes.get(it.reverse ? it.e.from : it.e.to);
+      if (live && p >= 0 && it.left !== c) { it.left = c; liveFx.push(...fxDepart(src, 0, liveSeen)); }
+      if (p < 0 || p > 1) {
+        it.g.style.opacity = 0; if (it.tail) it.tail.style.opacity = 0;
+        if (live && p > 1 && it.pulsed !== c) { it.pulsed = c; liveFx.push(...fxArrive(dst, 0, liveSeen)); }
+        return;
+      }
+      const op = Math.min(1, p * 9, (1 - p) * 9);
+      it.g.style.opacity = op;
+      placeAt(it, p, op);
+    });
   };
+  if (seekMode) return delay + cycle;
+  const begin = performance.now() + delay;
+  const tick = now => { flowAt(now - begin, true); flowRAF = requestAnimationFrame(tick); };
   flowRAF = requestAnimationFrame(tick);
   return delay + cycle;
 }
@@ -2157,6 +2811,14 @@ function updateBar() {
   $('n').textContent = two(cur + 1);
   $('h').textContent = st.title;
   $('p').innerHTML = md(st.say);
+  const pl = $('pl'), s = proofSummary;
+  pl.hidden = !(PROOF && s.total && (st.recap || proofView));
+  if (!pl.hidden) {   // "6 of 7 hops traced to code · 1 inferred"
+    const traced = s.verified + s.cited, tone = s.broken ? 'error' : traced === s.total ? 'ok' : 'warn';
+    const glyph = tone === 'ok' ? '<path d="M-3.3 .2l2.2 2.2 4.3-4.5"/>' : `<text y=".5">${tone === 'error' ? '!' : '?'}</text>`;
+    pl.innerHTML = `<svg class="pl-mark pm-${tone}" viewBox="-8 -8 16 16" aria-hidden="true"><circle r="7.5"/>${glyph}</svg><span>${md([TX.traced(traced, s.total),
+      ...['inferred', 'unproven', 'broken'].filter(k => s[k]).map(k => `${s[k]} ${TX[k]}`)].join(' · '))}</span>`;
+  }
   document.querySelectorAll('.progress button').forEach((b, i) => { b.setAttribute('aria-current', i === cur ? 'step' : 'false'); b.classList.toggle('done', i < cur); });
   $('prev').disabled = cur === 0;
   $('next').disabled = cur === steps.length - 1;
@@ -2166,7 +2828,7 @@ function go(k, opts = {}) {
   k = clamp(k, 0, steps.length - 1);
   const animate = ANIM && !opts.instant && k === cur + 1;
   if (k !== cur) closeCode();
-  cur = k;
+  cur = k; seekK = -1;
   const timing = enter(k, animate);
   updateBar();
   if (!opts.keepHash) { try { history.replaceState(null, '', '#' + (k + 1)); } catch (_) {} }
@@ -2174,11 +2836,12 @@ function go(k, opts = {}) {
 }
 function schedule(timing) {
   clearTimeout(playTimer);
-  if (cur >= steps.length - 1) { stop(); return; }
+  const last = cur >= steps.length - 1;
+  if (last && !LOOP) { stop(); return; }
   const st = steps[cur];
   const words = (st.title + ' ' + st.say).split(/\s+/).filter(Boolean).length;
   const read = typeof st.wait === 'number' ? st.wait * 1000 : Math.max(2600, 900 + words * 290);
-  playTimer = setTimeout(() => go(cur + 1), Math.max(timing.t + read, timing.flowT || 0));
+  playTimer = setTimeout(() => last ? go(0) : go(cur + 1), Math.max(timing.t + read, timing.flowT || 0) + (last ? 1200 : 0));
 }
 function play() { playing = true; $('play').setAttribute('aria-label', 'Pause'); $('play-i').setAttribute('d', 'M8 5.5v13M16 5.5v13'); if (cur >= steps.length - 1) go(0); else schedule({ t: 600, flowT: 0 }); }
 function stop() { playing = false; clearTimeout(playTimer); $('play').setAttribute('aria-label', 'Play'); $('play-i').setAttribute('d', 'M8 5.5v13l10.5-6.5z'); }
@@ -2211,8 +2874,12 @@ function openCode(o) {
   const c = o.code; if (!c) return;
   stop();
   codeFor = o.id;
-  $('code-label').textContent = (o.label || o.id).replace(/\n/g, ' ');
+  const nm = id => { const n = nodes.get(id); return n && n.label ? n.label : id; };
+  $('code-label').textContent = (o.label || (o.type === 'edge' ? `${nm(o.from)} → ${nm(o.to)}` : o.id)).replace(/\n/g, ' ');
   $('code-file').textContent = c.file + (c.start ? `:${c.start}${c.end > c.start ? '-' + c.end : ''}` : '');
+  const pm = o.type === 'edge' ? proofMark(o) : null, hitLn = pm && o.proof.status === 'verified' ? o.proof.hit : 0;
+  $('code-proof').hidden = !pm;
+  if (pm) { $('code-proof').className = 'pm-' + pm[0]; $('code-proof').textContent = (pm[1] === 'check' ? '✓' : pm[1]) + '  ' + pm[2]; }
   const links = $('code-links'); links.innerHTML = '';
   const link = (text, href) => { const a = document.createElement('a'); a.textContent = text; a.href = href; if (/^https?:/.test(href)) { a.target = '_blank'; a.rel = 'noopener'; } links.appendChild(a); };
   const ed = EDITORS[S.editor || 'vscode'];
@@ -2225,13 +2892,13 @@ function openCode(o) {
     body.style.setProperty('--ln0', c.start - 1);
     body.innerHTML = highlight(c.text, c.file).split('\n').map((l, i) => {
       const ln = c.start + i;
-      return `<span class="ln${mk.length && ln >= mk[0] && ln <= mk[1] ? ' mark' : ''}">${l || ' '}</span>`;
+      return `<span class="ln${mk.length && ln >= mk[0] && ln <= mk[1] ? ' mark' : ''}${ln === hitLn ? ' hit' : ''}">${l || ' '}</span>`;
     }).join('');
   }
   const panel = $('code');
   panel.classList.add('open'); panel.setAttribute('aria-hidden', 'false');
   body.scrollTop = 0;
-  const first = body.querySelector('.mark');
+  const first = body.querySelector('.hit') || body.querySelector('.mark');
   if (first) body.scrollTop = Math.max(0, first.offsetTop - body.clientHeight / 3);
   $('code-close').focus({ preventScroll: true });
 }
@@ -2266,7 +2933,8 @@ function drawCodeBadges() {
   edges.forEach(e => {
     if (!e.code || !e.g) return;
     e.g.classList.add('has-code');
-    if (e.lg) { e.lg.classList.add('has-code'); if (e.lbox) badge(e.lg, e.lbox.x + e.lbox.w + 2, e.lbox.y + e.lbox.h / 2); }
+    // with proof on, the label's proof mark already says "there is code behind this"
+    if (e.lg) { e.lg.classList.add('has-code'); if (e.lbox && !PROOF) badge(e.lg, e.lbox.x + e.lbox.w + 2, e.lbox.y + e.lbox.h / 2); }
   });
 }
 
@@ -2284,6 +2952,8 @@ function wire() {
   $('next').onclick = () => { stop(); go(cur + 1); };
   $('play').onclick = () => playing ? stop() : play();
   $('code-close').onclick = closeCode;
+  $('proof').onclick = () => setProofView(!proofView);
+  $('diff').onclick = () => setDiffView(diffView === 'before' ? 'after' : 'before');
   $('theme').onclick = () => {
     themeChoice = resolveTheme() === 'dark' ? 'light' : 'dark';
     try { localStorage.setItem('chalk-talk-theme', themeChoice); } catch (_) {}
@@ -2301,6 +2971,8 @@ function wire() {
     else if (k === 'End') { stop(); go(steps.length - 1); }
     else if (k === 'p' || k === 'P') playing ? stop() : play();
     else if (k === 't' || k === 'T') $('theme').click();
+    else if (k === 'v' || k === 'V') setProofView(!proofView);
+    else if (k === 'd' || k === 'D') setDiffView(diffView === 'before' ? 'after' : 'before');
     else if (/^[1-9]$/.test(k)) { stop(); go(+k - 1); }
   });
   let down = null;
@@ -2310,6 +2982,7 @@ function wire() {
     const dx = ev.clientX - down[0], dy = ev.clientY - down[1]; down = null;
     if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy)) { stop(); go(cur + (dx < 0 ? 1 : -1)); }
     else if (Math.abs(dx) < 6 && Math.abs(dy) < 6) {
+      if (ev.target.closest && ev.target.closest('#hud-diff')) { $('diff').click(); return; }
       // a tap on something with code opens it; with the panel open, a tap on the board closes it
       const hitEl = ev.target.closest && ev.target.closest('.has-code[data-id]'), o = hitEl && all.get(hitEl.dataset.id);
       if (o && o.code && !hitEl.classList.contains('off')) { o.id === codeFor ? closeCode() : openCode(o); return; }
@@ -2329,7 +3002,77 @@ function publishReport() {
   if (!node) { node = document.createElement('script'); node.type = 'application/json'; node.id = 'chalk-report'; document.body.appendChild(node); }
   node.textContent = JSON.stringify(report).replace(/</g, '\\u003c');   // keeps the serialized DOM parseable
   report.issues.forEach(i => (i.level === 'error' ? console.error : console.warn)(`[chalk-talk] ${i.where}: ${i.msg}`));
-  window.chalk = { report, steps: steps.length, style: STYLE_NAME, go: k => go(k - 1, { instant: true }) };
+  // steps are numbered from 1 here, like the page's #hash and chalk.go
+  Object.assign(window.chalk, { report, style: STYLE_NAME, steps: () => steps.length, go: k => go(k - 1, { instant: true }), seek, duration });
+}
+
+/* ---------- views: proof (V) and before / after (D) ---------- */
+function setProofView(on) {
+  if (!PROOF) return;
+  proofView = on;
+  document.documentElement.classList.toggle('proof-view', on);
+  $('proof').setAttribute('aria-pressed', String(on));
+  if (cur >= 0) updateBar();
+}
+function setDiffView(v) {
+  if (!CHANGE) return;
+  diffView = v;
+  document.documentElement.classList.toggle('diff-before', v === 'before');
+  $('diff').setAttribute('aria-pressed', String(v === 'before'));
+  drawHud();
+  if (cur >= 0) go(cur, { instant: true, keepHash: true });
+}
+
+/* ---------- deterministic time, for recorders ----------
+   seek(k, ms) draws step k exactly as it looks ms after it starts (entered from step k-1, the way
+   "next" plays it): every WAAPI animation is paused at that time, packets are placed from the same
+   clock, and the camera and dimming moves, CSS transitions in the live page, become animations
+   too. The first call stops playback and leaves the page in this frozen recording mode. */
+let seekMode = false, seekK = -1;
+function seekEnter(k) {
+  if (!seekMode) {
+    seekMode = true; ANIM = true; stop(); closeCode();
+    document.documentElement.classList.add('seeking');
+    document.getAnimations().forEach(a => a.cancel());
+  }
+  let cam0 = 'none';
+  const op0 = new Map();
+  if (k > 0) {   // where the previous step left the camera and the dimming
+    enter(k - 1, false);
+    cam0 = L.world.style.transform || 'none';
+    board.querySelectorAll('#world .el').forEach(g => { if (!g.classList.contains('off')) op0.set(g, getComputedStyle(g).opacity); });
+  }
+  cur = k;
+  enter(k, true);
+  updateBar();
+  if (k > 0) {
+    const cam1 = L.world.style.transform || 'none';
+    if (cam1 !== cam0) running.push(L.world.animate([{ transform: cam0 }, { transform: cam1 }], { duration: 950, easing: 'cubic-bezier(.65,0,.35,1)', fill: 'backwards' }));
+    op0.forEach((o, g) => {
+      const o1 = getComputedStyle(g).opacity;
+      if (!g.classList.contains('off') && o1 !== o) running.push(g.animate([{ opacity: o }, { opacity: o1 }], { duration: 450, easing: 'ease', fill: 'backwards' }));
+    });
+  }
+  const seen = new Map();
+  flowItems.forEach(it => {
+    running.push(...fxDepart(nodes.get(it.reverse ? it.e.to : it.e.from), flowDelay + it.start, seen));
+    running.push(...fxArrive(nodes.get(it.reverse ? it.e.from : it.e.to), flowDelay + it.start + it.dur, seen));
+  });
+  seekK = k;
+}
+function seek(k, ms = 0) {
+  k = clamp(Math.round(k) - 1, 0, steps.length - 1);
+  if (k !== seekK || !seekMode) seekEnter(k);
+  ms = Math.max(0, +ms || 0);
+  running.forEach(a => { a.pause(); a.currentTime = ms; });
+  if (flowAt) flowAt(ms - flowDelay, false);
+}
+// ms until step k has finished moving: entrances, notes, focus, camera and one pass of its packets
+function duration(k) {
+  seek(k, 0);
+  let end = flowItems.length ? flowDelay + flowSpan : 0;
+  running.forEach(a => { const t = a.effect.getComputedTiming().endTime; if (isFinite(t)) end = Math.max(end, t); });
+  return Math.ceil(end);
 }
 function fatal(msg) {
   document.body.innerHTML = '';
@@ -2337,6 +3080,7 @@ function fatal(msg) {
   const node = document.createElement('script'); node.type = 'application/json'; node.id = 'chalk-report';
   node.textContent = JSON.stringify({ ok: false, steps: 0, issues: [{ level: 'error', where: 'scene', msg }] }); document.body.appendChild(node);
   document.documentElement.dataset.chalk = 'ready';
+  if (readyResolve) readyResolve(window.chalk);
 }
 
 /* ---------- boot ---------- */
@@ -2367,8 +3111,13 @@ async function boot() {
   L.world.style.transition = 'none';                // the first frame is placed, not flown to
   go(start, { instant: start !== 0 || !ANIM, keepHash: true });
   requestAnimationFrame(() => requestAnimationFrame(() => { L.world.style.transition = ''; }));
+  $('proof').hidden = !PROOF; $('diff').hidden = !CHANGE;
+  if (qs.has('proof')) setProofView(true);            // ?proof opens in proof view, ?diff=before in the before view
+  if (qs.get('diff') === 'before') setDiffView('before');
   wire();
+  if (qs.has('play') && ANIM) play();
   document.documentElement.dataset.chalk = 'ready';
+  readyResolve(window.chalk);
   if (timedOut) loaded.then(() => { readMetrics(); computeTitleBox(); layout(); draw(); const k = cur; cur = -1; go(k, { instant: true, keepHash: true }); });
 }
 boot();

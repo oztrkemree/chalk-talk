@@ -1,0 +1,509 @@
+{
+  "title": "How FastAPI calls your function",
+  "subtitle": "from one ASGI call to a JSON response, traced through fastapi and starlette",
+  "lang": "en",
+  "root": "../../../chalk-gallery-src",
+  "nodes": [
+    {
+      "id": "server",
+      "kind": "cloud",
+      "label": "ASGI server",
+      "sub": "e.g. uvicorn",
+      "at": [
+        0,
+        1
+      ]
+    },
+    {
+      "id": "app",
+      "label": "FastAPI app",
+      "sub": "FastAPI.__call__",
+      "icon": "bolt",
+      "at": [
+        1,
+        1
+      ],
+      "code": {
+        "file": "fastapi/fastapi/applications.py",
+        "lines": [
+          1197,
+          1227
+        ],
+        "mark": [
+          1211,
+          1217
+        ]
+      }
+    },
+    {
+      "id": "router",
+      "label": "Router",
+      "sub": "APIRouter.app",
+      "icon": "search",
+      "at": [
+        2,
+        1
+      ],
+      "code": {
+        "file": "fastapi/fastapi/routing.py",
+        "lines": [
+          2789,
+          2822
+        ],
+        "mark": [
+          2800,
+          2810
+        ]
+      }
+    },
+    {
+      "id": "route",
+      "label": "Route handler",
+      "sub": "get_request_handler",
+      "icon": "gear",
+      "at": [
+        3,
+        1
+      ],
+      "code": {
+        "file": "fastapi/fastapi/routing.py",
+        "lines": [
+          450,
+          522
+        ],
+        "mark": [
+          510,
+          518
+        ]
+      }
+    },
+    {
+      "id": "deps",
+      "kind": "pill",
+      "label": "Dependency solver",
+      "sub": "solve_dependencies",
+      "icon": "refresh",
+      "color": "teal",
+      "at": [
+        3,
+        0
+      ],
+      "code": {
+        "file": "fastapi/fastapi/dependencies/utils.py",
+        "lines": [
+          619,
+          708
+        ],
+        "mark": [
+          660,
+          680
+        ]
+      }
+    },
+    {
+      "id": "pyd",
+      "kind": "pill",
+      "label": "Pydantic",
+      "sub": "TypeAdapter.validate_python",
+      "icon": "shield",
+      "color": "violet",
+      "at": [
+        2,
+        0
+      ],
+      "code": {
+        "file": "fastapi/fastapi/_compat/v2.py",
+        "lines": [
+          173,
+          187
+        ],
+        "mark": [
+          182,
+          182
+        ]
+      }
+    },
+    {
+      "id": "endpoint",
+      "label": "Your endpoint",
+      "sub": "dependant.call",
+      "icon": "star",
+      "color": "orange",
+      "at": [
+        3,
+        2
+      ],
+      "code": {
+        "file": "fastapi/fastapi/routing.py",
+        "lines": [
+          363,
+          376
+        ],
+        "mark": [
+          370,
+          376
+        ]
+      }
+    },
+    {
+      "id": "serialize",
+      "kind": "pill",
+      "label": "Serializer",
+      "sub": "serialize_response",
+      "icon": "code",
+      "color": "teal",
+      "at": [
+        2,
+        2
+      ],
+      "code": {
+        "file": "fastapi/fastapi/routing.py",
+        "lines": [
+          320,
+          360
+        ],
+        "mark": [
+          332,
+          355
+        ]
+      }
+    },
+    {
+      "id": "resp",
+      "kind": "file",
+      "label": "JSONResponse",
+      "sub": "starlette.responses",
+      "icon": "file",
+      "color": "blue",
+      "at": [
+        0,
+        2
+      ],
+      "code": {
+        "file": "starlette/starlette/responses.py",
+        "lines": [
+          184,
+          204
+        ],
+        "mark": [
+          197,
+          204
+        ]
+      }
+    }
+  ],
+  "edges": [
+    {
+      "id": "asgi",
+      "from": "server",
+      "to": "app",
+      "num": 1,
+      "label": "ASGI call",
+      "packet": "scope",
+      "inferred": "The ASGI server (e.g. uvicorn) makes this call; that code lives outside FastAPI and Starlette."
+    },
+    {
+      "id": "mw",
+      "from": "app",
+      "to": "router",
+      "num": 2,
+      "label": "middleware",
+      "packet": "scope",
+      "code": {
+        "file": "fastapi/fastapi/applications.py",
+        "lines": [
+          1067,
+          1105
+        ],
+        "mark": [
+          1102,
+          1104
+        ]
+      },
+      "calls": [
+        "app = self.router",
+        "app = cls(app, *args, **kwargs)"
+      ]
+    },
+    {
+      "id": "match",
+      "from": "router",
+      "to": "route",
+      "num": 3,
+      "label": "route match",
+      "packet": "path_params",
+      "code": {
+        "file": "fastapi/fastapi/routing.py",
+        "lines": [
+          2800,
+          2810
+        ]
+      },
+      "calls": [
+        "route.matches(scope)",
+        "await route.handle(scope, receive, send)"
+      ]
+    },
+    {
+      "id": "solve",
+      "from": "route",
+      "to": "deps",
+      "num": 4,
+      "label": "solve_dependencies()",
+      "packet": "request + body",
+      "code": {
+        "file": "fastapi/fastapi/routing.py",
+        "lines": [
+          510,
+          518
+        ]
+      },
+      "calls": "await solve_dependencies("
+    },
+    {
+      "id": "validate",
+      "from": "deps",
+      "to": "pyd",
+      "num": 5,
+      "label": "field.validate()",
+      "packet": "\"42\"",
+      "code": {
+        "file": "fastapi/fastapi/dependencies/utils.py",
+        "lines": [
+          734,
+          742
+        ]
+      },
+      "calls": "field.validate(value, values, loc=loc)"
+    },
+    {
+      "id": "call",
+      "from": "route",
+      "to": "endpoint",
+      "num": 6,
+      "label": "run_endpoint_function()",
+      "packet": "**values",
+      "code": {
+        "file": "fastapi/fastapi/routing.py",
+        "lines": [
+          745,
+          749
+        ]
+      },
+      "calls": "await run_endpoint_function("
+    },
+    {
+      "id": "ret",
+      "from": "endpoint",
+      "to": "serialize",
+      "num": 7,
+      "label": "return value",
+      "packet": "dict / model",
+      "code": {
+        "file": "fastapi/fastapi/routing.py",
+        "lines": [
+          766,
+          779
+        ]
+      },
+      "calls": [
+        "await serialize_response(",
+        "response_content=raw_response"
+      ]
+    },
+    {
+      "id": "wrap",
+      "from": "serialize",
+      "to": "resp",
+      "num": 8,
+      "label": "build response",
+      "packet": "content",
+      "code": {
+        "file": "fastapi/fastapi/routing.py",
+        "lines": [
+          780,
+          787
+        ]
+      },
+      "calls": [
+        "Response(",
+        "actual_response_class(content, **response_args)"
+      ]
+    },
+    {
+      "id": "send",
+      "from": "resp",
+      "to": "server",
+      "num": 9,
+      "label": "send()",
+      "packet": "200 + JSON",
+      "tone": "ok",
+      "code": {
+        "file": "starlette/starlette/responses.py",
+        "lines": [
+          166,
+          170
+        ]
+      },
+      "calls": [
+        "\"http.response.start\"",
+        "\"http.response.body\""
+      ]
+    }
+  ],
+  "steps": [
+    {
+      "title": "One ASGI call",
+      "say": "The server calls your `FastAPI` object as `app(scope, receive, send)`. That single call is the whole contract between them.",
+      "show": [
+        "asgi"
+      ],
+      "flow": [
+        "asgi"
+      ],
+      "focus": [
+        "app"
+      ]
+    },
+    {
+      "title": "Through the middleware",
+      "say": "Starlette runs the middleware stack: error handler, your middleware, exception handlers. The router is innermost, so middleware sees every request first.",
+      "show": [
+        "mw"
+      ],
+      "flow": [
+        "mw"
+      ],
+      "notes": [
+        {
+          "on": "mw",
+          "text": "stack built on the first request"
+        }
+      ]
+    },
+    {
+      "title": "Finding the route",
+      "say": "The router tries each route's path regex in order. The first full match wins and its `path_params` are copied into the scope.",
+      "show": [
+        "match"
+      ],
+      "flow": [
+        "match"
+      ],
+      "focus": [
+        "router"
+      ],
+      "notes": [
+        {
+          "on": "router",
+          "text": "path fits, method doesn't: 405",
+          "side": "top"
+        }
+      ]
+    },
+    {
+      "title": "Dependencies first",
+      "say": "The handler reads the body, then `solve_dependencies` walks the `Depends` tree, running each sub-dependency before whatever needs it.",
+      "show": [
+        "solve"
+      ],
+      "flow": [
+        "solve"
+      ],
+      "focus": [
+        "deps"
+      ],
+      "notes": [
+        {
+          "on": "deps",
+          "text": "use_cache: one call per request",
+          "side": "right"
+        }
+      ]
+    },
+    {
+      "title": "Strings become types",
+      "say": "Path, query, header, cookie and body values each pass through a **Pydantic** `TypeAdapter`. Errors are collected, so a bad request gets one 422 listing them all.",
+      "show": [
+        "validate"
+      ],
+      "flow": [
+        "validate",
+        {
+          "edge": "validate",
+          "reverse": true,
+          "packet": "42"
+        }
+      ],
+      "focus": [
+        "pyd"
+      ],
+      "notes": [
+        {
+          "on": "pyd",
+          "text": "any error: your code never runs",
+          "tone": "warn",
+          "side": "top"
+        }
+      ]
+    },
+    {
+      "title": "Your function, finally",
+      "say": "Only now is your endpoint called, with arguments already typed. A plain `def` runs in a threadpool so it can't block the event loop.",
+      "show": [
+        "call",
+        "ret"
+      ],
+      "flow": [
+        "call",
+        "ret"
+      ],
+      "focus": [
+        "endpoint"
+      ]
+    },
+    {
+      "title": "Back out as JSON",
+      "say": "`serialize_response` checks the return value against the response model, if there is one, and turns it into JSON. The response then `send`s it to the server.",
+      "show": [
+        "wrap",
+        "send"
+      ],
+      "flow": [
+        "wrap",
+        "send"
+      ],
+      "focus": [
+        "resp"
+      ],
+      "notes": [
+        {
+          "on": "resp",
+          "text": "with a response model: plain Response",
+          "side": "bottom"
+        },
+        {
+          "on": "serialize",
+          "text": "model set: Pydantic dump_json",
+          "side": "top"
+        }
+      ]
+    },
+    {
+      "title": "The whole trip",
+      "say": "One ASGI call, one route match, dependencies, validation, your function, JSON out. Every arrow but the first is traced to a line of code.",
+      "recap": true,
+      "flow": [
+        "asgi",
+        "mw",
+        "match",
+        "solve",
+        "validate",
+        "call",
+        "ret",
+        "wrap",
+        "send"
+      ]
+    }
+  ]
+}

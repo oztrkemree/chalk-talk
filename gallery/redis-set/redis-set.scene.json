@@ -1,0 +1,39 @@
+{
+  "title": "What Redis does with SET greeting hello",
+  "subtitle": "one command, from socket bytes to +OK, through the real redis source",
+  "lang": "en",
+  "root": "../../../chalk-gallery-src/redis",
+  "nodes": [
+    {"id": "cli", "kind": "browser", "label": "redis-cli", "sub": "SET greeting hello", "at": [0, 1]},
+    {"id": "loop", "label": "Event loop", "sub": "ae.c · aeProcessEvents", "icon": "refresh", "color": "violet", "at": [1, 1], "code": {"file": "src/ae.c", "lines": [420, 443], "mark": [439, 442]}},
+    {"id": "reader", "label": "Socket reader", "sub": "readQueryFromClient", "icon": "mail", "at": [1, 0], "code": {"file": "src/networking.c", "lines": [4111, 4172], "mark": [4111, 4111]}},
+    {"id": "parser", "kind": "pill", "label": "RESP parser", "sub": "processMultibulkBuffer", "icon": "code", "color": "teal", "at": [2, 0], "code": {"file": "src/networking.c", "lines": [3546, 3592], "mark": [3577, 3579]}},
+    {"id": "table", "kind": "db", "label": "Command table", "sub": "server.commands", "icon": "search", "color": "stone", "at": [3, 0], "code": {"file": "src/server.c", "lines": [3682, 3700], "mark": [3683, 3683]}},
+    {"id": "gate", "label": "Gatekeeper", "sub": "processCommand", "icon": "shield", "at": [2, 1], "code": {"file": "src/server.c", "lines": [4773, 4800], "mark": [4773, 4797]}},
+    {"id": "set", "label": "SET handler", "sub": "t_string.c · setCommand", "icon": "bolt", "color": "orange", "at": [2, 2], "code": {"file": "src/t_string.c", "lines": [430, 439], "mark": [437, 438]}},
+    {"id": "keys", "kind": "db", "label": "Keyspace", "sub": "db->keys · dbAddInternal", "at": [3, 2], "code": {"file": "src/db.c", "lines": [439, 476], "mark": [446, 448]}},
+    {"id": "outq", "kind": "queue", "label": "Reply buffer", "sub": "c->buf · pending writes", "at": [0, 2], "code": {"file": "src/networking.c", "lines": [292, 310], "mark": [307, 308]}}
+  ],
+  "edges": [
+    {"id": "send", "from": "cli", "to": "loop", "num": 1, "label": "TCP", "packet": "*3 SET …", "inferred": "network boundary: the bytes cross the kernel's TCP stack; no Redis line sends them to the server"},
+    {"id": "readable", "from": "loop", "to": "reader", "num": 2, "label": "readable", "packet": "conn", "code": {"file": "src/networking.c", "lines": [130, 134]}, "calls": "connSetReadHandler(conn, readQueryFromClient)"},
+    {"id": "parse", "from": "reader", "to": "parser", "num": 3, "label": "parse", "packet": "querybuf", "code": {"file": "src/networking.c", "lines": [4168, 4172]}, "calls": "processInputBuffer(c)"},
+    {"id": "lookup", "from": "parser", "to": "table", "num": 4, "label": "lookupCommand", "packet": "\"SET\"", "code": {"file": "src/server.c", "lines": [4624, 4641]}, "calls": "lookupCommand(pcmd->argv, pcmd->argc)"},
+    {"id": "run", "from": "parser", "to": "gate", "num": 5, "label": "processCommand", "packet": "argv[3]", "code": {"file": "src/networking.c", "lines": [3970, 3976]}, "calls": "processCommandAndResetClient(c)"},
+    {"id": "exec", "from": "gate", "to": "set", "num": 6, "label": "call()", "packet": "client", "code": {"file": "src/server.c", "lines": [4238, 4244]}, "calls": "c->cmd->proc(c)"},
+    {"id": "write", "from": "set", "to": "keys", "num": 7, "label": "setKeyByLink", "packet": "greeting", "code": {"file": "src/t_string.c", "lines": [178, 191]}, "calls": ["setKeyByLink(c, c->db, key, valref, setkey_flags, &link)", "server.dirty++"]},
+    {"id": "reply", "from": "set", "to": "outq", "num": 8, "label": "addReply", "packet": "+OK", "code": {"file": "src/t_string.c", "lines": [212, 214]}, "calls": "addReply(c, ok_reply ? ok_reply : shared.ok)"},
+    {"id": "flush", "from": "outq", "to": "cli", "num": 9, "label": "writeToClient", "packet": "+OK", "tone": "ok", "code": {"file": "src/networking.c", "lines": [3100, 3110]}, "calls": "writeToClient(c,0)"}
+  ],
+  "steps": [
+    {"title": "A command arrives", "say": "`redis-cli` sends **RESP**: an array of three bulk strings. The server's main thread sits in its **event loop**, waiting for any socket to wake it.", "show": ["send"], "flow": ["send"], "notes": [{"on": "send", "text": "*3 $3 SET $8 greeting $5 hello", "side": "top"}]},
+    {"title": "The socket wakes the loop", "say": "The socket turns readable, so the loop runs the handler set at connect time, `readQueryFromClient`. It appends the bytes to the client's **query buffer**.", "show": ["readable"], "flow": ["readable"], "focus": ["reader"], "notes": [{"on": "loop", "kind": "tag", "text": "io-threads 1 by default", "tone": "info"}]},
+    {"title": "Bytes become arguments", "say": "`processInputBuffer` sees the leading `*`, and `processMultibulkBuffer` cuts it into three string objects. A half-arrived command just waits for the next read.", "show": ["parse"], "flow": ["parse"], "focus": ["parser"], "notes": [{"on": "parser", "text": "argv = SET, greeting, hello", "side": "top"}]},
+    {"title": "A name becomes a function", "say": "Still during parsing, `preprocessCommand` looks `SET` up in the `server.commands` dict and checks its arity, so a bad command is flagged before anything runs.", "show": ["lookup"], "flow": ["lookup", {"edge": "lookup", "reverse": true, "packet": "setCommand"}], "focus": ["table"], "notes": [{"on": "table", "text": "set → setCommand, arity -3", "side": "bottom"}]},
+    {"title": "The gatekeeper", "say": "`processCommand` checks auth, ACL permissions and, if set, `maxmemory` (SET is DENYOOM). Only then does `call()` jump into `setCommand`.", "show": ["run", "exec"], "flow": ["run", "exec"], "focus": ["gate"], "notes": [{"on": "gate", "kind": "tag", "text": "-NOPERM · -OOM", "tone": "warn"}]},
+    {"title": "The key is written", "say": "`setGenericCommand` stores `greeting` in the keyspace. Its `server.dirty++` is how `call()` knows to propagate the SET to the AOF and replicas.", "show": ["write"], "flow": ["write"], "focus": ["keys"], "notes": [{"on": "keys", "text": "new key → dbAddByLink", "side": "bottom"}]},
+    {"title": "Reply now, send later", "say": "`addReply` only copies `+OK` into the client's buffer and queues the client. Just before the loop sleeps, `beforeSleep` writes it straight to the socket.", "show": ["reply", "flush"], "flow": ["reply", "flush"], "focus": ["outq"], "notes": [{"on": "outq", "text": "write handler only if it won't fit", "side": "left"}]},
+    {"title": "SET, end to end", "say": "Read, parse, look up, check, run, store, reply. Commands execute one at a time on the main thread, so no two writes ever interleave.", "recap": true, "flow": ["send", "readable", "parse", "lookup", "run", "exec", "write", "reply", "flush"]}
+  ],
+  "spacing": 1.15
+}
