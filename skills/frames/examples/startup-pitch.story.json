@@ -1,0 +1,377 @@
+{
+ "title": "Lull",
+ "subtitle": "seed pitch · fictional startup",
+ "lang": "en",
+ "accent": "blue",
+ "theme": "paper",
+ "cast": [
+  {
+   "id": "maya",
+   "name": "Maya",
+   "look": {
+    "hair": "bob",
+    "top": "jacket"
+   },
+   "hero": true
+  },
+  {
+   "id": "sam",
+   "name": "Sam",
+   "look": {
+    "hair": "short",
+    "top": "sweater",
+    "glasses": true
+   }
+  }
+ ],
+ "frames": [
+  {
+   "lens": "title",
+   "kind": "open",
+   "kicker": "THE PITCH",
+   "headline": "Your bedtime voice, *wherever you are.*",
+   "sub": "Five minutes of a parent's voice become new bedtime stories, every night.",
+   "caption": "Lull: a parent records **five minutes once**, and their child hears new stories in that voice every night.",
+   "notes": "Answer first. Everything after this earns that sentence."
+  },
+  {
+   "lens": "moment",
+   "kicker": "THE PROBLEM",
+   "shot": "split",
+   "split": [
+    {
+     "label": "Lisbon · 8:15 pm",
+     "set": "meeting",
+     "people": [
+      {
+       "who": "maya",
+       "pose": "sit",
+       "mood": "tired",
+       "at": "center",
+       "think": "Leo's bedtime..."
+      }
+     ],
+     "props": [
+      {
+       "kind": "clock",
+       "at": "right",
+       "label": "8:15 pm"
+      }
+     ]
+    },
+    {
+     "label": "Home · 8:15 pm",
+     "set": "home",
+     "people": [
+      {
+       "who": "sam",
+       "pose": "phone",
+       "mood": "sad",
+       "at": "center",
+       "say": "He only wants your story."
+      }
+     ]
+    }
+   ],
+   "caption": "Tuesday, 8:15 pm. Maya is stuck in a late client meeting; at home, Leo **won't sleep without her story**.",
+   "notes": "Leo is six. Maya travels two nights a month. Every parent in the room knows this call."
+  },
+  {
+   "lens": "number",
+   "kicker": "THE MARKET",
+   "big": "6M",
+   "label": "US parents of kids 2-8 who travel for work",
+   "sub": "We start there, not with \"every parent\".",
+   "viz": {
+    "kind": "bars",
+    "unit": "million parents",
+    "data": [
+     {
+      "label": "Kids 2-8",
+      "value": 24
+     },
+     {
+      "label": "Travel monthly",
+      "value": 6,
+      "accent": true
+     },
+     {
+      "label": "Year-3 goal",
+      "value": 0.3
+     }
+    ]
+   },
+   "who": "maya",
+   "stamp": "example data",
+   "caption": "Honest size: **6 million** parents who miss bedtime for work. Year three, we aim for 300,000 of them."
+  },
+  {
+   "lens": "screen",
+   "kicker": "THE PRODUCT",
+   "device": "phone",
+   "ui": [
+    {
+     "type": "header",
+     "text": "The Dragon Who Lost His Roar",
+     "sub": "Tonight · new story · 9 min"
+    },
+    {
+     "type": "avatars",
+     "items": [
+      "Maya",
+      "Sam"
+     ],
+     "text": "Who reads tonight?"
+    },
+    {
+     "type": "text",
+     "text": "Written tonight from Leo's favorite things: dragons, boats and the moon."
+    },
+    {
+     "type": "button",
+     "text": "Play in Mom's voice",
+     "accent": true
+    },
+    {
+     "type": "list",
+     "items": [
+      "The Moon Bakery · 7 min",
+      "Otto's Night Train · 8 min"
+     ]
+    }
+   ],
+   "annotate": [
+    {
+     "at": 3,
+     "text": "one tap, her voice"
+    }
+   ],
+   "caption": "Leo taps one button. A **new story in Mom's voice** begins, even while Mom is on a plane."
+  },
+  {
+   "lens": "flow",
+   "kicker": "HOW IT WORKS",
+   "actors": [
+    {
+     "id": "parent",
+     "kind": "person",
+     "label": "Maya",
+     "sub": "records once",
+     "at": [
+      0,
+      0
+     ]
+    },
+    {
+     "id": "model",
+     "kind": "cloud",
+     "label": "Voice model",
+     "sub": "private to the family",
+     "at": [
+      1,
+      0
+     ]
+    },
+    {
+     "id": "writer",
+     "kind": "fn",
+     "label": "Story writer",
+     "sub": "knows Leo loves dragons",
+     "at": [
+      1,
+      1
+     ]
+    },
+    {
+     "id": "stories",
+     "kind": "doc",
+     "label": "Tonight's story",
+     "sub": "new every night",
+     "at": [
+      2,
+      1
+     ]
+    },
+    {
+     "id": "child",
+     "kind": "person",
+     "label": "Leo",
+     "sub": "age 6",
+     "at": [
+      3,
+      1
+     ]
+    }
+   ],
+   "flows": [
+    {
+     "from": "parent",
+     "to": "model",
+     "type": "data",
+     "label": "her voice",
+     "value": "5 min, once",
+     "new": true
+    },
+    {
+     "from": "model",
+     "to": "stories",
+     "type": "data",
+     "label": "narrates"
+    },
+    {
+     "from": "writer",
+     "to": "stories",
+     "type": "data",
+     "label": "new plot"
+    },
+    {
+     "from": "stories",
+     "to": "child",
+     "type": "goods",
+     "label": "8 pm, every night"
+    }
+   ],
+   "caption": "Five minutes train a **private voice model**. Each night it narrates a brand-new story, written for Leo.",
+   "notes": "Voice never leaves the family account; either parent can delete it in one tap."
+  },
+  {
+   "lens": "moment",
+   "kicker": "SAME TUESDAY",
+   "shot": "close",
+   "set": "meeting",
+   "people": [
+    {
+     "who": "maya",
+     "pose": "phone",
+     "mood": "happy",
+     "at": "left"
+    }
+   ],
+   "insert": {
+    "kind": "phone",
+    "who": "maya",
+    "screen": [
+     {
+      "type": "header",
+      "text": "Lull"
+     },
+     {
+      "type": "text",
+      "text": "Leo heard \"The Dragon Who Lost His Roar\" in your voice."
+     },
+     {
+      "type": "check",
+      "text": "Asleep at 8:31 pm",
+      "accent": true
+     },
+     {
+      "type": "text",
+      "text": "Tomorrow: The Moon Bakery"
+     }
+    ]
+   },
+   "caption": "Back in Lisbon, Maya's phone buzzes: **Leo is asleep**. She was there, in the way that counts."
+  },
+  {
+   "lens": "number",
+   "kicker": "TRACTION",
+   "big": "71%",
+   "label": "of beta families still play Lull at week 8",
+   "sub": "1,240 families · 5 nights a week on average",
+   "viz": {
+    "kind": "dots",
+    "data": [
+     {
+      "label": "Still listening at week 8",
+      "value": 71,
+      "accent": true
+     },
+     {
+      "label": "Stopped",
+      "value": 29
+     }
+    ]
+   },
+   "stamp": "example data",
+   "caption": "Out of every 100 beta families, **71 still play Lull** after two months. Bedtime is nightly, so it sticks."
+  },
+  {
+   "lens": "compare",
+   "kicker": "BUSINESS MODEL",
+   "left": {
+    "label": "Free",
+    "tone": "muted",
+    "lines": [
+     "One voice only",
+     "Three stories a week",
+     "No offline listening"
+    ],
+    "art": {
+     "people": [
+      {
+       "who": "maya",
+       "mood": "neutral"
+      }
+     ]
+    }
+   },
+   "right": {
+    "label": "$7.99 a month",
+    "tone": "accent",
+    "lines": [
+     "Both parents' voices",
+     "A new story every night",
+     "Works offline, for flights"
+    ],
+    "art": {
+     "people": [
+      {
+       "who": "maya",
+       "mood": "happy"
+      }
+     ]
+    }
+   },
+   "stamp": "example data",
+   "caption": "Families start free and upgrade for nightly stories: **$7.99 a month**, about 80% gross margin."
+  },
+  {
+   "lens": "timeline",
+   "kicker": "MILESTONES",
+   "items": [
+    {
+     "when": "Month 0",
+     "what": "Close the seed round"
+    },
+    {
+     "when": "Month 4",
+     "what": "Public launch, iOS + Android"
+    },
+    {
+     "when": "Month 9",
+     "what": "Grandparents' voices"
+    },
+    {
+     "when": "Month 18",
+     "what": "25,000 paying families",
+     "accent": true
+    }
+   ],
+   "stamp": "example data",
+   "caption": "Eighteen months, one number that matters: **25,000 paying families**, ready for a Series A."
+  },
+  {
+   "lens": "title",
+   "kind": "ask",
+   "kicker": "THE ASK",
+   "headline": "$1.5M seed, *18 months.*",
+   "items": [
+    "Team of 4 grows to 9",
+    "Goal: 25,000 paying families"
+   ],
+   "sign": "in?",
+   "stamp": "example data",
+   "caption": "We're raising **$1.5M** to put a parent's voice at every bedtime they can't make."
+  }
+ ]
+}

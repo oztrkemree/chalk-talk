@@ -1,0 +1,295 @@
+{
+  "title": "Checkout outage, Friday",
+  "subtitle": "incident review · fictional company",
+  "lang": "en",
+  "accent": "tomato",
+  "theme": "paper",
+  "cast": [
+    {
+      "id": "maya",
+      "name": "Maya",
+      "look": {
+        "hair": "bob",
+        "top": "sweater"
+      },
+      "hero": true
+    }
+  ],
+  "frames": [
+    {
+      "lens": "title",
+      "kind": "open",
+      "kicker": "THE ANSWER",
+      "headline": "One config change stopped checkout for *42 minutes.*",
+      "sub": "Fixed Friday 18:54. Three safeguards so it can't happen the same way again.",
+      "caption": "In one line: a setting shrank our payment connections, **checkout failed**, a rollback fixed it.",
+      "notes": "Answer first: what broke, how long, that it's fixed, and what we change. Blameless review: we look at the system, not at a person."
+    },
+    {
+      "lens": "moment",
+      "kicker": "THE CUSTOMER",
+      "set": "home",
+      "shot": "close",
+      "people": [
+        {
+          "who": "maya",
+          "pose": "phone",
+          "mood": "annoyed",
+          "at": "center-left",
+          "think": "Third try…"
+        }
+      ],
+      "insert": {
+        "kind": "phone",
+        "who": "maya",
+        "screen": [
+          {
+            "type": "header",
+            "text": "Checkout"
+          },
+          {
+            "type": "amount",
+            "text": "$86.40"
+          },
+          {
+            "type": "button",
+            "text": "Pay now"
+          },
+          {
+            "type": "toast",
+            "text": "Payment failed"
+          }
+        ]
+      },
+      "caption": "Friday, 18:20. **Maya** has her cart ready and taps Pay three times. It fails every time.",
+      "notes": "Maya stands for every customer who tried to pay in those 42 minutes."
+    },
+    {
+      "lens": "timeline",
+      "kicker": "WHAT HAPPENED",
+      "items": [
+        {
+          "when": "18:12",
+          "what": "Config change goes live"
+        },
+        {
+          "when": "18:14",
+          "what": "Payment errors spike, on-call paged"
+        },
+        {
+          "when": "18:31",
+          "what": "Cause found: connection pool set to 5",
+          "accent": true
+        },
+        {
+          "when": "18:41",
+          "what": "Config rolled back"
+        },
+        {
+          "when": "18:54",
+          "what": "Checkout fully recovered"
+        }
+      ],
+      "stamp": "example data",
+      "caption": "Alerts fired in 2 minutes. **Finding the cause took 17**, because recent changes weren't shown next to alerts."
+    },
+    {
+      "lens": "flow",
+      "kicker": "HOW PAYING WORKS",
+      "actors": [
+        {
+          "id": "maya",
+          "kind": "person",
+          "label": "Maya",
+          "at": [
+            0,
+            1
+          ]
+        },
+        {
+          "id": "checkout",
+          "kind": "browser",
+          "label": "Checkout",
+          "at": [
+            1,
+            1
+          ]
+        },
+        {
+          "id": "pay",
+          "kind": "server",
+          "label": "Payment service",
+          "sub": "pool of 50 connections",
+          "at": [
+            2,
+            1
+          ]
+        },
+        {
+          "id": "card",
+          "kind": "payment",
+          "label": "Card processor",
+          "at": [
+            3,
+            1
+          ]
+        }
+      ],
+      "flows": [
+        {
+          "id": "f1",
+          "from": "maya",
+          "to": "checkout",
+          "type": "request",
+          "label": "Pay"
+        },
+        {
+          "id": "f2",
+          "from": "checkout",
+          "to": "pay",
+          "type": "request",
+          "label": "charge $86.40"
+        },
+        {
+          "id": "f3",
+          "from": "pay",
+          "to": "card",
+          "type": "request",
+          "label": "authorize",
+          "value": "1 connection"
+        }
+      ],
+      "caption": "Every payment borrows **one connection** from a pool of 50. On a normal Friday that's plenty."
+    },
+    {
+      "lens": "flow",
+      "kicker": "WHAT BROKE",
+      "continue": true,
+      "actors": [
+        {
+          "id": "cfg",
+          "kind": "doc",
+          "label": "Config change",
+          "sub": "Fri 18:12",
+          "at": [
+            2,
+            0
+          ]
+        },
+        {
+          "id": "pay",
+          "kind": "server",
+          "label": "Payment service",
+          "sub": "pool of 5 connections"
+        }
+      ],
+      "flows": [
+        {
+          "id": "f4",
+          "from": "cfg",
+          "to": "pay",
+          "type": "event",
+          "label": "pool size 50 → 5",
+          "new": true
+        },
+        {
+          "id": "f5",
+          "from": "pay",
+          "to": "checkout",
+          "type": "response",
+          "label": "timeout"
+        }
+      ],
+      "focus": [
+        "cfg",
+        "pay",
+        "checkout"
+      ],
+      "caption": "A routine change set the pool to *5*. Payments waited in line for a connection, then **timed out**.",
+      "notes": "The change was reviewed and looked harmless: the field had no lower limit and no staged rollout. That's the gap we close."
+    },
+    {
+      "lens": "number",
+      "kicker": "IMPACT",
+      "big": "4,600",
+      "label": "checkouts failed in 42 minutes",
+      "sub": "About 70% of those customers came back and paid within a day.",
+      "viz": {
+        "kind": "line",
+        "unit": "successful checkouts / min",
+        "data": [
+          {
+            "label": "18:00",
+            "value": 118
+          },
+          {
+            "label": "18:10",
+            "value": 121
+          },
+          {
+            "label": "18:20",
+            "value": 9
+          },
+          {
+            "label": "18:30",
+            "value": 7,
+            "accent": true
+          },
+          {
+            "label": "18:40",
+            "value": 12
+          },
+          {
+            "label": "18:50",
+            "value": 84
+          },
+          {
+            "label": "19:00",
+            "value": 119
+          }
+        ]
+      },
+      "who": "maya",
+      "stamp": "example data",
+      "caption": "Most customers came back, but **about 1,400 orders** were simply lost on a Friday evening."
+    },
+    {
+      "lens": "compare",
+      "kicker": "WHAT CHANGES",
+      "left": {
+        "label": "Friday",
+        "tone": "muted",
+        "lines": [
+          "Config goes live everywhere at once",
+          "Any pool size is accepted",
+          "Alerts don't show recent changes"
+        ]
+      },
+      "right": {
+        "label": "From now on",
+        "tone": "accent",
+        "lines": [
+          "Config rolls out to 5% first",
+          "Pool below 20 is rejected",
+          "Alerts list the last changes"
+        ]
+      },
+      "caption": "Not \"be more careful\": **three safeguards** that catch the same mistake automatically, for anyone.",
+      "notes": "Blameless: the person who made the change did everything our process asked. The process is what we fix."
+    },
+    {
+      "lens": "title",
+      "kind": "ask",
+      "kicker": "THE ASK",
+      "headline": "2 engineers, *3 weeks.*",
+      "items": [
+        "Staged config rollout + pool guardrail",
+        "Recent changes shown on every alert",
+        "Progress review: Friday, Nov 7"
+      ],
+      "sign": "agree?",
+      "caption": "With your OK we start Monday and pause the loyalty work for three weeks.",
+      "notes": "The trade-off is explicit: three weeks of the loyalty roadmap."
+    }
+  ]
+}

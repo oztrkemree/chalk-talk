@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+- **New skill: `frames`.** Explain anything (pitches, PRDs, strategy, incidents, lessons, code) as a 60–120 s story in one HTML file: one idea per frame, eight lenses, ink-on-paper style with one accent, present mode with notes, phone layout. Seven example stories in `skills/frames/examples/`.
+- `check.mjs` (frames) drives one headless Chrome at below-normal priority over the DevTools protocol and removes its temp profile.
+
 ## 0.2.0
 
 - **Proof.** Every arrow can cite the line it happens on (`code`) and the call that proves it (`calls`). The build checks each one and marks it ✓ verified, ? inferred (with the reason) or ! broken. `V` shows which hops are proven; the recap says "6 of 7 hops traced to code".

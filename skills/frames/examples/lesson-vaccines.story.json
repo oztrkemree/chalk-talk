@@ -1,0 +1,301 @@
+{
+  "title": "How a vaccine teaches",
+  "subtitle": "science class · grade 7",
+  "lang": "en",
+  "accent": "blue",
+  "theme": "paper",
+  "cast": [
+    {
+      "id": "leo",
+      "name": "Leo",
+      "look": {
+        "hair": "curly",
+        "top": "hoodie"
+      },
+      "hero": true
+    },
+    {
+      "id": "ana",
+      "name": "Nurse Ana",
+      "look": {
+        "hair": "bun",
+        "top": "shirt",
+        "glasses": true
+      }
+    },
+    {
+      "id": "maya",
+      "name": "Maya",
+      "look": {
+        "hair": "long",
+        "top": "sweater"
+      }
+    }
+  ],
+  "frames": [
+    {
+      "lens": "title",
+      "kind": "open",
+      "kicker": "THE BIG IDEA",
+      "headline": "A vaccine is a *practice run.*",
+      "sub": "Your body meets a harmless copy of a germ's shape, and remembers it.",
+      "caption": "Short answer: your immune system **learns safely first**, so it's ready when the real virus shows up.",
+      "notes": "Give the answer first. The rest of the lesson shows how the body pulls it off."
+    },
+    {
+      "lens": "moment",
+      "kicker": "MEET LEO",
+      "set": "office",
+      "shot": "wide",
+      "people": [
+        {
+          "who": "ana",
+          "pose": "stand",
+          "mood": "happy",
+          "at": "center-left",
+          "say": "Quick pinch, all done!"
+        },
+        {
+          "who": "leo",
+          "pose": "stand",
+          "mood": "surprised",
+          "at": "center-right",
+          "think": "What's inside that?"
+        }
+      ],
+      "props": [
+        {
+          "kind": "clock",
+          "at": "right",
+          "label": "9:00"
+        }
+      ],
+      "highlight": "leo",
+      "caption": "Leo, 12, gets his flu shot. It can't give him the flu: inside are only **harmless pieces** of the virus.",
+      "notes": "Injected flu vaccines contain inactivated virus pieces or a single virus protein, never a live virus that can cause flu."
+    },
+    {
+      "lens": "flow",
+      "kicker": "SPOT IT",
+      "actors": [
+        {
+          "id": "vax",
+          "kind": "doc",
+          "label": "Vaccine",
+          "sub": "a wanted poster",
+          "at": [
+            0,
+            1
+          ]
+        },
+        {
+          "id": "apc",
+          "kind": "person",
+          "label": "Presenting cell",
+          "sub": "the lookout",
+          "at": [
+            1,
+            1
+          ]
+        },
+        {
+          "id": "th",
+          "kind": "person",
+          "label": "Helper T cell",
+          "sub": "the coach",
+          "at": [
+            2,
+            1
+          ]
+        }
+      ],
+      "flows": [
+        {
+          "from": "vax",
+          "to": "apc",
+          "type": "goods",
+          "label": "picks up the piece"
+        },
+        {
+          "from": "apc",
+          "to": "th",
+          "type": "info",
+          "label": "shows its shape",
+          "new": true
+        }
+      ],
+      "caption": "A **presenting cell** picks up the piece and shows its shape to a **helper T cell**: *watch for this.*",
+      "notes": "Presenting cells (like dendritic cells) carry the piece to a lymph node, where helper T cells check it."
+    },
+    {
+      "lens": "flow",
+      "kicker": "BUILD IT",
+      "continue": true,
+      "actors": [
+        {
+          "id": "b",
+          "kind": "person",
+          "label": "B cells",
+          "sub": "the builders",
+          "at": [
+            3,
+            1
+          ]
+        },
+        {
+          "id": "ab",
+          "kind": "cloud",
+          "label": "Antibodies",
+          "sub": "fit the shape",
+          "at": [
+            3,
+            0
+          ]
+        },
+        {
+          "id": "mem",
+          "kind": "person",
+          "label": "Memory cells",
+          "sub": "remember for years",
+          "at": [
+            3,
+            2
+          ]
+        }
+      ],
+      "flows": [
+        {
+          "from": "th",
+          "to": "b",
+          "type": "info",
+          "label": "wakes up"
+        },
+        {
+          "from": "b",
+          "to": "ab",
+          "type": "goods",
+          "label": "make"
+        },
+        {
+          "from": "b",
+          "to": "mem",
+          "type": "data",
+          "label": "some become",
+          "new": true
+        }
+      ],
+      "caption": "The helper T cell wakes **B cells**. They make **antibodies** that fit the shape; some become *memory cells.*",
+      "notes": "Antibodies stick to the virus, block it and mark it for clean-up. Memory B and T cells stay in the body."
+    },
+    {
+      "lens": "moment",
+      "kicker": "MONTHS LATER",
+      "set": "classroom",
+      "shot": "wide",
+      "people": [
+        {
+          "who": "maya",
+          "pose": "sit",
+          "mood": "tired",
+          "at": "center-left",
+          "say": "Achoo!"
+        },
+        {
+          "who": "leo",
+          "pose": "sit",
+          "mood": "happy",
+          "at": "center-right"
+        }
+      ],
+      "highlight": "leo",
+      "caption": "Months later, flu goes around Leo's class. His memory cells **recognize the shape** right away.",
+      "notes": "Vaccines lower the chance of getting sick and of getting very sick; they are not a perfect shield."
+    },
+    {
+      "lens": "compare",
+      "kicker": "THE HEAD START",
+      "left": {
+        "label": "First time, no vaccine",
+        "tone": "muted",
+        "lines": [
+          "Starts from zero",
+          "Antibodies: 1–2 weeks",
+          "Virus has time to spread"
+        ],
+        "art": {
+          "people": [
+            {
+              "who": "leo",
+              "pose": "sit",
+              "mood": "sad"
+            }
+          ]
+        }
+      },
+      "right": {
+        "label": "After the vaccine",
+        "tone": "accent",
+        "lines": [
+          "Memory cells know it",
+          "Antibodies: a few days",
+          "Virus often stopped early"
+        ],
+        "art": {
+          "people": [
+            {
+              "who": "leo",
+              "pose": "cheer",
+              "mood": "happy"
+            }
+          ]
+        }
+      },
+      "stamp": "typical times",
+      "caption": "Same virus, different head start: with memory cells, **antibodies arrive in days, not weeks.**",
+      "notes": "Textbook primary vs secondary immune response. Exact times vary by person and by germ."
+    },
+    {
+      "lens": "timeline",
+      "kicker": "HOW LONG",
+      "items": [
+        {
+          "when": "Day 0",
+          "what": "The shot: harmless pieces arrive"
+        },
+        {
+          "when": "First days",
+          "what": "Presenting cells alert helper T cells"
+        },
+        {
+          "when": "About 1 week",
+          "what": "B cells start making antibodies"
+        },
+        {
+          "when": "About 2 weeks",
+          "what": "Protection is built",
+          "accent": true
+        },
+        {
+          "when": "Months to years",
+          "what": "Memory cells stay on watch"
+        }
+      ],
+      "stamp": "typical times",
+      "caption": "Building protection takes about **two weeks**. That's why flu shots come *before* flu season.",
+      "notes": "CDC: it takes about two weeks after vaccination for protective antibodies to develop (cdc.gov/flu/vaccines/keyfacts.html). Some vaccines need boosters to keep memory strong."
+    },
+    {
+      "lens": "title",
+      "kind": "ask",
+      "kicker": "TAKEAWAY",
+      "headline": "Practice now, *ready* later.",
+      "caption": "A vaccine is a **safe rehearsal** for your immune system. Questions about your own shots? Ask a doctor.",
+      "notes": "Exit ticket: draw the five-step relay from vaccine to memory cells.",
+      "items": [
+        "The vaccine shows the shape",
+        "Memory cells remember it",
+        "Antibodies arrive fast"
+      ]
+    }
+  ]
+}

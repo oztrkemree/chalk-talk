@@ -1,0 +1,119 @@
+{
+  "title": "Hesabı böl",
+  "subtitle": "ürün önerisi · VP sunumu",
+  "lang": "tr",
+  "accent": "tomato",
+  "theme": "paper",
+  "cast": [
+    { "id": "deniz", "name": "Deniz", "look": { "hair": "bob", "top": "sweater" }, "hero": true },
+    { "id": "ece", "name": "Ece", "look": { "hair": "beanie", "top": "hoodie" } },
+    { "id": "mert", "name": "Mert", "look": { "hair": "short", "top": "shirt", "glasses": true } },
+    { "id": "can", "name": "Can", "look": { "hair": "curly", "top": "jacket" } }
+  ],
+  "frames": [
+    {
+      "lens": "title", "kind": "open", "kicker": "ÖNERİ",
+      "headline": "Ödeyen kişi *cezalandırılmasın.*",
+      "sub": "Grup siparişlerinde hesabı uygulama içinde bölelim.",
+      "caption": "Tek cümlede: **Hesabı böl** ile herkes kendi payını öder, sipariş tek seferde çıkar.",
+      "notes": "Önce cevabı veriyorum, sonra neden."
+    },
+    {
+      "lens": "moment", "kicker": "SORUN", "set": "table", "shot": "wide",
+      "people": [
+        { "who": "ece", "pose": "sit", "mood": "happy", "at": "left" },
+        { "who": "deniz", "pose": "phone", "mood": "neutral", "at": "center-left" },
+        { "who": "mert", "pose": "sit", "mood": "happy", "at": "center-right", "say": "Sonra atarız!" },
+        { "who": "can", "pose": "sit", "mood": "happy", "at": "right" }
+      ],
+      "props": [{ "kind": "food", "at": "center" }, { "kind": "clock", "at": "right", "label": "21:04" }],
+      "highlight": "deniz",
+      "caption": "Cuma akşamı dört arkadaş birlikte sipariş veriyor. Hesabı her zamanki gibi **Deniz** ödüyor."
+    },
+    {
+      "lens": "moment", "kicker": "SORUN", "shot": "insert",
+      "insert": { "kind": "chat", "messages": [
+        { "from": "deniz", "text": "Cumadan 930 ₺ kaldı :)", "time": "Pzt" },
+        { "from": "deniz", "text": "Arkadaşlar?", "time": "Çar" },
+        { "from": "deniz", "text": "Mert, 310 ₺ lütfen", "time": "Cum", "seen": true }
+      ] },
+      "caption": "Bir hafta boyunca para kovalıyor. Mesajlar görülüyor, cevap gelmiyor."
+    },
+    {
+      "lens": "number", "kicker": "İÇGÖRÜ", "big": "%31", "label": "siparişlerin grup siparişi",
+      "sub": "Ödeyen kişi sonraki ay %23 daha az sipariş veriyor.",
+      "viz": { "kind": "bars", "unit": "aylık sipariş", "data": [
+        { "label": "Ödeyen", "value": 77, "accent": true },
+        { "label": "Diğerleri", "value": 100 }
+      ] },
+      "who": "deniz", "stamp": "örnek veri",
+      "caption": "Grup siparişi büyük bir dilim. Ama hesabı ödeyen, **bir sonraki siparişi erteliyor**."
+    },
+    {
+      "lens": "screen", "kicker": "ÇÖZÜM", "device": "phone",
+      "ui": [
+        { "type": "header", "text": "Sepet · 4 kişi" },
+        { "type": "amount", "text": "1.240 ₺" },
+        { "type": "avatars", "items": ["Deniz", "Ece", "Mert", "Can"] },
+        { "type": "button", "text": "Hesabı böl", "accent": true },
+        { "type": "text", "text": "Herkese kendi payının linki gider." }
+      ],
+      "annotate": [{ "at": 3, "text": "yeni düğme" }],
+      "caption": "Ödeme ekranında tek düğme: **Hesabı böl**. Herkese kendi payının linki gider."
+    },
+    {
+      "lens": "flow", "kicker": "NASIL ÇALIŞIR", "compare": true,
+      "actors": [
+        { "id": "masa", "kind": "group", "label": "Masa", "sub": "4 kişi", "members": ["Deniz", "Ece", "Mert", "Can"], "at": [0, 1] },
+        { "id": "app", "kind": "app", "label": "Uygulama", "at": [1, 0] },
+        { "id": "pay", "kind": "payment", "label": "Ödeme sağlayıcı", "at": [2, 1], "state": "after" },
+        { "id": "rest", "kind": "store", "label": "Restoran", "at": [3, 0] }
+      ],
+      "flows": [
+        { "from": "masa", "to": "app", "type": "money", "label": "Deniz öder", "value": "1.240 ₺", "state": "before" },
+        { "from": "masa", "to": "pay", "type": "money", "label": "herkes kendi payı", "value": "4 × 310 ₺", "new": true, "state": "after" },
+        { "from": "pay", "to": "app", "type": "info", "label": "4/4 ödendi", "new": true, "state": "after" },
+        { "from": "app", "to": "rest", "type": "info", "label": "sipariş" },
+        { "from": "rest", "to": "masa", "type": "goods", "label": "yemek" }
+      ],
+      "caption": "Ödeme sağlayıcı payları tutar; dördü de gelince sipariş restorana gider. 10 dakikada gelmeyeni Deniz tamamlar."
+    },
+    {
+      "lens": "whatif", "kicker": "SEN DENE",
+      "headline": "Grup büyüdükçe *ödeyenin kaybı* da büyür.",
+      "vars": [
+        { "id": "friends", "label": "Kaç kişi?", "min": 2, "max": 10, "step": 1, "value": 4, "unit": "kişi" },
+        { "id": "unpaid", "label": "Hiç geri ödemeyenler", "min": 0, "max": 60, "step": 5, "value": 25, "unit": "%" }
+      ],
+      "outputs": [
+        { "label": "Deniz'in alacağı", "expr": "(friends - 1) * 310", "format": "₺" },
+        { "label": "Hiç dönmeyen", "expr": "(friends - 1) * 310 * unpaid / 100", "format": "₺" }
+      ],
+      "stamp": "örnek veri",
+      "caption": "Kaydırıcıları oynat: bugün bu kaybı **tek bir kişi** taşıyor."
+    },
+    {
+      "lens": "compare", "kicker": "ETKİ",
+      "left": { "label": "Bugün", "tone": "muted", "lines": ["Bir kişi öder", "Bir hafta para kovalar", "Sonraki siparişi erteler"] },
+      "right": { "label": "Hesabı böl ile", "tone": "accent", "lines": ["Herkes kendi payını öder", "Kimse kovalanmaz", "Grup siparişi büyür"] },
+      "caption": "İzleyeceğimiz tek metrik: **ödeyenlerin tekrar sipariş oranı**."
+    },
+    {
+      "lens": "timeline", "kicker": "PLAN",
+      "items": [
+        { "when": "1-2. hafta", "what": "Ödeme sağlayıcıda pay tutma" },
+        { "when": "3-4. hafta", "what": "Link + sepet ekranı" },
+        { "when": "5. hafta", "what": "İstanbul'da A/B testi", "accent": true },
+        { "when": "6. hafta", "what": "Karar: yayına al ya da durdur" }
+      ],
+      "caption": "Altı haftada uçtan uca, sonunda veriye bakıp karar."
+    },
+    {
+      "lens": "title", "kind": "ask", "kicker": "İSTEK",
+      "headline": "2 mühendis, *6 hafta.*",
+      "items": ["İstanbul'da A/B testi", "Metrik: ödeyenlerin tekrar siparişi"],
+      "sign": "onay?",
+      "caption": "Onay verirsen pazartesi başlıyoruz."
+    }
+  ]
+}
