@@ -1,0 +1,641 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Hesabı böl · Zukai</title>
+<meta name="description" content="Grup siparişinde hesabı uygulama bölsün: dokuz adımda bir ürün önerisi, zukai (図解) diyagram diliyle.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Newsreader:opsz,wght@6..72,400;6..72,500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#F3EFE6;
+  --ink:#1E1C19;
+  --ink2:#5F5A51;
+  --ink3:#ABA598;
+  --rule:#DAD3C5;
+  --accent:#C43D26;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;background:var(--paper);color:var(--ink);
+  font-family:'IBM Plex Sans',system-ui,sans-serif;
+  -webkit-font-smoothing:antialiased;overflow:hidden;
+}
+/* paper grain: hand-made texture, not polish */
+body::before{
+  content:"";position:fixed;inset:0;pointer-events:none;z-index:5;mix-blend-mode:multiply;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .25 0 0 0 0 .22 0 0 0 0 .17 0 0 0 .11 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+.bar{position:fixed;top:0;left:0;right:0;display:flex;gap:3px;padding:0;height:3px;z-index:6}
+.bar i{flex:1;background:var(--rule);position:relative;overflow:hidden}
+.bar i b{position:absolute;inset:0;background:var(--ink);transform:scaleX(0);transform-origin:left}
+.bar i.done b{transform:scaleX(1)}
+.bar i.run b{animation:fill var(--d) linear forwards}
+@keyframes fill{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+
+.wrap{height:100vh;height:100dvh;display:flex;flex-direction:column;max-width:1280px;margin:0 auto;padding:26px 44px 14px}
+.top{display:flex;justify-content:space-between;align-items:baseline;gap:16px;
+  font:500 11.5px/1 'IBM Plex Mono',monospace;letter-spacing:.06em;color:var(--ink2);
+  padding-bottom:12px;border-bottom:1px solid var(--rule)}
+.top b{font-weight:600;color:var(--ink)}
+.top .brand{font-family:'IBM Plex Sans',sans-serif;font-size:12.5px;letter-spacing:0}
+.top .brand i{font-style:normal;color:var(--ink2)}
+.text{padding:22px 0 0;max-width:900px;transition:opacity .25s}
+.text.fade{opacity:0}
+h1{font-family:'Newsreader',Georgia,serif;font-weight:500;font-size:clamp(25px,3vw,40px);
+  line-height:1.1;letter-spacing:-.012em;margin:0 0 10px;text-wrap:balance}
+#c{font-size:clamp(15px,1.3vw,18px);line-height:1.45;color:var(--ink2);margin:0;max-width:64ch;text-wrap:pretty}
+.tools{display:flex;justify-content:space-between;align-items:center;gap:10px 18px;flex-wrap:wrap;margin-top:16px;min-height:32px}
+.seg{display:inline-flex;border:1px solid var(--ink);border-radius:999px;padding:2px;gap:2px}
+.seg.off{visibility:hidden}
+.seg button{all:unset;cursor:pointer;font:500 13px/1 'IBM Plex Sans',sans-serif;padding:7px 13px;border-radius:999px;color:var(--ink)}
+.seg button[aria-pressed=true]{background:var(--ink);color:var(--paper)}
+.seg button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.seg button .dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--accent);margin-right:7px;vertical-align:1px}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font:400 12px/1.2 'IBM Plex Sans',sans-serif;color:var(--ink2)}
+.legend span{display:inline-flex;align-items:center;gap:7px;white-space:nowrap}
+.legend svg{width:30px;height:12px;overflow:visible}
+.stage{flex:1;min-height:0;margin:8px 0 0;position:relative;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.stage svg{width:100%;height:100%;display:block}
+.ctl{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-top:10px;border-top:1px solid var(--rule)}
+.ctl button{all:unset;cursor:pointer;display:inline-flex;align-items:center;gap:8px;font:500 13px/1 'IBM Plex Sans',sans-serif;
+  color:var(--ink);padding:9px 12px;border-radius:8px}
+.ctl button:hover{background:rgba(30,28,25,.06)}
+.ctl button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.ctl button:disabled{opacity:.3;cursor:default;background:none}
+.ctl svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.ctl .mid{display:flex;align-items:center;gap:14px}
+.hint{font:400 12px/1 'IBM Plex Mono',monospace;color:var(--ink3)}
+
+/* ---- diagram vocabulary ---- */
+svg text{font-family:'IBM Plex Sans',sans-serif;fill:var(--ink)}
+.i{fill:var(--ink)} .p{fill:var(--paper)}
+.o{fill:none;stroke:var(--ink);stroke-width:3}
+.o2{fill:none;stroke:var(--ink);stroke-width:2.2}
+.nm{font-weight:600}
+.sb{fill:var(--ink2)}
+.val{font-weight:500;font-variant-numeric:tabular-nums}
+.vs{fill:var(--ink2)}
+.tab{font-family:'IBM Plex Mono',monospace;letter-spacing:.08em;fill:var(--ink2)}
+.halo{paint-order:stroke;stroke:var(--paper);stroke-width:6px;stroke-linejoin:round}
+svg.wide .nm{font-size:15px} svg.wide .sb{font-size:12.5px} svg.wide .val{font-size:14px} svg.wide .vs{font-size:12px} svg.wide .tab{font-size:11px}
+svg.tall .nm{font-size:16.5px} svg.tall .sb{font-size:13.5px} svg.tall .val{font-size:15px} svg.tall .vs{font-size:13px} svg.tall .tab{font-size:12px}
+.big{font-weight:500;letter-spacing:-.025em;font-variant-numeric:tabular-nums}
+svg.wide .big{font-size:44px} svg.tall .big{font-size:38px}
+
+[data-k]{transition:opacity .35s ease}
+[data-k]:not(.on){opacity:0;pointer-events:none}
+[data-k].on.dim{opacity:.2}
+.tok{transition:opacity .35s ease,transform .9s cubic-bezier(.65,0,.25,1)}
+.instant [data-k],.instant .tok,.instant .ln{transition:none!important}
+
+.ln{fill:none;stroke:var(--ink);transition:stroke .5s}
+.t-money .ln{stroke-width:2.6}
+.t-owed .ln{stroke-width:2.2;stroke-dasharray:6 5}
+.t-info .ln{stroke-width:1.5}
+.t-link .ln{stroke-width:2.4;stroke-dasharray:.01 6.5;stroke-linecap:round}
+.t-food .ln{stroke-width:8}
+.t-food .ln2{fill:none;stroke:var(--paper);stroke-width:5}
+.hf{fill:var(--ink);transition:fill .5s}
+.hc{fill:none;stroke:var(--ink);stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;transition:stroke .5s}
+.t-link .hc{stroke-width:2}
+.ht{fill:var(--paper);stroke:var(--ink);stroke-width:1.6;stroke-linejoin:round}
+.xk{stroke:var(--ink);stroke-width:2.2;stroke-linecap:round}
+.new .ln,.new .hc,.new .ht,.new .xk{stroke:var(--accent)}
+.new .hf{fill:var(--accent)}
+.new text.val{fill:var(--accent)}
+.held .ln,.held .hc{stroke:var(--ink3)}
+.held .hf{fill:var(--ink3)}
+.held text{fill:var(--ink3)}
+.acc{fill:var(--accent)}
+.accs{stroke:var(--accent)}
+.mini text,.mini .tg{display:none}
+.lead{fill:none;stroke:var(--ink2);stroke-width:1;stroke-dasharray:2 3}
+
+@media (max-width:700px){
+  .wrap{padding:16px 16px 8px}
+  .top{font-size:10.5px;padding-bottom:10px}
+  .top .brand i{display:none}
+  .text{padding-top:14px}
+  h1{font-size:25px;margin-bottom:7px}
+  #c{font-size:15px;line-height:1.4}
+  .tools{margin-top:12px;gap:8px 12px}
+  .legend{font-size:11px;gap:5px 12px}
+  .legend svg{width:24px}
+  .seg button{font-size:12.5px;padding:7px 11px}
+  .hint{display:none}
+  .ctl{padding-top:6px}
+  .ctl .lbl{display:none}
+}
+@media (prefers-reduced-motion:reduce){
+  [data-k],.tok,.ln{transition:none!important}
+}
+</style>
+</head>
+<body>
+<div class="bar" id="bar" aria-hidden="true"></div>
+<main class="wrap">
+  <header class="top">
+    <span class="brand"><b>Hesabı böl</b> <i>· ürün önerisi · VP sunumu</i></span>
+    <span id="fig">Şekil 1 / 9</span>
+  </header>
+  <section class="text" id="text" aria-live="polite">
+    <h1 id="h"></h1>
+    <p id="c"></p>
+  </section>
+  <div class="tools">
+    <div class="seg off" id="seg" role="group" aria-label="Karşılaştır">
+      <button type="button" data-m="alt" aria-pressed="false">Bugün</button>
+      <button type="button" data-m="main" aria-pressed="true"><span class="dot"></span>Hesabı böl ile</button>
+    </div>
+    <div class="legend" id="legend" aria-label="Ok türleri"></div>
+  </div>
+  <figure class="stage" id="stage" aria-label="Diyagram, ilerlemek için dokunun">
+    <svg id="svg" role="img" xmlns="http://www.w3.org/2000/svg"></svg>
+  </figure>
+  <nav class="ctl" aria-label="Kontroller">
+    <button type="button" id="prev" aria-label="Geri"><svg viewBox="0 0 16 16"><path d="M10 3 5 8l5 5"/></svg><span class="lbl">Geri</span></button>
+    <div class="mid">
+      <button type="button" id="play" aria-label="Otomatik oynat"><svg viewBox="0 0 16 16" id="playIc"><path d="M5 3.5v9l7-4.5z" fill="currentColor"/></svg><span id="playTx">Oynat</span></button>
+      <span class="hint">→ boşluk · ← · kaydır</span>
+    </div>
+    <button type="button" id="next" aria-label="İleri"><span class="lbl">İleri</span><svg viewBox="0 0 16 16"><path d="M6 3l5 5-5 5"/></svg></button>
+  </nav>
+</main>
+
+<script>
+/* =========================================================
+   ZUKAI GRAMMAR
+   actors  : fixed pictogram vocabulary + label
+   flows   : typed arrows; type decides the line (money, owed, info, link, food)
+   frames  : each frame = set of visible keys (+dim, +held, +positions)
+   accent  : only for what "Hesabı böl" adds
+   ========================================================= */
+const NS='http://www.w3.org/2000/svg';
+function el(tag,attrs,parent){const e=document.createElementNS(NS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);if(parent)parent.appendChild(e);return e}
+function txt(parent,s,x,y,cls,anchor){
+  const t=el('text',{x,y,class:cls,'text-anchor':anchor||'middle'},parent);
+  const lines=String(s).split('\n');
+  if(lines.length===1)t.textContent=s;
+  else lines.forEach((ln,i)=>{const ts=el('tspan',{x,dy:i?'1.2em':'0'},t);ts.textContent=ln});
+  return t;
+}
+
+const ICON={
+  person:'<circle class="i" cx="0" cy="-14" r="9.5"/><path class="i" d="M-18 22V12a12 12 0 0 1 12-12h12a12 12 0 0 1 12 12v10z"/>',
+  app:'<rect class="i" x="-15" y="-25" width="30" height="50" rx="6"/><rect class="p" x="-11.5" y="-19.5" width="23" height="35" rx="2"/><rect class="p" x="-4.5" y="18.8" width="9" height="2.4" rx="1.2"/><path class="i" d="M-7.5-3h15a7.5 7.5 0 0 1-15 0z"/><path class="i" d="M-2.6-11.5c-1.6 1.6 1.6 3 0 4.6M2.6-11.5c-1.6 1.6 1.6 3 0 4.6" fill="none" stroke="#1E1C19" stroke-width="1.4" stroke-linecap="round"/>',
+  rest:'<path class="i" d="M-21-24H21L25-11H-25Z"/><path class="i" d="M-25-11a6.25 6.25 0 0 0 12.5 0a6.25 6.25 0 0 0 12.5 0a6.25 6.25 0 0 0 12.5 0a6.25 6.25 0 0 0 12.5 0Z"/><path class="o" d="M-20-3V22.5H20V-3"/><rect class="i" x="3" y="6" width="10" height="16.5"/><rect class="o2" x="-14" y="4" width="11" height="9"/>',
+  pay:'<rect class="i" x="-24" y="-16" width="48" height="32" rx="5"/><rect class="p" x="-24" y="-9" width="48" height="6"/><rect class="p" x="-17" y="4" width="13" height="6" rx="1.5"/>',
+  eng:'<circle class="i" cx="0" cy="-14" r="9.5"/><path class="i" d="M-18 22V12a12 12 0 0 1 12-12h12a12 12 0 0 1 12 12v10z"/><path d="M-14 9h28l5 13h-38z" fill="#F3EFE6" stroke="#1E1C19" stroke-width="2" stroke-linejoin="round"/>'
+};
+const LINK_GLYPH='<g transform="scale(.6) translate(-12 -12)" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/></g>';
+
+const ACTORS={
+  ece:{kind:'person',name:'Ece'}, deniz:{kind:'person',name:'Deniz',sub:'ödeyen'},
+  mert:{kind:'person',name:'Mert'}, can:{kind:'person',name:'Can'},
+  app:{kind:'app',name:'Uygulama'}, rest:{kind:'rest',name:'Restoran'}, pay:{kind:'pay',name:'Ödeme sağlayıcı'}
+};
+const PEOPLE=['ece','deniz','mert','can'];
+const FLOWS={
+  payToday:{type:'money'}, order:{type:'info'}, food:{type:'food'},
+  dEce:{type:'owed'}, dMert:{type:'owed'}, dCan:{type:'owed',broken:true},
+  split:{type:'info',nw:1}, links:{type:'link',nw:1}, money:{type:'money',nw:1},
+  payOk:{type:'info',nw:1}, payRest:{type:'money',nw:1},
+  loopTop:{type:'info',nw:1}, loopBot:{type:'info',nw:1},
+  loopTopT:{type:'info'}, loopBotT:{type:'money'}
+};
+const HEAD={money:[11,5.5],owed:[10,5],info:[9,5],link:[9,5.5],food:[15,10]};
+
+/* ---------- two layouts: same scene, different grid ---------- */
+const LAY={
+ wide:{name:'wide',W:1000,H:540,vb:[20,24,965,492],
+  A:{ece:[120,150,'below'],deniz:[300,150,'below'],mert:[120,330,'below'],can:[300,330,'below'],
+     app:[560,150,'above'],rest:[880,150,'above'],pay:[560,380,'below']},
+  masa:[40,60,340,380],
+  F:{
+   payToday:{pts:[[330,150],[535,150]],lb:['1.240 ₺',432,138]},
+   split:{pts:[[330,150],[535,150]],lb:['Hesabı böl',432,138]},
+   order:{pts:[[585,150],[845,150]],lb:['sipariş',660,138]},
+   food:{pts:[[913,150],[965,150],[965,505],[210,505],[210,444]],lb:['yemek',420,493]},
+   dEce:{pts:[[148,150],[272,150]],lb:['310 ₺',210,138],sb:['3. gün',210,170]},
+   dMert:{pts:[[144,306],[274,176]],lb:['310 ₺',199,231,'end'],sb:['6. gün',199,248,'end']},
+   dCan:{pts:[[300,298],[300,264]],lb:['310 ₺',316,272,'start'],sb:['gelmedi',316,289,'start']},
+   links:{pts:[[548,183],[548,250],[382,250]],lb:['3 link',468,240]},
+   money:{pts:[[382,380],[526,380]],lb:['4 × 310 ₺',454,368]},
+   payOk:{pts:[[580,354],[580,183]],lb:['hepsi ödendi',592,272,'start']},
+   payRest:{pts:[[594,380],[880,380],[880,184]],lb:['1.240 ₺',740,368]},
+   loopTop:{curve:[[372,236],[500,120],[628,236]],lb:['tekrar sipariş',500,160]},
+   loopBot:{curve:[[628,284],[500,400],[372,284]],lb:['hesap bölünür',500,366]},
+   loopTopT:{curve:[[372,236],[500,120],[628,236]],lb:['daha az sipariş · −%18',500,160]},
+   loopBotT:{curve:[[628,284],[500,400],[372,284]],lb:['1.240 ₺ tek başına',500,366]}
+  },
+  hold:[770,150], counter:[560,452], timer:[606,350], tagDy:-44,
+  phone:[690,206,128,232], leader:[[588,168],[690,232]],
+  insight:[640,214,290], cover:[640,262],
+  loopC:[500,264], metric:[500,452],
+  f8:{deniz:[330,260,'below'],app:[670,260,'below']},
+  ab:{s:.46,a:[25,56],b:[515,56],div:340,
+      eng:[[95,425],[165,425]],engL:[130,482],tl:[290,409,52,32,6],tlL:[461,482],
+      city:[720,412]}
+ },
+ tall:{name:'tall',W:380,H:600,vb:[0,0,380,600],
+  A:{mert:[104,84,'below'],ece:[262,84,'below'],can:[104,222,'below'],deniz:[262,222,'right'],
+     app:[262,380,'right'],rest:[262,540,'right'],pay:[118,462,'below']},
+  masa:[36,20,330,272],
+  F:{
+   payToday:{pts:[[262,256],[262,345]],lb:['1.240 ₺',276,306,'start']},
+   split:{pts:[[262,256],[262,345]],lb:['Hesabı böl',276,306,'start']},
+   order:{pts:[[262,415],[262,505]],lb:['sipariş',276,438,'start']},
+   food:{pts:[[262,574],[262,588],[18,588],[18,170],[35,170]],lb:['yemek',140,580]},
+   dEce:{pts:[[262,140],[262,190]],lb:['310 ₺',276,162,'start'],sb:['3. gün',276,179,'start']},
+   dMert:{pts:[[127,104],[236,200]],lb:['310 ₺',170,163,'end'],sb:['6. gün',170,180,'end']},
+   dCan:{pts:[[134,222],[176,222]],lb:['310 ₺',155,208],sb:['gelmedi',188,244]},
+   links:{pts:[[237,374],[196,374],[196,296]],lb:['3 link',208,356,'start'],gl:[216,336]},
+   money:{pts:[[118,296],[118,434]],lb:['4 × 310 ₺',106,362,'end']},
+   payOk:{pts:[[148,450],[238,398]],lb:['hepsi\nödendi',178,404,'end']},
+   payRest:{pts:[[148,476],[238,528]],lb:['1.240 ₺',202,490,'start']},
+   loopTop:{curve:[[224,166],[332,280],[224,394]],lb:['tekrar\nsipariş',290,272,'start']},
+   loopBot:{curve:[[156,394],[48,280],[156,166]],lb:['hesap\nbölünür',90,272,'end']},
+   loopTopT:{curve:[[224,166],[332,280],[224,394]],lb:['daha az\nsipariş\n−%18',290,262,'start']},
+   loopBotT:{curve:[[156,394],[48,280],[156,166]],lb:['1.240 ₺\ntek\nbaşına',90,262,'end']}
+  },
+  hold:[262,474], counter:[118,527], timer:[30,432], tagDy:-40,
+  phone:[44,312,126,204], leader:null,
+  insight:[48,322,180], cover:[52,350],
+  loopC:[190,286], metric:[190,522],
+  f8:{deniz:[190,150,'above'],app:[190,410,'below']},
+  ab:{s:.47,a:[8,50],b:[194,50],div:352,
+      eng:[[62,412],[124,412]],engL:[93,468],tl:[180,397,26,30,4],tlL:[268,468],
+      city:[190,520]}
+ }
+};
+
+/* ---------- builders ---------- */
+const norm=(a,b)=>{const dx=b[0]-a[0],dy=b[1]-a[1],l=Math.hypot(dx,dy)||1;return[dx/l,dy/l]};
+function roundPath(pts,r){
+  let d=`M${pts[0][0]} ${pts[0][1]}`;
+  for(let i=1;i<pts.length-1;i++){
+    const [x0,y0]=pts[i-1],[x1,y1]=pts[i],[x2,y2]=pts[i+1];
+    const l1=Math.hypot(x1-x0,y1-y0),l2=Math.hypot(x2-x1,y2-y1),rr=Math.min(r,l1/2,l2/2);
+    d+=` L${x1-(x1-x0)/l1*rr} ${y1-(y1-y0)/l1*rr} Q${x1} ${y1} ${x1+(x2-x1)/l2*rr} ${y1+(y2-y1)/l2*rr}`;
+  }
+  const p=pts[pts.length-1];return d+` L${p[0]} ${p[1]}`;
+}
+function geom(g,trim){
+  if(g.curve){const[p0,c,p1]=g.curve,dir=norm(c,p1),e=[p1[0]-dir[0]*trim,p1[1]-dir[1]*trim];
+    return{d:`M${p0[0]} ${p0[1]} Q${c[0]} ${c[1]} ${e[0]} ${e[1]}`,tip:p1,dir}}
+  const pts=g.pts.map(p=>p.slice()),n=pts.length,dir=norm(pts[n-2],pts[n-1]),tip=pts[n-1].slice();
+  pts[n-1]=[tip[0]-dir[0]*trim,tip[1]-dir[1]*trim];
+  return{d:roundPath(pts,14),tip,dir};
+}
+function setPos(g,p,L){
+  g.style.transform=`translate(${p[0]}px,${p[1]}px)`;
+  if(g._side!==p[2]){g._side=p[2];placeLabel(g._lab,g._def,p[2],L)}
+}
+function placeLabel(lab,def,side,L){
+  lab.innerHTML='';const tall=L.name==='tall';
+  if(side==='below'){txt(lab,def.name,0,tall?45:43,'nm halo');if(def.sub)txt(lab,def.sub,0,tall?63:60,'sb halo')}
+  else if(side==='above'){if(def.sub){txt(lab,def.name,0,tall?-52:-50,'nm halo');txt(lab,def.sub,0,-34,'sb halo')}else txt(lab,def.name,0,-36,'nm halo')}
+  else{txt(lab,def.name,34,def.sub?-1:5,'nm halo','start');if(def.sub)txt(lab,def.sub,34,17,'sb halo','start')}
+}
+function pill(parent,x,y,w,h,cls){return el('rect',{x:x-w/2,y:y-h/2,width:w,height:h,rx:h/2,class:cls},parent)}
+
+function build(svg,L,pre,mini){
+  const els=new Map();
+  const defs=el('defs',{},svg);
+  const root=el('g',{class:mini?'mini':''},svg);
+  const reg=(k,g)=>{g.setAttribute('data-k',k);els.set(k,g);return g};
+
+  // container: the group (masa)
+  {const[x,y,w,h]=L.masa,g=reg('masa',el('g',{},root));
+   el('rect',{x,y,width:w,height:h,rx:18,fill:'none',stroke:'#1E1C19','stroke-width':1.1},g);
+   el('rect',{x:x+12,y:y-8,width:L.name==='tall'?122:112,height:16,fill:'#F3EFE6'},g);
+   txt(g,'MASA · 4 KİŞİ',x+20,y+4,'tab','start');}
+
+  // flows
+  for(const k in L.F){
+    const def=FLOWS[k],geo=L.F[k],[hl,hw]=HEAD[def.type];
+    const trim=def.broken?0:(def.type==='food'?hl-1:(def.type==='info'||def.type==='link')?1:hl-3);
+    const{d,tip,dir}=geom(geo,trim),px=-dir[1],py=dir[0];
+    const g=reg(k,el('g',{class:`fl t-${def.type}${def.nw?' new':''}`},root));
+    const mid=`${pre}m-${k}`;
+    const m=el('mask',{id:mid,maskUnits:'userSpaceOnUse',x:-40,y:-40,width:L.W+80,height:L.H+80},defs);
+    g._mp=el('path',{d,fill:'none',stroke:'#fff','stroke-width':18,pathLength:1,'stroke-dasharray':'1 1','stroke-dashoffset':0},m);
+    const lg=el('g',{mask:`url(#${mid})`},g);
+    el('path',{d,class:'ln'},lg);
+    if(def.type==='food')el('path',{d,class:'ln2'},lg);
+    const hg=el('g',{class:'hd'},g);g._hd=hg;
+    if(def.broken){
+      const cx=tip[0]+dir[0]*10,cy=tip[1]+dir[1]*10,s=5.5;
+      el('path',{d:`M${cx-s} ${cy-s}L${cx+s} ${cy+s}M${cx+s} ${cy-s}L${cx-s} ${cy+s}`,class:'xk'},hg);
+    }else{
+      const bx=tip[0]-dir[0]*hl,by=tip[1]-dir[1]*hl;
+      const a=`${bx+px*hw} ${by+py*hw}`,b=`${bx-px*hw} ${by-py*hw}`,t=`${tip[0]} ${tip[1]}`;
+      if(def.type==='money'||def.type==='owed')el('path',{d:`M${t}L${a}L${b}Z`,class:'hf'},hg);
+      else if(def.type==='food')el('path',{d:`M${t}L${a}L${b}Z`,class:'ht'},hg);
+      else el('path',{d:`M${a}L${t}L${b}`,class:'hc'},hg);
+    }
+    const tg=el('g',{class:'lbl'},g);g._lb=tg;
+    if(geo.lb){
+      const t=txt(tg,geo.lb[0],geo.lb[1],geo.lb[2],'val halo',geo.lb[3]);
+      if(k==='links'){ // link glyph before the label
+        const gp=geo.gl||[geo.lb[1]-38,geo.lb[2]-5];const gx=el('g',{transform:`translate(${gp[0]} ${gp[1]})`,class:'accs',stroke:'#C43D26'},tg);gx.innerHTML=LINK_GLYPH;
+      }
+    }
+    if(geo.sb)txt(tg,geo.sb[0],geo.sb[1],geo.sb[2],'vs halo',geo.sb[3]);
+  }
+
+  // actors
+  for(const k in ACTORS){
+    const def=ACTORS[k],g=reg(k,el('g',{class:'tok'},root));g._tok=1;g._def=def;
+    el('g',{},g).innerHTML=ICON[def.kind];
+    g._lab=el('g',{},g);setPos(g,L.A[k],L);
+  }
+
+  // tags on people: link badge (F5) and paid share (F6+)
+  for(const p of PEOPLE){
+    const[x,y]=L.A[p],ty=y+L.tagDy;
+    const t=reg('tag-'+p,el('g',{class:'tg'},root));
+    pill(t,x,ty,52,21,'');t.lastChild.setAttribute('fill','#F3EFE6');t.lastChild.setAttribute('stroke','#C43D26');t.lastChild.setAttribute('stroke-width',1.3);
+    txt(t,'310 ₺',x,ty+4.5,'val acc');
+    if(p!=='deniz'){
+      const b=reg('lb-'+p,el('g',{class:'tg'},root));
+      el('circle',{cx:x,cy:ty,r:11.5,fill:'#F3EFE6',stroke:'#C43D26','stroke-width':1.3},b);
+      const gl=el('g',{transform:`translate(${x} ${ty}) scale(.8)`,stroke:'#C43D26'},b);gl.innerHTML=LINK_GLYPH;
+    }
+  }
+
+  // hold badge on the order arrow
+  {const[x,y]=L.hold,g=reg('hold',el('g',{class:'tg'},root));
+   pill(g,x,y,86,23,'');g.lastChild.setAttribute('fill','#F3EFE6');g.lastChild.setAttribute('stroke','#ABA598');
+   el('path',{d:`M${x-30} ${y-4.5}v9M${x-25.5} ${y-4.5}v9`,stroke:'#5F5A51','stroke-width':2,'stroke-linecap':'round'},g);
+   txt(g,'bekliyor',x+6,y+4.5,'vs');}
+  // counter under provider
+  {const[x,y]=L.counter,g=reg('counter',el('g',{},root));g._t=txt(g,'4/4 ödendi',x,y,'val acc halo');}
+  // 10-minute rule
+  {const[x,y]=L.timer,g=reg('timer',el('g',{},root));
+   el('circle',{cx:x+7,cy:y-4.5,r:7,fill:'none',stroke:'#C43D26','stroke-width':1.5},g);
+   el('path',{d:`M${x+7} ${y-8.5}v4l3 2`,fill:'none',stroke:'#C43D26','stroke-width':1.5,'stroke-linecap':'round'},g);
+   txt(g,'10 dk',x+19,y,'val acc halo','start');}
+
+  // phone close-up (F5)
+  {const[x,y,w,h]=L.phone,g=reg('phone',el('g',{},root)),cx=x+w/2;
+   if(L.leader){const[a,b]=L.leader;el('path',{d:`M${a[0]} ${a[1]}L${b[0]} ${b[1]}`,class:'lead'},g)}
+   el('rect',{x,y,width:w,height:h,rx:16,fill:'#F3EFE6',stroke:'#1E1C19','stroke-width':2},g);
+   el('rect',{x:cx-14,y:y+8,width:28,height:5,rx:2.5,fill:'#1E1C19'},g);
+   txt(g,'Sepet · 4 kişi',x+12,y+38,'vs','start');
+   [0,1,2].forEach(i=>el('rect',{x:x+12,y:y+50+i*13,width:(w-24)*(i===1?.62:.8),height:5,rx:2.5,fill:'#DAD3C5'},g));
+   el('path',{d:`M${x+12} ${y+h*.5+4}H${x+w-12}`,stroke:'#DAD3C5'},g);
+   txt(g,'Toplam',x+12,y+h*.5+24,'vs','start');
+   txt(g,'1.240 ₺',x+w-12,y+h*.5+24,'val','end').style.fontSize='12.5px';
+   el('rect',{x:x+10,y:y+h*.5+40,width:w-20,height:32,rx:8,fill:'#C43D26'},g);
+   const bt=txt(g,'Hesabı böl',cx,y+h*.5+61,'nm');bt.setAttribute('fill','#F3EFE6');bt.style.fill='#F3EFE6';bt.style.fontSize='14px';
+   txt(g,'kişi başı 310 ₺',cx,y+h*.5+92,'vs acc');
+  }
+
+  // insight slot (F4): numbers as annotated values
+  {const[x,y,w]=L.insight,g=reg('insight',el('g',{},root));
+   txt(g,'%31',x,y+34,'big','start');
+   txt(g,'siparişlerin grup siparişi',x,y+56,'vs','start');
+   el('rect',{x,y:y+66,width:w,height:5,fill:'#DAD3C5'},g);el('rect',{x,y:y+66,width:w*.31,height:5,fill:'#1E1C19'},g);
+   txt(g,'−%18',x,y+122,'big','start');
+   txt(g,'ödeyenin sonraki ay siparişi',x,y+144,'vs','start');
+   el('rect',{x,y:y+154,width:w,height:5,fill:'#DAD3C5'},g);el('rect',{x,y:y+154,width:w*.82,height:5,fill:'#1E1C19'},g);
+   el('path',{d:`M${x+w} ${y+149}v15`,stroke:'#1E1C19','stroke-width':1.2},g);
+   pill(g,x+40,y+192,80,22,'');g.lastChild.setAttribute('fill','none');g.lastChild.setAttribute('stroke','#5F5A51');g.lastChild.setAttribute('stroke-dasharray','2 2.5');
+   txt(g,'örnek veri',x+40,y+196,'vs');
+  }
+
+  // cover (F1): the answer first
+  {const[x,y]=L.cover,g=reg('cover',el('g',{},root)),tall=L.name==='tall';
+   txt(g,'BUGÜN',x,y,'tab','start');
+   const a=txt(g,'1 × 1.240 ₺',x,y+32,'val','start');a.style.fontSize=tall?'22px':'24px';a.style.fill='#5F5A51';a.style.textDecoration='line-through';
+   const b=txt(g,'HESABI BÖL İLE',x,y+78,'tab','start');b.style.fill='#C43D26';
+   txt(g,'4 × 310 ₺',x,y+124,'big acc','start');
+  }
+  // loop centre + metric (F8)
+  {const[x,y]=L.loopC;
+   const a=reg('loopC',el('g',{},root));txt(a,'iyi döngü',x,y+5,'nm acc');
+   el('path',{d:`M${x-34} ${y+16}h68`,stroke:'#C43D26','stroke-width':1},a);
+   const b=reg('loopCT',el('g',{},root));txt(b,'kısır döngü',x,y+5,'nm');
+   el('path',{d:`M${x-38} ${y+16}h76`,stroke:'#1E1C19','stroke-width':1},b);
+   const[mx,my]=L.metric,m=reg('metric',el('g',{},root));
+   txt(m,'İZLENECEK METRİK',mx,my,'tab');
+   const v=txt(m,L.name==='tall'?'ödeyenin 30 günlük\ntekrar sipariş oranı':'ödeyenin 30 günlük tekrar sipariş oranı',mx,my+26,'nm');
+   v.style.fontSize=L.name==='tall'?'17px':'19px';
+   el('path',{d:`M${mx-(L.name==='tall'?86:170)} ${my+(L.name==='tall'?56:38)}h${L.name==='tall'?172:340}`,stroke:'#C43D26','stroke-width':2},m);
+  }
+
+  // the ask: small multiples A/B + resources (F9)
+  if(!mini){
+    const A=L.ab,g=reg('ab',el('g',{},root)),sw=L.W*A.s,sh=L.H*A.s;
+    [['a','A · bugünkü akış',FR[2].s],['b','B · Hesabı böl',FR[6].s]].forEach(([key,label,st])=>{
+      const[x,y]=A[key];
+      el('rect',{x:x-4,y:y-4,width:sw+8,height:sh+8,rx:10,fill:'none',stroke:'#DAD3C5'},g);
+      const t=txt(g,label,x,y-14,'nm','start');if(key==='b')t.classList.add('acc');
+      const holder=el('g',{transform:`translate(${x} ${y}) scale(${A.s})`},g);
+      const sub=build(holder,L,pre+key,true);applyState(sub,{show:st.show,cls:st.cls},false);
+    });
+    el('path',{d:`M${A.a[0]} ${A.div}H${L.W-A.a[0]}`,stroke:'#DAD3C5'},g);
+    A.eng.forEach(([x,y])=>{const e=el('g',{transform:`translate(${x} ${y})`},g);e.innerHTML=ICON.eng});
+    txt(g,'2 mühendis',A.engL[0],A.engL[1],'nm');
+    const[tx,ty,tw,th,gap]=A.tl;
+    for(let i=0;i<6;i++){el('rect',{x:tx+i*(tw+gap),y:ty-th/2,width:tw,height:th,rx:3,fill:'none',stroke:'#1E1C19','stroke-width':1.2},g);
+      txt(g,String(i+1),tx+i*(tw+gap)+tw/2,ty+5,'val')}
+    txt(g,'6 hafta',A.tlL[0],A.tlL[1],'nm');
+    const[cx,cy]=A.city;
+    if(L.name==='wide'){
+      txt(g,'İstanbul · A/B testi',cx,cy-6,'nm','start');
+      txt(g,'%50 bugün  /  %50 Hesabı böl',cx,cy+16,'vs','start');
+      txt(g,'KARAR METRİĞİ',cx,cy+50,'tab','start');
+      txt(g,'ödeyenin tekrar siparişi',cx,cy+72,'nm acc','start');
+    }else{
+      txt(g,'İstanbul · A/B testi · %50 / %50',cx,cy,'nm');
+      txt(g,'KARAR METRİĞİ',cx,cy+30,'tab');
+      txt(g,'ödeyenin tekrar siparişi',cx,cy+52,'nm acc');
+    }
+  }
+  return{els,L};
+}
+
+/* ---------- frames: the scene file ---------- */
+const CAST=['masa','ece','deniz','mert','can','app','rest'];
+const TODAY=[...CAST,'payToday','order','food'];
+const DEBTS=['dEce','dMert','dCan'];
+const NEWC=[...CAST,'split','links'];
+const TAGS=PEOPLE.map(p=>'tag-'+p);
+const COMPARE={show:[...TODAY,...DEBTS],c:'Karşılaştırma · bugün: Deniz 1.240 ₺’yi tek başına öder, sonra üç borcu kovalar.'};
+const F8POS={wide:LAY.wide.f8,tall:LAY.tall.f8};
+const FR=[
+ {h:'Grup siparişinde hesabı uygulama bölsün.',
+  c:'Ödeyen kişi para kovalamasın. Talep: 2 mühendis × 6 hafta, İstanbul’da A/B testi.',
+  s:{show:[...CAST,...TAGS,'cover']},dur:8000},
+ {h:'Bugün: dört kişi yer, biri öder.',
+  c:'Deniz 1.240 ₺’nin tamamını kendi kartıyla öder. Sipariş restorana gider, yemek masaya gelir.',
+  s:{show:TODAY,delay:{order:800,food:1600}},dur:9000},
+ {h:'Sonra Deniz bir hafta para kovalar.',
+  c:'Ece 3. gün, Mert 6. gün öder. Can hiç ödemez; Deniz 310 ₺ zararda kalır.',
+  s:{show:[...TODAY,...DEBTS],dim:['payToday','order','food','app','rest'],delay:{dMert:900,dCan:1800}},dur:9500},
+ {h:'Bu tek bir masa değil.',
+  c:'Siparişlerin %31’i grup siparişi. Ödeyen kişi sonraki ay %18 daha az sipariş veriyor.',
+  s:{show:[...TODAY,...DEBTS,'insight'],dim:['payToday','order','food','app','rest','ece','mert','can','dEce','dMert','dCan','masa']},dur:9500},
+ {h:'Çözüm: ödeme ekranında “Hesabı böl”.',
+  c:'Deniz butona basar; Ece, Mert ve Can’a birer ödeme linki gider.',
+  s:{show:[...NEWC,'phone','lb-ece','lb-mert','lb-can'],delay:{phone:300,links:900,'lb-ece':1700,'lb-mert':1850,'lb-can':2000}},alt:COMPARE,dur:9500},
+ {h:'Herkes kendi payını öder.',
+  c:'Her pay 310 ₺. Ödeme sağlayıcısı payları tutar; sipariş henüz restorana gitmez.',
+  s:{show:[...NEWC,'pay','money',...TAGS,'order','hold','counter'],cls:{order:'held'},dim:['split','links'],
+     delay:{pay:0,money:300,'tag-deniz':1100,'tag-ece':1600,'tag-mert':2100,'tag-can':2600,order:400,hold:400,counter:1100},count:true},alt:COMPARE,dur:10000},
+ {h:'Dört pay tamamlanınca sipariş çıkar.',
+  c:'Para restorana, sipariş mutfağa gider. 10 dakikada ödemeyen olursa kalanı Deniz tamamlar.',
+  s:{show:[...NEWC,'pay','money',...TAGS,'order','counter','payOk','payRest','food','timer'],dim:['split','links'],
+     delay:{payOk:0,payRest:900,food:1700,timer:2600}},alt:COMPARE,dur:10000},
+ {h:'Ödeyen cezalandırılmaz, tekrar sipariş verir.',
+  c:'İzleyeceğimiz metrik: ödeyenlerin 30 gün içinde tekrar sipariş verme oranı.',
+  s:{show:['deniz','app','loopTop','loopBot','loopC','metric'],pos:F8POS,delay:{loopTop:700,loopBot:1300,loopC:1900,metric:2300}},
+  alt:{show:['deniz','app','loopTopT','loopBotT','loopCT','metric'],pos:F8POS,c:'Karşılaştırma · bugün: ödeyen kişi sonraki ay %18 daha az sipariş veriyor (örnek veri).'},dur:9500},
+ {h:'Talep: 2 mühendis × 6 hafta.',
+  c:'İstanbul’da A/B testi: kullanıcıların yarısı bugünkü akışı, yarısı Hesabı böl’ü görür.',
+  s:{show:['ab']},dur:10000}
+];
+
+/* ---------- state application ---------- */
+let timers=[];
+function later(fn,ms){timers.push(setTimeout(fn,ms))}
+function applyState(D,st,animate){
+  const show=new Set(st.show),dim=new Set(st.dim||[]),cls=st.cls||{},delay=st.delay||{};
+  const pos=(st.pos&&st.pos[D.L.name])||{};
+  for(const[k,e]of D.els){
+    const on=show.has(k),was=e.classList.contains('on');
+    e.classList.toggle('on',on);
+    e.classList.toggle('dim',on&&dim.has(k));
+    e.classList.toggle('held',cls[k]==='held');
+    if(e._tok)setPos(e,pos[k]||D.L.A[k],D.L);
+    if(!on||!was||!animate)e.getAnimations({subtree:true}).forEach(a=>a.cancel());
+    if(on&&!was&&animate)reveal(e,delay[k]||0);
+  }
+  const c=D.els.get('counter');
+  if(c){
+    if(st.count&&animate){
+      c._t.textContent='0/4 ödendi';
+      [1,2,3,4].forEach(i=>later(()=>{c._t.textContent=i+'/4 ödendi'},(delay['tag-'+PEOPLE[i-1]]||0)+150));
+    }else c._t.textContent='4/4 ödendi';
+  }
+}
+function reveal(e,d){
+  const ease='cubic-bezier(.45,0,.2,1)';
+  if(e._mp){
+    e._mp.animate([{strokeDashoffset:'1px'},{strokeDashoffset:'0px'}],{duration:750,delay:d,easing:ease,fill:'backwards'});
+    e._hd.animate([{opacity:0},{opacity:1}],{duration:200,delay:d+650,fill:'backwards'});
+    e._lb.animate([{opacity:0},{opacity:1}],{duration:300,delay:d+400,fill:'backwards'});
+  }else e.animate([{opacity:0},{opacity:1}],{duration:450,delay:d,easing:ease,fill:'backwards'});
+}
+
+/* ---------- legend: only the arrow types on screen ---------- */
+const LEG={
+  money:['para','<path d="M1 6H21" stroke="#1E1C19" stroke-width="2.6"/><path d="M29 6L19 1.5V10.5Z" fill="#1E1C19"/>'],
+  owed:['borç (ödenmedi)','<path d="M1 6H21" stroke="#1E1C19" stroke-width="2.2" stroke-dasharray="5 4"/><path d="M29 6L20 1.8V10.2Z" fill="#1E1C19"/>'],
+  info:['bilgi','<path d="M1 6H28" stroke="#1E1C19" stroke-width="1.5"/><path d="M21 1.5L28.5 6L21 10.5" fill="none" stroke="#1E1C19" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>'],
+  link:['ödeme linki','<path d="M2 6H27" stroke="#1E1C19" stroke-width="2.4" stroke-dasharray=".01 6" stroke-linecap="round"/><path d="M21 1.5L28.5 6L21 10.5" fill="none" stroke="#1E1C19" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>'],
+  food:['yemek','<path d="M1 6H18" stroke="#1E1C19" stroke-width="8"/><path d="M0 6H18.5" stroke="#F3EFE6" stroke-width="5"/><path d="M29 6L17 -1V13Z" fill="#F3EFE6" stroke="#1E1C19" stroke-width="1.4" stroke-linejoin="round"/>']
+};
+function legend(st){
+  const types=new Set();let nw=false;
+  st.show.forEach(k=>{if(FLOWS[k]){types.add(FLOWS[k].type);if(FLOWS[k].nw)nw=true}if(k==='phone'||k==='ab'||k==='cover'||k.startsWith('tag-'))nw=true});
+  let h='';
+  for(const t of['money','owed','info','link','food'])if(types.has(t))h+=`<span><svg viewBox="0 0 30 12">${LEG[t][1]}</svg>${LEG[t][0]}</span>`;
+  if(nw)h+=`<span><svg viewBox="0 0 30 12"><path d="M1 6H29" stroke="#C43D26" stroke-width="2.6"/></svg><b style="color:var(--accent);font-weight:500">kırmızı = Hesabı böl ile gelen</b></span>`;
+  document.getElementById('legend').innerHTML=h;
+}
+
+/* ---------- player ---------- */
+const svg=document.getElementById('svg'),stage=document.getElementById('stage');
+const RM=matchMedia('(prefers-reduced-motion: reduce)').matches;
+let cur=0,mode='main',playing=false,ptimer=null,D=null,layoutName='';
+const bar=document.getElementById('bar');
+bar.innerHTML=FR.map(()=>'<i><b></b></i>').join('');
+
+function pickLayout(){const r=stage.getBoundingClientRect();return(r.width<720||r.width/Math.max(r.height,1)<1.3)?'tall':'wide'}
+function rebuild(){
+  const n=pickLayout();if(n===layoutName&&D)return false;
+  layoutName=n;const L=LAY[n];
+  svg.innerHTML='';svg.setAttribute('viewBox',L.vb.join(' '));svg.setAttribute('class',n);
+  D=build(svg,L,'x',false);
+  return true;
+}
+function render(animate,toggle){
+  timers.forEach(clearTimeout);timers=[];
+  const f=FR[cur],st=(mode==='alt'&&f.alt)?f.alt:f.s;
+  if(!animate){svg.classList.add('instant')}
+  applyState(D,st,animate&&!RM);
+  if(!animate)setTimeout(()=>svg.classList.remove('instant'),60);
+  legend(st);
+  const seg=document.getElementById('seg');
+  seg.classList.toggle('off',!f.alt);
+  seg.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.m===mode)));
+  const cap=st.c||f.c;if(toggle)document.getElementById('c').textContent=cap;
+  svg.setAttribute('aria-label',f.h+' '+cap);
+}
+function setText(animate){
+  const t=document.getElementById('text'),f=FR[cur];
+  const put=()=>{document.getElementById('h').textContent=f.h;document.getElementById('c').textContent=f.c;t.classList.remove('fade')};
+  if(animate&&!RM){t.classList.add('fade');setTimeout(put,180)}else put();
+  document.getElementById('fig').textContent=`Şekil ${cur+1} / ${FR.length}`;
+  document.getElementById('prev').disabled=cur===0;
+  document.getElementById('next').disabled=cur===FR.length-1;
+}
+function paintBar(){
+  [...bar.children].forEach((s,i)=>{s.className=i<cur?'done':(i===cur?(playing?'run':'done'):'');
+    if(i===cur&&playing){s.style.setProperty('--d',(FR[cur].dur||9000)+'ms');s.className='';void s.offsetWidth;s.className='run'}});
+}
+function go(i,animate=true){
+  i=Math.max(0,Math.min(FR.length-1,i));
+  const fwd=i>cur;cur=i;mode='main';
+  setText(animate);render(animate&&fwd);
+  history.replaceState(null,'','#'+(cur+1));
+  schedule();paintBar();
+}
+function schedule(){
+  clearTimeout(ptimer);
+  if(!playing)return;
+  ptimer=setTimeout(()=>{if(cur<FR.length-1)go(cur+1);else setPlay(false)},FR[cur].dur||9000);
+}
+function setPlay(on){
+  playing=on;
+  document.getElementById('playTx').textContent=on?'Duraklat':'Oynat';
+  document.getElementById('playIc').innerHTML=on?'<path d="M5 3.5v9M11 3.5v9" stroke-width="2"/>':'<path d="M5 3.5v9l7-4.5z" fill="currentColor"/>';
+  if(on&&cur===FR.length-1){go(0);return}
+  schedule();paintBar();
+}
+const next=()=>go(cur+1),prev=()=>go(cur-1);
+document.getElementById('next').onclick=next;
+document.getElementById('prev').onclick=prev;
+document.getElementById('play').onclick=()=>setPlay(!playing);
+document.querySelectorAll('#seg button').forEach(b=>b.onclick=()=>{
+  if(mode===b.dataset.m)return;mode=b.dataset.m;setPlay(false);render(true,true);
+});
+stage.addEventListener('click',next);
+addEventListener('keydown',e=>{
+  if(e.target.closest&&e.target.closest('button')&&(e.key===' '||e.key==='Enter'))return;
+  if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){e.preventDefault();next()}
+  else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();prev()}
+  else if(e.key==='Home')go(0);else if(e.key==='End')go(FR.length-1);
+});
+let tx=null,ty=null;
+addEventListener('touchstart',e=>{const t=e.touches[0];tx=t.clientX;ty=t.clientY},{passive:true});
+addEventListener('touchend',e=>{
+  if(tx===null)return;const t=e.changedTouches[0],dx=t.clientX-tx,dy=t.clientY-ty;tx=null;
+  if(Math.abs(dx)>45&&Math.abs(dx)>Math.abs(dy)*1.3){dx<0?next():prev()}
+},{passive:true});
+addEventListener('hashchange',()=>{const n=parseInt(location.hash.slice(1),10);if(n>=1&&n<=FR.length&&n-1!==cur)go(n-1,false)});
+let rz;addEventListener('resize',()=>{clearTimeout(rz);rz=setTimeout(()=>{if(rebuild())render(false)},120)});
+
+const h=parseInt(location.hash.slice(1),10);
+cur=(h>=1&&h<=FR.length)?h-1:0;
+rebuild();setText(false);render(false);paintBar();
+</script>
+</body>
+</html>

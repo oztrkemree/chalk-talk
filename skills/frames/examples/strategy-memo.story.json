@@ -1,0 +1,358 @@
+{
+  "title": "Tally: free plan to trial",
+  "subtitle": "COO memo · all hands",
+  "lang": "en",
+  "accent": "blue",
+  "theme": "paper",
+  "cast": [
+    {
+      "id": "maya",
+      "name": "Maya",
+      "look": {
+        "hair": "curly",
+        "top": "sweater"
+      },
+      "hero": true
+    },
+    {
+      "id": "theo",
+      "name": "Theo",
+      "look": {
+        "hair": "short",
+        "top": "shirt",
+        "glasses": true
+      }
+    }
+  ],
+  "frames": [
+    {
+      "lens": "title",
+      "kind": "open",
+      "kicker": "THE DECISION",
+      "headline": "Free forever ends. *Try it free* instead.",
+      "sub": "New Tally accounts get 14 days of everything, then choose a plan.",
+      "caption": "In one line: the **free plan** becomes a **14-day free trial**, because free accounts cost more than they bring.",
+      "notes": "Answer first. Everything after this is why, what changes, and what I need from you."
+    },
+    {
+      "lens": "moment",
+      "kicker": "THE PROBLEM",
+      "shot": "split",
+      "split": [
+        {
+          "label": "Maya · free plan, 2 years",
+          "set": "home",
+          "people": [
+            {
+              "who": "maya",
+              "pose": "type",
+              "mood": "happy",
+              "at": "center"
+            }
+          ]
+        },
+        {
+          "label": "Theo · support queue",
+          "set": "office",
+          "people": [
+            {
+              "who": "theo",
+              "pose": "type",
+              "mood": "tired",
+              "at": "center",
+              "think": "Another free account..."
+            }
+          ],
+          "props": [
+            {
+              "kind": "coffee",
+              "at": "left"
+            },
+            {
+              "kind": "clock",
+              "at": "right"
+            }
+          ]
+        }
+      ],
+      "caption": "Maya has invoiced on the free plan for two years and never paid. Her questions still land in **Theo's queue**.",
+      "notes": "Maya is a composite of many real conversations, not one customer. She loves Tally; that is the point."
+    },
+    {
+      "lens": "number",
+      "kicker": "THE COST",
+      "big": "$22k",
+      "label": "a month to serve accounts that never pay",
+      "sub": "Free accounts are 95% of users and open 7 of every 10 support tickets.",
+      "viz": {
+        "kind": "bars",
+        "unit": "$k per month",
+        "data": [
+          {
+            "label": "Paid plans bring in",
+            "value": 30
+          },
+          {
+            "label": "Free accounts cost",
+            "value": 22,
+            "accent": true
+          }
+        ]
+      },
+      "who": "theo",
+      "stamp": "example data",
+      "caption": "Free accounts eat **almost three quarters** of what paying customers bring in, mostly as support time.",
+      "notes": "Cost = hosting + payment-email volume + support hours attributed to free accounts."
+    },
+    {
+      "lens": "compare",
+      "kicker": "WHAT CHANGES",
+      "left": {
+        "label": "Today: free plan",
+        "tone": "muted",
+        "art": "lock",
+        "lines": [
+          "Free forever, a few features locked",
+          "Upgrade nudges, rarely taken",
+          "One support queue for all"
+        ]
+      },
+      "right": {
+        "label": "New: 14-day trial",
+        "tone": "accent",
+        "art": "key",
+        "lines": [
+          "Every feature, free for 14 days",
+          "No card needed to start",
+          "Then a plan, or read-only"
+        ]
+      },
+      "caption": "New customers see **everything on day one**, and decide while Tally is clearly useful to them.",
+      "notes": "Read-only means you can always open and download your old invoices. Nobody loses their data."
+    },
+    {
+      "lens": "moment",
+      "kicker": "EXISTING USERS",
+      "set": "home",
+      "shot": "close",
+      "people": [
+        {
+          "who": "maya",
+          "pose": "phone",
+          "mood": "neutral",
+          "at": "left",
+          "think": "Fair enough."
+        }
+      ],
+      "insert": {
+        "kind": "phone",
+        "who": "maya",
+        "screen": [
+          {
+            "type": "header",
+            "text": "Tally"
+          },
+          {
+            "type": "text",
+            "text": "Your free plan ends in 60 days. Your invoices stay yours."
+          },
+          {
+            "type": "amount",
+            "text": "50% off",
+            "accent": true
+          },
+          {
+            "type": "text",
+            "text": "for your first 12 months"
+          },
+          {
+            "type": "button",
+            "text": "Choose a plan"
+          }
+        ]
+      },
+      "caption": "Free users like Maya get **60 days' notice** and half price for a year. Nobody loses an invoice.",
+      "notes": "We tell existing users first, before any public announcement."
+    },
+    {
+      "lens": "flow",
+      "kicker": "HOW MONEY FLOWS",
+      "compare": true,
+      "actors": [
+        {
+          "id": "users",
+          "kind": "group",
+          "label": "New sign-ups",
+          "sub": "a month",
+          "at": [
+            0,
+            0
+          ]
+        },
+        {
+          "id": "tally",
+          "kind": "app",
+          "label": "Tally",
+          "at": [
+            1,
+            0
+          ]
+        },
+        {
+          "id": "rev",
+          "kind": "bank",
+          "label": "Revenue",
+          "at": [
+            2,
+            0
+          ]
+        },
+        {
+          "id": "support",
+          "kind": "person",
+          "label": "Theo's team",
+          "sub": "support cost",
+          "at": [
+            1,
+            1
+          ]
+        }
+      ],
+      "flows": [
+        {
+          "from": "users",
+          "to": "tally",
+          "type": "info",
+          "label": "free, forever",
+          "state": "before"
+        },
+        {
+          "from": "users",
+          "to": "tally",
+          "type": "info",
+          "label": "14-day trial",
+          "state": "after"
+        },
+        {
+          "from": "tally",
+          "to": "rev",
+          "type": "money",
+          "label": "4 in 100 upgrade",
+          "state": "before"
+        },
+        {
+          "from": "tally",
+          "to": "rev",
+          "type": "money",
+          "label": "trial ends at a plan",
+          "new": true,
+          "state": "after"
+        },
+        {
+          "from": "tally",
+          "to": "support",
+          "type": "money",
+          "label": "mostly free accounts",
+          "value": "$22k / mo",
+          "state": "before"
+        },
+        {
+          "from": "tally",
+          "to": "support",
+          "type": "money",
+          "label": "trials + customers",
+          "value": "$9k / mo",
+          "state": "after"
+        }
+      ],
+      "stamp": "example data",
+      "caption": "Toggle before and after: the same sign-ups, but every trial now **ends at a decision**, and support shrinks.",
+      "notes": "The support estimate assumes trial users ask about as much as paying ones."
+    },
+    {
+      "lens": "whatif",
+      "kicker": "TRY IT",
+      "headline": "Every point of *conversion* is real money.",
+      "vars": [
+        {
+          "id": "conv",
+          "label": "Trials that become paying",
+          "min": 2,
+          "max": 20,
+          "step": 1,
+          "value": 8,
+          "unit": "%"
+        }
+      ],
+      "outputs": [
+        {
+          "label": "New paying customers a month",
+          "expr": "5000 * conv / 100",
+          "format": "n"
+        }
+      ],
+      "viz": {
+        "kind": "bars",
+        "unit": "$ added to revenue each month",
+        "format": "n",
+        "data": [
+          {
+            "label": "Free plan today (4%)",
+            "value": 3000
+          },
+          {
+            "label": "14-day trial",
+            "expr": "5000 * conv / 100 * 15",
+            "accent": true
+          }
+        ]
+      },
+      "stamp": "example data",
+      "caption": "5,000 sign-ups a month at $15: each extra point of conversion adds **$750 a month**, every month.",
+      "notes": "Break-even with today is 4%. Anything above that is new money, before counting the support savings."
+    },
+    {
+      "lens": "timeline",
+      "kicker": "THE PLAN",
+      "items": [
+        {
+          "when": "Week 1",
+          "what": "Email every free user: 60 days' notice"
+        },
+        {
+          "when": "Week 2",
+          "what": "New sign-ups start on the trial"
+        },
+        {
+          "when": "Week 4",
+          "what": "First trials end: read conversion",
+          "accent": true
+        },
+        {
+          "when": "Week 9",
+          "what": "Free accounts move to half-price plans"
+        },
+        {
+          "when": "Week 12",
+          "what": "Review: keep, tune or roll back"
+        }
+      ],
+      "caption": "Twelve weeks, with **one honest checkpoint** at week four when the first trials end.",
+      "notes": "If conversion is under 4% at week 4, we pause before touching existing free accounts."
+    },
+    {
+      "lens": "title",
+      "kind": "ask",
+      "kicker": "THE ASK",
+      "headline": "Three teams, *three jobs.*",
+      "items": [
+        "Product: trial + plan picker",
+        "Support: 1-hour trial replies",
+        "Marketing: emails + sign-up page"
+      ],
+      "sign": "with us?",
+      "caption": "Your lead has the details today. Questions go to the **#trial-switch** channel.",
+      "notes": "Close by thanking support; they carried the free plan."
+    }
+  ]
+}

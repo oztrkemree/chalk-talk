@@ -1,0 +1,47 @@
+<!doctype html>
+<!--
+  chalk-talk frames · dev page (no build step)
+
+  Run a static server from skills/frames and open this page:
+      cd skills/frames && python -m http.server 8811
+      http://localhost:8811/engine/dev.html                                  (examples/hesabi-bol.story.json)
+      http://localhost:8811/engine/dev.html?story=../.scratch/my.story.json  (any story, path relative to engine/)
+
+  It loads skin.css + core.js + the lens files listed below straight from disk; a lens file that does not
+  exist yet just 404s and its frames show the placeholder card. Every runtime option works here too:
+  #N, ?theme=night, ?aspect=tall|wide, ?play, ?play=loop, ?present, ?snap, ?accent=blue|%23hex.
+  file:// does not work (fetch of the story is blocked); use the server.
+-->
+<html lang="tr" data-theme="paper">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>chalk-talk frames · dev</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=Newsreader:ital,opsz,wght@0,6..72,400..700;1,6..72,400..700&family=Shantell+Sans:wght@400..700&display=swap">
+<link rel="stylesheet" href="skin.css">
+</head>
+<body>
+<script src="core.js"></script>
+<script src="lens-title.js"></script>
+<script src="lens-moment.js"></script>
+<script src="lens-flow.js"></script>
+<script src="lens-card.js"></script>
+<script>
+(async () => {
+  const path = new URLSearchParams(location.search).get('story') || '../examples/hesabi-bol.story.json';
+  let story;
+  try {
+    const res = await fetch(path, { cache: 'no-store' });
+    if (!res.ok) throw new Error(res.status + ' ' + res.statusText);
+    story = await res.json();
+  } catch (err) {
+    document.body.innerHTML = '<pre class="ct-fatal">[chalk dev] could not load story "' + path.replace(/</g, '&lt;') + '": ' + String(err.message).replace(/</g, '&lt;') + '</pre>';
+    return;
+  }
+  chalk.boot(story);
+})();
+</script>
+</body>
+</html>

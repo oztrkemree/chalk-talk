@@ -1,0 +1,529 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Hesabı böl</title>
+<meta name="description" content="Bir ürün önerisinin storyboard anlatımı: grup siparişinde herkes kendi payını ödesin.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,500&family=Shantell+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#F2EDE3; --sheet:#FBF8F1; --ink:#211C17; --ink-2:#6E655B; --ink-3:rgba(33,28,23,.16);
+  --accent:#E2552C;
+  --pw:min(1180px, calc(100vw - 48px), calc((100dvh - 300px) * 16 / 9));
+}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{
+  background:var(--paper); color:var(--ink);
+  font-family:'Newsreader',Georgia,serif;
+  display:flex; flex-direction:column; min-height:100dvh; overflow:hidden;
+  -webkit-font-smoothing:antialiased; -webkit-tap-highlight-color:transparent;
+}
+body::after{ /* kâğıt dokusu */
+  content:""; position:fixed; inset:0; pointer-events:none; z-index:5; mix-blend-mode:multiply; opacity:.55;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='260' height='260'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .13 0 0 0 0 .11 0 0 0 0 .09 0 0 0 .11 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+.prog{display:flex; gap:5px; padding:12px 24px 0}
+.seg{flex:1; height:3px; border-radius:2px; background:var(--ink-3); overflow:hidden}
+.seg i{display:block; height:100%; width:0; background:var(--ink)}
+.seg.done i,.seg.cur i{width:100%}
+.playing .seg.cur i{width:0; animation:fill var(--dur,8s) linear forwards}
+@keyframes fill{to{width:100%}}
+
+header{display:flex; justify-content:space-between; align-items:baseline; gap:16px; padding:14px 24px 0; font:13px/1.2 'Courier Prime',monospace; color:var(--ink-2); letter-spacing:.04em}
+header b{font:italic 500 19px/1 'Newsreader',serif; color:var(--ink); letter-spacing:0; margin-right:10px}
+
+main{flex:1; min-height:0; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:10px 24px 0}
+.slate{width:var(--pw); display:flex; justify-content:space-between; gap:12px; font:13px/1 'Courier Prime',monospace; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-2); margin-bottom:10px}
+.slate .act{color:var(--ink)}
+.slate .act em{font-style:normal; color:var(--accent); margin-right:8px}
+.panel{position:relative; width:var(--pw); aspect-ratio:16/9; background:var(--sheet); touch-action:pan-y; cursor:pointer; user-select:none}
+.edge{position:absolute; inset:-3px; width:calc(100% + 6px); height:calc(100% + 6px); pointer-events:none; overflow:visible}
+.frame{position:absolute; inset:0; opacity:0; visibility:hidden; transition:opacity .28s ease, visibility 0s linear .28s}
+.frame.cur{opacity:1; visibility:visible; transition:opacity .28s ease}
+.frame svg{position:absolute; inset:0; width:100%; height:100%; display:block}
+.frame .cap{display:none}
+
+.caption{width:min(var(--pw), 860px); min-height:2.7em; margin:18px auto 0; text-align:center; font-size:clamp(19px, 1.25vw + 8px, 27px); line-height:1.32; font-weight:400; text-wrap:balance}
+.caption b{font-weight:600; text-decoration:underline; text-decoration-color:var(--accent); text-decoration-thickness:3px; text-underline-offset:4px}
+.caption q{font-style:italic; quotes:"“" "”"}
+
+.controls{display:flex; align-items:center; justify-content:center; gap:14px; padding:14px 24px 22px; position:relative}
+.controls button{width:44px; height:44px; border-radius:50%; border:1.5px solid var(--ink); background:transparent; color:var(--ink); display:grid; place-items:center; cursor:pointer; padding:0}
+.controls button:hover{background:rgba(33,28,23,.06)}
+.controls button:focus-visible{outline:2px solid var(--accent); outline-offset:3px}
+.controls #play{width:auto; padding:0 18px 0 14px; border-radius:22px; gap:8px; display:flex; font:15px 'Courier Prime',monospace}
+.count{font:14px 'Courier Prime',monospace; color:var(--ink-2); min-width:58px; text-align:center}
+.hint{position:absolute; right:24px; font:12px 'Courier Prime',monospace; color:var(--ink-2)}
+
+/* SVG içi yazılar */
+svg text{stroke:none; fill:var(--ink)}
+.h{font-family:'Shantell Sans','Comic Sans MS',sans-serif}
+.c{font-family:'Courier Prime',monospace}
+.n{font-family:'Newsreader',serif}
+svg .acc{fill:var(--accent)} svg .wht{fill:var(--sheet)} svg .gry{fill:#8C8378}
+
+/* vuruşlar (beats): yalnız kare açıkken oynar */
+.pop,.grow,.tear,.press{transform-box:fill-box}
+.pop,.press{transform-origin:center}
+.grow{transform-origin:0 50%}
+.draw{stroke-dasharray:1}
+.tear{transform:translate(var(--tx),var(--ty)) rotate(var(--r)); transform-origin:50% 0}
+.on .b{animation:fadeUp .55s cubic-bezier(.2,.8,.2,1) var(--d,0s) both}
+.on .b.pop{animation-name:pop; animation-duration:.45s}
+.on .b.draw{animation-name:draw; animation-duration:.8s; animation-timing-function:ease-in-out}
+.on .b.grow{animation-name:grow; animation-duration:.8s}
+.on .b.fly{animation-name:fly; animation-duration:1s; animation-timing-function:cubic-bezier(.5,0,.2,1)}
+.on .b.from{animation-name:from; animation-duration:.7s}
+.on .press{animation:press .3s ease-in-out var(--d,0s) both}
+.on .tear{animation:tear 1s cubic-bezier(.3,.7,.2,1) var(--d,0s) both}
+@keyframes fadeUp{from{opacity:0; transform:translateY(10px)}}
+@keyframes pop{from{opacity:0; transform:scale(.7)}}
+@keyframes draw{from{stroke-dashoffset:1} to{stroke-dashoffset:0}}
+@keyframes grow{from{transform:scaleX(0)}}
+@keyframes fly{0%{opacity:0; transform:translate(var(--tx),var(--ty))} 20%{opacity:1; transform:translate(var(--tx),var(--ty))}}
+@keyframes from{from{opacity:var(--o,1); transform:translate(var(--tx,0),var(--ty,0))}}
+@keyframes press{50%{transform:scale(.94)}}
+@keyframes tear{from{transform:none}}
+@media (prefers-reduced-motion:reduce){
+  .on .b,.on .tear,.on .press{animation:none!important}
+  .frame,.frame.cur{transition:none}
+}
+
+/* geniş / kare kompozisyon */
+.sq-only{display:none}
+@media (max-width:720px), (max-aspect-ratio:4/5){
+  :root{--pw:min(calc(100vw - 32px), calc(100dvh - 380px))}
+  .panel{aspect-ratio:1/1}
+  .sq-only{display:inline} .wide-only{display:none}
+  .prog{padding:10px 16px 0}
+  header{padding:12px 16px 0; font-size:12px}
+  header .meta{display:none}
+  main{padding:max(16px, 5vh) 16px 0; justify-content:flex-start}
+  .slate{font-size:11.5px}
+  .caption{font-size:20.5px; margin-top:18px; min-height:4em}
+  .controls{padding:10px 16px max(18px, env(safe-area-inset-bottom))}
+  .hint{display:none}
+}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <filter id="ink" x="-4%" y="-4%" width="108%" height="108%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.022" numOctaves="3" seed="7" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="5" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+    <pattern id="hatch" width="9" height="9" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+      <rect width="9" height="9" fill="#FBF8F1"/><line x1="0" y1="0" x2="0" y2="9" stroke="#211C17" stroke-width="2.6"/>
+    </pattern>
+    <pattern id="hatchL" width="13" height="13" patternUnits="userSpaceOnUse" patternTransform="rotate(-30)">
+      <rect width="13" height="13" fill="#FBF8F1"/><line x1="0" y1="0" x2="0" y2="13" stroke="#211C17" stroke-width="1.8"/>
+    </pattern>
+    <pattern id="hatchT" width="10" height="10" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+      <line x1="0" y1="0" x2="0" y2="10" stroke="#211C17" stroke-width="1.6" opacity=".5"/>
+    </pattern>
+    <pattern id="stripe" width="40" height="10" patternUnits="userSpaceOnUse">
+      <rect width="20" height="10" fill="#211C17"/><rect x="20" width="20" height="10" fill="#FBF8F1"/>
+    </pattern>
+  </defs>
+</svg>
+
+<div class="prog" id="prog"></div>
+<header><span><b>Hesabı böl</b><span class="meta">ürün önerisi · storyboard</span></span><span>örnek veri içerir</span></header>
+<main>
+  <div class="slate" aria-live="polite"><span class="act" id="act"></span><span id="shot"></span></div>
+  <div class="panel" id="panel" role="region" aria-label="Storyboard karesi">
+    <div id="frames"></div>
+    <svg class="edge" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+      <path d="M.4 .7 L33 .3 L67 .8 L99.5 .4 L99.7 34 L99.4 67 L99.6 99.5 L66 99.7 L34 99.3 L.5 99.6 L.3 66 L.6 33 Z" fill="none" stroke="#211C17" stroke-width="2" vector-effect="non-scaling-stroke" stroke-linejoin="round"/>
+    </svg>
+  </div>
+  <p class="caption" id="caption" aria-live="polite"></p>
+</main>
+<div class="controls">
+  <button id="prev" aria-label="Önceki kare"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M11 3 5 9l6 6"/></svg></button>
+  <span class="count" id="count">01 / 10</span>
+  <button id="play" aria-label="Otomatik oynat"><svg id="pi" width="14" height="14" viewBox="0 0 14 14"><path d="M3 1.5v11l9-5.5z" fill="currentColor"/></svg><span id="pl">Oynat</span></button>
+  <button id="next" aria-label="Sonraki kare"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m7 3 6 6-6 6"/></svg></button>
+  <span class="hint">← → · boşluk</span>
+</div>
+
+<script>
+/* ============ PRİMİTİFLER (çizim sözlüğü) ============ */
+const K='#211C17', S='#FBF8F1', A='#E2552C', W='#F6D3C3', P2='#EAE2D3', G='#B5AC9F';
+const ink = s => `<g filter="url(#ink)">${s}</g>`;
+const T = (x,y,t,cls='h',size=30,ex='') => { const m=ex.match(/class="([^"]+)"/); if(m){ cls=m[1]; ex=ex.replace(m[0],''); }
+  return `<text x="${x}" y="${y}" class="${cls}" font-size="${size}" ${ex}>${t}</text>`; };
+const beat = (d,s,cls='',st='') => `<g class="b ${cls}" style="--d:${d}s;${st}">${s}</g>`;
+
+// önemsiz yazı = karalama çizgisi
+function sq(x,y,w,col=G,sw=3.5){
+  const n=Math.max(2,Math.round(w/16)), st=w/n; let d=`M${x} ${y}`;
+  for(let k=0;k<n;k++) d+=` q${(st/2).toFixed(1)} ${k%2?4:-4} ${st.toFixed(1)} 0`;
+  return `<path d="${d}" stroke="${col}" stroke-width="${sw}"/>`;
+}
+const dash=(x1,y,x2,col=G)=>`<path d="M${x1} ${y}H${x2}" stroke="${col}" stroke-width="3" stroke-dasharray="7 9"/>`;
+const tick=(x,y,s=1,col=K,sw=5)=>`<path d="M${x-11*s} ${y} l${7*s} ${8*s} l${15*s} ${-17*s}" stroke="${col}" stroke-width="${sw}"/>`;
+
+// oyuncu kadrosu
+const FACE='M0 -50C28 -50 48 -29 48 1C48 30 28 50 0 50C-28 50 -48 30 -48 1C-48 -29 -28 -50 0 -50Z';
+const CAST={
+  deniz:{col:A,
+    front:`<path d="M-57 24C-63 -34 -34 -64 2 -64C41 -64 63 -33 57 24C56 35 46 37 44 27C44 5 38 -13 26 -23C8 -9 -20 -9 -40 -17C-45 -1 -45 15 -44 29C-47 37 -56 35 -57 24Z" fill="${K}"/>`,
+    torso:`<path d="M-24 62Q0 82 24 62" stroke-width="3"/>`},
+  ece:{col:S,
+    back:`<path d="M-51 -6C-57 -48 -28 -65 2 -65C35 -65 59 -46 53 -6C51 30 60 78 46 112H-46C-62 78 -49 30 -51 -6Z" fill="url(#hatchL)"/>`,
+    front:`<path d="M-48 -2C-47 -41 -14 -59 22 -52C43 -47 52 -28 50 -6C37 -27 16 -34 -2 -30C-22 -26 -39 -14 -48 -2Z" fill="url(#hatchL)"/><path d="M-47 0C-58 34 -60 74 -52 104C-46 110 -36 106 -33 96C-38 64 -40 34 -38 8Z" fill="url(#hatchL)"/><path d="M47 -4C58 34 60 74 52 104C46 110 36 106 33 96C38 64 40 34 38 8Z" fill="url(#hatchL)"/>`,
+    torso:`<path d="M0 68V160" stroke-width="3"/><circle cx="0" cy="96" r="3.5" fill="${K}" stroke="none"/><circle cx="0" cy="122" r="3.5" fill="${K}" stroke="none"/>`},
+  can:{col:P2,
+    front:`<path d="M-50 -12C-52 -53 -26 -73 0 -73C28 -73 52 -53 50 -12Z" fill="${S}"/><path d="M-55 -25H55V-6H-55Z" fill="${S}"/><path d="M-41 -22V-9M-27 -22V-9M-13 -22V-9M1 -22V-9M15 -22V-9M29 -22V-9M43 -22V-9" stroke-width="2.5"/><circle cx="0" cy="-80" r="11" fill="${S}"/>`,
+    torso:`<path d="M-13 68V104M13 68V104" stroke-width="3"/>`},
+  mert:{col:'url(#hatch)',
+    front:`<path d="M-49 -8C-51 -49 -24 -59 0 -59C28 -59 51 -47 49 -8C41 -28 20 -36 -4 -34C-24 -33 -41 -23 -49 -8Z" fill="${K}"/><path d="M-47 6C-46 40 -24 54 0 54C24 54 46 40 47 6C40 22 30 37 0 41C-30 37 -40 22 -47 6Z" fill="url(#hatch)"/><path d="M-15 19Q0 12 15 19Q0 25 -15 19Z" fill="${K}"/><circle cx="-18" cy="4" r="14" stroke-width="3.5"/><circle cx="18" cy="4" r="14" stroke-width="3.5"/><path d="M-4 3H4" stroke-width="3"/>`},
+};
+const MOUTH={smile:'<path d="M-12 27Q0 36 12 27"/>', flat:'<path d="M-9 30H9"/>', laugh:`<path d="M-15 24Q0 44 15 24Z" fill="${K}"/>`, sad:'<path d="M-10 33Q0 27 10 33"/>', o:`<ellipse cx="0" cy="30" rx="6" ry="7" fill="${K}"/>`, none:''};
+function eyes(m){
+  if(m==='happy') return '<path d="M-24 8Q-17 0 -10 8M10 8Q17 0 24 8"/>';
+  if(m==='down')  return '<path d="M-24 11Q-17 16 -10 11M10 11Q17 16 24 11"/>';
+  if(m==='tired') return `<path d="M-26 6L-9 0M26 6L9 0" stroke-width="3.5"/><circle cx="-16" cy="12" r="4" fill="${K}" stroke="none"/><circle cx="16" cy="12" r="4" fill="${K}" stroke="none"/>`;
+  return `<circle cx="-16" cy="6" r="4.8" fill="${K}" stroke="none"/><circle cx="16" cy="6" r="4.8" fill="${K}" stroke="none"/>`;
+}
+function tube(d,col,w=30){
+  const base = col.startsWith('url') ? `<path d="${d}" stroke="${S}" stroke-width="${w-8}"/>` : '';
+  return `<path d="${d}" stroke="${K}" stroke-width="${w}"/>${base}<path d="${d}" stroke="${col}" stroke-width="${w-8}"/>`;
+}
+const hand=(x,y,r=13)=>`<circle cx="${x}" cy="${y}" r="${r}" fill="${S}"/>`;
+const LREST='M-62 90C-86 122 -94 166 -72 180C-62 186 -50 186 -38 184', RREST='M62 90C86 122 94 166 72 180C62 186 50 186 38 184';
+function arms(p,col){
+  if(p==='rest') return tube(LREST,col)+tube(RREST,col)+hand(-34,184)+hand(34,184);
+  if(p==='phone') return tube('M-62 90C-92 132 -80 172 -38 160',col)+tube('M62 90C92 132 80 172 38 160',col)
+     +`<rect x="-34" y="106" width="68" height="100" rx="12" fill="${K}"/><circle cx="-19" cy="121" r="4.5" fill="${S}" stroke="none"/>`+hand(-34,160)+hand(34,160);
+  if(p==='slice') return tube(LREST,col)+hand(-34,184)
+     +`<path d="M46 -4L108 -40C116 -26 112 -6 98 4Z" fill="#F1E2C6"/><path d="M98 4C110 -6 114 -24 108 -40" stroke-width="9"/><circle cx="76" cy="-12" r="5" fill="${K}" stroke="none"/><circle cx="92" cy="-20" r="4" fill="${K}" stroke="none"/>`
+     +tube('M62 90C102 80 102 24 66 8',col)+hand(62,8);
+  if(p==='cup') return tube(LREST,col)+hand(-34,184)
+     +`<path d="M56 136H92L88 192H60Z" fill="${S}"/><path d="M80 136L90 112" stroke-width="3"/>`
+     +tube('M62 90C90 122 94 160 72 172',col)+hand(66,172);
+  return '';
+}
+function person(who,o={}){
+  const c=CAST[who], {pose='rest',mood='',mouth='smile',x=0,y=0,s=1,chair=true,len=140}=o;
+  let g='';
+  if(chair) g+=`<path d="M-86 140V20C-86 6 -74 -2 -58 -2H58C74 -2 86 6 86 20V140" fill="${P2}" stroke-width="3.5"/>`;
+  g+=(c.back||'');
+  g+=`<path d="M-75 ${len}V104C-77 78 -55 63 -20 61H20C55 63 77 78 75 104V${len}Z" fill="${c.col}"/>`;
+  g+=`<path d="M-14 36V66H14V36" fill="${S}"/>`+(c.torso||'');
+  g+=`<path d="${FACE}" fill="${S}"/>`+(c.front||'')+eyes(mood)+(MOUTH[mouth]||'');
+  g+=arms(pose,c.col);
+  return `<g transform="translate(${x} ${y}) scale(${s})">${g}</g>`;
+}
+const head=(who,x,y,s=.5,mood='',mouth='smile')=>`<g transform="translate(${x} ${y}) scale(${s})">${CAST[who].back||''}<path d="${FACE}" fill="${S}"/>${CAST[who].front}${eyes(mood)}${MOUTH[mouth]}</g>`;
+
+function phone(x,y,w,h){
+  return `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${w*.15}" fill="${S}" stroke-width="5"/>
+  <rect x="${x+w/2-w*.1}" y="${y+w*.07}" width="${w*.2}" height="${Math.max(8,w*.045)}" rx="${w*.025}" fill="${K}" stroke="none"/>`;
+}
+function bubble(x,y,w,h,tail){ // konuşma balonu, kuyruk kadraj dışını gösterir
+  const ty=y+h*.62, t = tail==='left'
+    ? `M${x+26} ${ty-14} L${x-34} ${ty+30} L${x+40} ${ty+12}`
+    : `M${x+w-26} ${ty-14} L${x+w+34} ${ty+30} L${x+w-40} ${ty+12}`;
+  return `<path d="${t}" fill="${S}"/><rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${h/2}" fill="${S}"/><path d="${t}Z" fill="${S}" stroke="none"/>`;
+}
+function room(){
+  return `
+  <rect x="500" y="92" width="236" height="236" rx="4" fill="${S}"/>
+  <path d="M500 296C540 290 560 270 580 270C600 270 604 252 622 252C640 252 642 272 660 272V240M660 240V296M662 240L656 228L668 228Z" stroke-width="3"/>
+  <path d="M674 296V258H690V296M690 250C690 238 706 238 706 250V296M706 296C720 292 730 290 736 290" stroke-width="3"/>
+  <path d="M500 296H736" stroke-width="3"/>
+  <path d="M612 108a22 22 0 1 0 22 34a17 17 0 1 1 -22 -34Z" fill="${K}" stroke-width="2"/>
+  <path d="M618 92V328M500 210H736" stroke-width="4"/>
+  <path d="M800 0V114" stroke-width="3"/><path d="M748 168L768 114H832L852 168Z" fill="${S}"/><path d="M748 168H852" stroke-width="5"/>
+  <path d="M396 560H1204L1238 642H362Z" fill="${P2}"/>
+  <path d="M362 642H1238V668H362Z" fill="${S}"/>
+  <path d="M0 846H1600" stroke-width="3"/><path d="M412 668L420 846M1188 668L1180 846" stroke-width="7"/>`;
+}
+const cup=(x,y)=>`<path d="M${x-15} ${y-40}H${x+15}L${x+11} ${y}H${x-11}Z" fill="${S}"/><path d="M${x+5} ${y-40}L${x+14} ${y-62}" stroke-width="3"/>`;
+function food(){
+  return `<path d="M712 590H888L908 632H692Z" fill="${S}"/>
+  <ellipse cx="800" cy="611" rx="80" ry="14" fill="#F1E2C6"/>
+  <path d="M800 597V625M738 603L862 619M862 603L738 619" stroke-width="2.5"/>
+  <circle cx="768" cy="608" r="3.5" fill="${K}" stroke="none"/><circle cx="828" cy="614" r="3.5" fill="${K}" stroke="none"/><circle cx="806" cy="604" r="3" fill="${K}" stroke="none"/>
+  ${cup(566,622)}${cup(1006,618)}`;
+}
+function plant(x){
+  return `<path d="M${x-50} 740H${x+50}L${x+38} 846H${x-38}Z" fill="${P2}"/>
+  <path d="M${x} 760C${x-10} 680 ${x-60} 640 ${x-90} 610C${x-50} 660 ${x-30} 700 ${x-6} 760" fill="${S}"/>
+  <path d="M${x+4} 760C${x+10} 660 ${x+50} 600 ${x+86} 580C${x+50} 640 ${x+34} 700 ${x+14} 760" fill="${S}"/>
+  <path d="M${x} 760C${x-4} 670 ${x+4} 600 ${x+10} 540C${x+24} 620 ${x+18} 700 ${x+8} 760" fill="${S}"/>`;
+}
+function receipt(w=360,h=520){ // adisyon (yerel koordinat)
+  let z=`M0 0H${w}V${h}`; const n=Math.round(w/24), st=w/n;
+  for(let k=0;k<n;k++) z+=` L${(w-st*(k+.5)).toFixed(1)} ${h+14} L${(w-st*(k+1)).toFixed(1)} ${h}`;
+  return z+'Z';
+}
+/* ============ SAHNELER (her kare = bir fikir) ============ */
+const SCENES=[];
+
+/* 1 — Açılış / BLUF */
+(()=>{
+  const RW=360, RH=490, X=620, Y=258, cut=[0,90,180,270,360];
+  const J=[2.5,-3,1,-2,3.5,-1.5,2,-3.5,1.5,-2.5,3,-1,2.5,-2,1,-3,3.5,-1.5,2,-2.5];
+  const edge = x0 => { const pts=[]; for(let y=-20,k=0;y<=RH+40;y+=13,k++) pts.push([x0+J[(k+x0)%J.length], y]); return pts; };
+  const E=cut.map((x,i)=> i===0? [[-30,-20],[-30,RH+40]] : i===4? [[RW+30,-20],[RW+30,RH+40]] : edge(x));
+  let clips='', strips='';
+  const fx=[[-72,16,-5],[-24,-6,-1.6],[26,6,1.8],[74,18,5]];
+  const inner = ink(`<path d="${receipt(RW,RH)}" fill="${S}"/>${dash(26,118,RW-26)}${[156,198,240,282,324].map(y=>sq(30,y,170)+sq(270,y,58)).join('')}${dash(26,364,RW-26)}`)
+      + T(RW/2,62,'ADİSYON','c',32,'font-weight="700" text-anchor="middle" letter-spacing="3"')
+      + T(RW/2,94,'Cuma akşamı · 4 kişi','c',19,'class="c gry" text-anchor="middle"')
+      + T(28,424,'TOPLAM','c',24,'font-weight="700"') + T(RW-28,426,'1.240 ₺','c',30,'font-weight="700" text-anchor="end"');
+  for(let i=0;i<4;i++){
+    const L=E[i], R=[...E[i+1]].reverse();
+    clips+=`<clipPath id="rc${i}"><polygon points="${[...L,...R].map(p=>p.join(',')).join(' ')}"/></clipPath>`;
+    const [tx,ty,r]=fx[i];
+    const ln = pts => `<polyline points="${pts.filter(p=>p[1]>=0&&p[1]<=RH).map(p=>p.join(',')).join(' ')}" stroke-width="3"/>`;
+    const edges = (i>0?ln(E[i]):'') + (i<3?ln(E[i+1]):'');
+    strips+=`<g class="tear" style="--tx:${tx}px;--ty:${ty}px;--r:${r}deg;--d:.9s"><g clip-path="url(#rc${i})">${inner}</g>${ink(edges)}
+      ${beat(1.9+i*.12, T(45+90*i, RH+74, '310 ₺','h',30,'class="h acc" font-weight="600" text-anchor="middle"'))}</g>`;
+  }
+  SCENES.push({act:'Açılış', shot:'Başlık kartı', dur:7,
+    cap:'Öneri: <b>Hesabı böl</b>. Grup siparişinde herkes kendi payını ödesin. İstek: 2 mühendis, 6 hafta.',
+    svg:`<defs>${clips}</defs>
+    ${T(800,92,'BİR ÜRÜN ÖNERİSİ','c',20,'class="c gry" text-anchor="middle" letter-spacing="5"')}
+    ${T(800,200,'Hesabı böl','n',124,'font-style="italic" font-weight="500" text-anchor="middle"')}
+    <g transform="translate(${X} ${Y})">${strips}</g>`});
+})();
+
+/* 2 — Sorun: genel plan */
+SCENES.push({act:'Sorun', shot:'Genel plan · Cuma akşamı', dur:7,
+  cap:'Cuma akşamı. Dört arkadaş birlikte sipariş veriyor; hesabı her zamanki gibi Deniz ödüyor.',
+  svg: ink(room()
+    + person('can',{x:470,y:420,pose:'slice',mood:'happy',mouth:'laugh'})
+    + person('deniz',{x:688,y:420,pose:'phone',mood:'down',mouth:'flat'})
+    + person('ece',{x:912,y:420,pose:'rest',mood:'happy',mouth:'laugh'})
+    + person('mert',{x:1130,y:420,pose:'cup',mouth:'smile'})
+    + food() + plant(200)
+    + `<circle cx="1420" cy="230" r="48" fill="${S}"/><path d="M1420 230V196M1420 230L1394 230" stroke-width="5"/>`)
+    + T(1420,320,'21:04','c',20,'class="c gry" text-anchor="middle"')
+});
+
+/* 3 — Sorun: detay plan, Deniz'in telefonu */
+SCENES.push({act:'Sorun', shot:'Detay plan · Deniz’in telefonu', dur:7,
+  cap:'1.240 ₺ tek karttan çıkıyor. Masadan hep aynı cümle yükseliyor: <q>Sonra atarız.</q>',
+  svg: ink(`<ellipse cx="986" cy="560" rx="24" ry="30" fill="${S}"/><ellipse cx="990" cy="626" rx="24" ry="30" fill="${S}"/><ellipse cx="986" cy="692" rx="23" ry="28" fill="${S}"/>
+    ${phone(616,70,368,900)}
+    <circle cx="800" cy="208" r="38"/>${tick(800,210,1.2)}
+    ${[386,430,474,518].map(y=>sq(676,y,170)+sq(884,y,48)).join('')}
+    ${dash(672,560,928)}
+    <path d="M690 724C740 738 860 716 914 730" stroke="${A}" stroke-width="8"/>
+    ${tube('M566 950C580 896 602 852 634 822','#FBF8F1',62)}<path d="M622 830q8 -6 16 -2" stroke-width="3"/>
+    ${tube('M510 1010C530 970 552 940 580 906','#E2552C',118)}`)
+    + T(800,296,'Ödeme alındı','h',38,'font-weight="600" text-anchor="middle"')
+    + T(800,336,'Cuma · 4 kişi · 6 ürün','c',20,'class="c gry" text-anchor="middle"')
+    + T(676,614,'Toplam','c',24)
+    + T(800,704,'1.240 ₺','h',70,'font-weight="700" text-anchor="middle"')
+    + T(800,782,'tek kart · Deniz •••• 4417','c',20,'class="c gry" text-anchor="middle"')
+    + beat(1.0, ink(bubble(372,228,224,92,'left')) + T(484,286,'Sonra atarız!','h',30,'text-anchor="middle"'))
+    + beat(1.8, ink(bubble(1030,452,206,92,'right')) + T(1133,510,'IBAN’ı at!','h',30,'text-anchor="middle"'))
+});
+
+/* 4 — Sorun: yakın plan, bir hafta boyunca peşinden koşmak */
+(()=>{
+  const msg=(d,y,w,t,mine,chk)=>{
+    if(chk) w+=34; const x= mine? 1240-w : 770;
+    return beat(d, ink(`<rect x="${x}" y="${y}" width="${w}" height="60" rx="22" fill="${mine?W:S}" stroke-width="3.5"/>${chk?tick(x+w-30,y+31,.9,A,4.5):''}`)
+      + T(x+22,y+40,t,'h',27));
+  };
+  const day=(d,y,t)=>beat(d, T(1005,y,t,'c',18,'class="c gry" text-anchor="middle" letter-spacing="4"'));
+  SCENES.push({act:'Sorun', shot:'Yakın plan · Ertesi hafta', dur:9,
+    cap:'Bir hafta boyunca herkese tek tek hatırlatıyor. Ece ve Can ödüyor; Mert hiç ödemiyor.',
+    svg: ink(`<path d="M318 590C318 560 336 546 366 546H676C706 546 724 560 724 590V900H318Z" fill="${P2}"/><path d="M290 700C290 676 304 664 326 664C348 664 360 676 360 700V900H290Z" fill="${P2}"/><path d="M682 700C682 676 694 664 716 664C738 664 752 676 752 700V900H682Z" fill="${P2}"/>`
+      + person('deniz',{x:520,y:330,s:1.6,pose:'phone',mood:'tired',mouth:'flat',chair:false,len:400})
+      + `<path d="M612 196q14 -16 34 -12M630 226q16 -10 30 -2M600 172q4 -18 18 -26" stroke-width="3.5"/>`)
+      + day(.2,96,'PAZARTESİ') + msg(.4,116,262,'Kişi başı 310 ₺',true)
+      + msg(1.1,192,196,'Ece: attım',false,true)
+      + day(1.8,300,'ÇARŞAMBA') + msg(2.0,320,200,'Can? Mert?',true)
+      + msg(2.7,396,300,'Can: pardon, attım',false,true)
+      + day(3.5,504,'CUMA') + msg(3.7,524,246,'Mert, 310 ₺?',true)
+      + beat(4.4, T(1238,612,'görüldü 18:40','c',19,'class="c gry" text-anchor="end"'))
+      + msg(5.2,640,136,'Mert??',true)
+      + beat(5.9, T(1238,728,'görüldü · cevap yok','c',19,'class="c gry" text-anchor="end"'))
+  });
+})();
+
+/* 5 — İçgörü: veri */
+(()=>{
+  const bag=(x,acc,i)=>{
+    const body=`<path d="M${x} 236H${x+62}L${x+58} 318H${x+4}Z" fill="${S}"/><path d="M${x+18} 236C${x+18} 214 ${x+44} 214 ${x+44} 236" stroke-width="3.5"/>`;
+    return ink(body) + (acc? beat(.4+i*.18, ink(`<path d="M${x} 236H${x+62}L${x+58} 318H${x+4}Z" fill="${A}"/><path d="M${x+18} 236C${x+18} 214 ${x+44} 214 ${x+44} 236" stroke-width="3.5"/>`),'pop') : '');
+  };
+  SCENES.push({act:'İçgörü', shot:'Veri · örnek veri', dur:9,
+    cap:'Bu tek bir Deniz değil: siparişlerin %31’i grup siparişi ve ödeyen kişi sonra daha az sipariş veriyor.',
+    svg: T(380,172,'%31','n',104,'font-weight="500"')
+      + T(624,132,'siparişlerin','h',30) + T(624,170,'grup siparişi','h',30,'font-weight="600"')
+      + [...Array(10)].map((_,i)=>bag(384+i*84,i<3,i)).join('')
+      + T(380,420,'SONRAKİ 30 GÜNDE KİŞİ BAŞI SİPARİŞ','c',20,'class="c gry" letter-spacing="2"')
+      + T(380,500,'Diğerleri','h',30) + T(380,534,'3,0 sipariş','c',21,'class="c gry"')
+      + beat(1.3, ink(`<rect x="590" y="472" width="600" height="54" fill="url(#hatch)" stroke-width="4"/>`),'grow')
+      + ink(head('deniz',404,600,.38,'tired','flat')) + T(436,612,'Ödeyen','h',30,'font-weight="600"') + T(380,656,'2,3 sipariş','c',21,'class="c gry"')
+      + beat(1.8, ink(`<rect x="590" y="584" width="460" height="54" fill="${A}" stroke-width="4"/>`),'grow')
+      + beat(2.7, ink(`<rect x="1050" y="584" width="140" height="54" stroke-dasharray="9 9" stroke-width="3.5"/>`) + T(1120,694,'−%23','h',38,'class="h acc" font-weight="700" text-anchor="middle"'))
+      + beat(3.4, `<g transform="rotate(-5 1110 800)">${ink(`<rect x="990" y="768" width="240" height="64" rx="4" stroke-width="3.5"/><rect x="998" y="776" width="224" height="48" rx="2" stroke-width="2"/>`)}${T(1110,811,'ÖRNEK VERİ','c',26,'font-weight="700" text-anchor="middle" letter-spacing="3"')}</g>`,'pop')
+  });
+})();
+
+/* 6 — Çözüm: detay plan, ödeme ekranı */
+(()=>{
+  const row=(d,y,who,name,sub)=>beat(d, ink(head(who,944,y,.46,'','smile')) + T(988,y-4,name,'h',28,'font-weight="600"') + T(988,y+28,sub,'c',19,'class="c gry"'));
+  const link=(d,y)=>beat(d, `<path d="M792 640C850 640 850 ${y} 906 ${y}" pathLength="1" stroke="${K}" stroke-width="3"/>`,'draw');
+  SCENES.push({act:'Çözüm', shot:'Detay plan · Ödeme ekranı', dur:8,
+    cap:'Ödeme ekranına tek bir düğme ekliyoruz: <b>Hesabı böl</b>. Her arkadaşa kendi payının linki gider.',
+    svg: ink(phone(470,52,340,900)
+      + [236,284,332,380].map(y=>`<circle cx="520" cy="${y}" r="13" fill="${P2}" stroke-width="3"/>`+sq(546,y,150)+sq(722,y,46)).join('')
+      + dash(504,424,776))
+      + T(506,150,'Sepetin','h',40,'font-weight="600"') + T(506,190,'Cuma · 4 kişi','c',20,'class="c gry"')
+      + T(506,474,'Toplam','c',22) + T(776,478,'1.240 ₺','h',40,'font-weight="700" text-anchor="end"')
+      + ink(`<rect x="500" y="514" width="280" height="66" rx="33" fill="${S}" stroke-width="3.5"/>`) + T(640,556,'Hepsini ben öderim','h',24,'text-anchor="middle"')
+      + `<g class="press" style="--d:1.15s">${ink(`<rect x="500" y="602" width="280" height="80" rx="40" fill="${A}" stroke-width="4"/>`)}${T(640,654,'Hesabı böl','h',32,'class="h wht" font-weight="700" text-anchor="middle"')}</g>`
+      + beat(.25, ink(`<path d="M1000 960C940 890 880 840 838 806" stroke="${K}" stroke-width="78"/><path d="M1000 960C940 890 880 840 838 806" stroke="${A}" stroke-width="66"/>
+          <path d="M760 772C752 744 770 720 800 716C836 712 862 738 860 772C858 806 826 820 800 816C778 812 764 796 760 772Z" fill="${S}"/>
+          <path d="M786 732L722 668" stroke="${K}" stroke-width="32"/><path d="M786 732L722 668" stroke="${S}" stroke-width="24"/>
+          <path d="M800 756q14 -4 24 4M806 778q14 -2 22 6" stroke-width="3"/>`),'from','--tx:90px;--ty:140px;--o:0')
+      + link(1.6,180)+link(1.75,340)+link(1.9,500)+link(2.05,660)
+      + row(2.0,180,'deniz','Sen','310 ₺ · kendi payın') + row(2.2,340,'ece','Ece','310 ₺ · link gitti')
+      + row(2.4,500,'can','Can','310 ₺ · link gitti') + row(2.6,660,'mert','Mert','310 ₺ · link gitti')
+  });
+})();
+
+/* 7 — Çözüm: bölünmüş ekran */
+(()=>{
+  const mini=(who,name,top,d,mood,extra='')=>
+    ink(`<rect x="0" y="0" width="400" height="400" rx="6" fill="${S}" stroke-width="3.5"/><path d="M4 302H396V396H4Z" fill="${P2}" stroke="none"/><path d="M2 302H398" stroke-width="3.5"/>`
+      + person(who,{x:112,y:166,s:.97,pose:'rest',mood,chair:false}) + phone(222,44,152,250)
+      + `<rect x="240" y="196" width="116" height="46" rx="23" fill="${S}" stroke-width="3"/>`)
+    + T(298,104,top,'c',15,'class="c gry" text-anchor="middle"') + T(298,160,'310 ₺','h',38,'font-weight="700" text-anchor="middle"')
+    + T(298,227,'Öde','h',22,'text-anchor="middle"') + T(22,390,name,'h',26,'font-weight="600"') + extra
+    + beat(d, ink(`<rect x="236" y="190" width="124" height="58" rx="29" fill="${A}" stroke-width="3.5"/>${tick(298,219,1.15,S,5.5)}`)+T(298,276,'ödendi','c',17,'class="c acc" text-anchor="middle"'),'pop');
+  const P=[mini('deniz','Deniz','Senin payın',.7,''), mini('ece','Ece','Deniz’den link',1.4,'happy'),
+           mini('can','Can','Deniz’den link',2.1,''), mini('mert','Mert','Deniz’den link',3.3,'', T(376,388,'≤ 10 dk','c',19,'class="c gry" text-anchor="end"'))];
+  const stamp=(x,y)=>beat(4.1, `<g transform="rotate(-7 ${x} ${y})">${ink(`<rect x="${x-180}" y="${y-44}" width="360" height="88" rx="10" fill="${S}" stroke="${A}" stroke-width="5"/><rect x="${x-168}" y="${y-32}" width="336" height="64" rx="6" stroke="${A}" stroke-width="2"/>`)}${T(x,y+11,'SİPARİŞ VERİLDİ','c',32,'class="c acc" font-weight="700" text-anchor="middle" letter-spacing="2"')}</g>`,'pop');
+  SCENES.push({act:'Çözüm', shot:'Bölünmüş ekran · 4 telefon', dur:9,
+    cap:'Herkes kendi payını öder. Hepsi ödeyince sipariş verilir; 10 dakika dolarsa kalanı Deniz tamamlar.',
+    svg:`<g class="wide-only">${T(800,190,'1.240 ₺  →  4 × 310 ₺','c',28,'text-anchor="middle" letter-spacing="1"')}
+      ${P.map((p,i)=>`<g transform="translate(${60+i*376} 252) scale(.88)">${p}</g>`).join('')}${stamp(800,744)}</g>
+      <g class="sq-only">${P.map((p,i)=>`<g transform="translate(${395+(i%2)*410} ${40+Math.floor(i/2)*410})">${p}</g>`).join('')}${stamp(800,445)}</g>`
+  });
+})();
+
+/* 8 — Nasıl çalışır: perde arkası */
+(()=>{
+  const curtain = `<path d="M0 0H300C292 140 250 290 196 420C176 470 168 640 190 900H0Z" fill="${P2}"/><path d="M70 0C84 300 50 600 64 900M140 0C150 240 118 520 128 900M220 0C222 160 196 300 170 430" stroke-width="3"/><path d="M150 430C190 440 210 420 214 404" stroke-width="7"/>`
+    + `<path d="M1600 0H1300C1308 140 1350 290 1404 420C1424 470 1432 640 1410 900H1600Z" fill="${P2}"/><path d="M1530 0C1516 300 1550 600 1536 900M1460 0C1450 240 1482 520 1472 900M1380 0C1378 160 1404 300 1430 430" stroke-width="3"/><path d="M1450 430C1410 440 1390 420 1386 404" stroke-width="7"/><path d="M0 10H1600" stroke-width="6"/>`;
+  const fin=[[766,476],[834,476],[766,410],[834,410]];
+  const coins=fin.map(([x,y],i)=>`<g class="b fly" style="--d:${.5+i*.45}s;--tx:${450-x}px;--ty:${420-y}px">${ink(`<circle cx="${x}" cy="${y}" r="31" fill="${A}" stroke-width="3.5"/>`)}${T(x,y+7,'310','c',20,'class="c wht" font-weight="700" text-anchor="middle"')}</g>`).join('');
+  SCENES.push({act:'Nasıl çalışır', shot:'Perde arkası', dur:8,
+    cap:'Perde arkasında ödeme sağlayıcı her payı bekletir; dördü tamamlanınca sipariş restorana iletilir.',
+    svg: ink(curtain) + `<g transform="translate(800 450) scale(.95) translate(-800 -450)">` + ink(''
+      + head('deniz',384,236,.36)+head('ece',426,236,.36,'happy')+head('can',468,236,.36)+head('mert',510,236,.36)
+      + phone(400,300,100,176) + sq(418,380,64,G,3) + sq(418,404,64,G,3) + sq(418,428,40,G,3)
+      + `<path d="M528 404C584 376 640 376 686 400" stroke-width="3.5"/><path d="M670 386L688 401L666 410" stroke-width="3.5"/>`
+      + `<path d="M914 404C970 376 1010 376 1046 400" stroke-width="3.5"/><path d="M1030 386L1048 401L1026 410" stroke-width="3.5"/>`
+      + `<path d="M732 312H868V336C896 350 904 372 904 398V502C904 520 892 530 872 530H728C708 530 696 520 696 502V398C696 372 704 350 732 336Z" fill="${S}"/>`
+      + `<rect x="722" y="290" width="156" height="24" rx="5" fill="${P2}"/>`
+      + `<path d="M1070 372H1230V530H1070Z" fill="${S}"/><path d="M1054 330H1246L1258 374H1042Z" fill="url(#stripe)"/><path d="M1084 290H1216V326H1084Z" fill="${S}"/>`
+      + `<rect x="1132" y="448" width="44" height="82" fill="${P2}"/><rect x="1086" y="400" width="36" height="40"/><rect x="1186" y="400" width="30" height="40"/>`+sq(1102,309,96,K,3))
+    + coins
+    + ink(`<path d="M876 400V500" stroke="${G}" stroke-width="5"/>`)
+    + T(450,592,'Uygulama','h',30,'text-anchor="middle"') + T(800,592,'Ödeme sağlayıcı','h',30,'font-weight="600" text-anchor="middle"')
+    + T(800,628,'payları bekletir','c',20,'class="c gry" text-anchor="middle"') + T(1150,592,'Restoran','h',30,'text-anchor="middle"')
+    + beat(2.7, T(800,256,'4/4','h',30,'class="h acc" font-weight="700" text-anchor="middle"'),'pop')
+    + `<g class="b fly" style="--d:3.3s;--tx:-350px;--ty:0px">${ink(`<path d="M1118 196H1182V262L1172 254L1162 262L1150 254L1138 262L1128 254L1118 262Z" fill="${S}" stroke-width="3"/>`+sq(1128,214,44,K,2.5)+sq(1128,232,32,K,2.5))}</g>`
+    + beat(4.3, T(1150,628,'sipariş açıldı','c',20,'class="c acc" text-anchor="middle"')) + '</g>'
+  });
+})();
+
+/* 9 — Etki: bir sonraki cuma */
+SCENES.push({act:'Etki', shot:'Genel plan · Bir sonraki cuma', dur:8,
+  cap:'Ödeyen artık cezalandırılmıyor, grup siparişi büyüyor. İzleyeceğimiz metrik: ödeyenlerin tekrar siparişi.',
+  svg: ink(room()
+    + person('can',{x:470,y:420,pose:'slice',mood:'happy',mouth:'laugh'})
+    + person('deniz',{x:688,y:420,pose:'rest',mood:'happy',mouth:'laugh'})
+    + person('ece',{x:912,y:420,pose:'rest',mood:'',mouth:'smile'})
+    + person('mert',{x:1130,y:420,pose:'cup',mood:'happy',mouth:'smile'})
+    + food() + plant(200))
+    + beat(.8, `<g transform="rotate(3 1110 170)">${ink(`<path d="M972 44H1240V286H972Z" fill="${S}"/><path d="M1080 34H1136V58H1080Z" fill="${P2}" stroke-width="2.5"/><path d="M1002 250L1050 236L1098 242L1146 212L1198 180" stroke="${A}" stroke-width="5"/><path d="M1178 176L1200 178L1194 198" stroke="${A}" stroke-width="5"/><path d="M1000 262H1212" stroke-width="2.5"/>`)}
+      ${T(992,92,'İZLENECEK METRİK','c',16,'class="c gry" letter-spacing="2"')}${T(992,128,'ödeyenlerin','h',26,'font-weight="600"')}${T(992,158,'tekrar siparişi','h',26,'font-weight="600"')}${T(1212,282,'hedef','c',16,'class="c gry" text-anchor="end"')}</g>`)
+});
+
+/* 10 — İstek */
+(()=>{
+  const r=(d,y,l,v)=>beat(d, T(640,y,l,'c',24,'class="c gry"') + T(960,y,v,'c',28,'font-weight="700" text-anchor="end"'));
+  SCENES.push({act:'İstek', shot:'Kapanış', dur:9,
+    cap:'İstek: 2 mühendis, 6 hafta. İstanbul’da A/B testiyle ölçelim; karar ölçütü ödeyenlerin tekrar siparişi.',
+    svg: ink(`<g transform="translate(600 40)"><path d="${receipt(400,790)}" fill="${S}"/></g>` + dash(630,196,970) + dash(630,486,970) + dash(630,690,970))
+      + T(800,120,'İSTEK','c',42,'font-weight="700" text-anchor="middle" letter-spacing="6"')
+      + T(800,162,'Hesabı böl · deney planı','c',20,'class="c gry" text-anchor="middle"')
+      + r(.3,264,'Ekip','2 mühendis') + r(.6,324,'Süre','6 hafta') + r(.9,384,'Şehir','İstanbul') + r(1.2,444,'Test','A / B')
+      + beat(1.6, T(640,546,'Başarı ölçütü','c',22,'class="c gry"') + T(640,594,'ödeyenlerin tekrar','h',34,'font-weight="600"') + T(640,638,'siparişi','h',34,'font-weight="600"'))
+      + beat(2.0, T(640,756,'TOPLAM','c',26,'font-weight="700"') + T(960,756,'12 kişi-hafta','c',26,'font-weight="700" text-anchor="end"'))
+      + beat(2.7, `<path d="M1084 814a70 70 0 1 1 0.1 0" pathLength="1" stroke="${A}" stroke-width="4"/>`,'draw')
+      + beat(3.2, T(1084,754,'onay?','h',30,'class="h acc" font-weight="700" text-anchor="middle" transform="rotate(-10 1084 744)"'))
+  });
+})();
+
+/* ============ OYNATICI ============ */
+const $=id=>document.getElementById(id);
+const host=$('frames'), N=SCENES.length;
+host.innerHTML=SCENES.map((s,i)=>`<section class="frame" aria-label="Kare ${i+1}"><svg viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" fill="none" stroke="${K}" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="${s.cap.replace(/<[^>]+>/g,'').replace(/"/g,'')}">${s.svg}</svg></section>`).join('');
+$('prog').innerHTML=SCENES.map(()=>'<div class="seg"><i></i></div>').join('');
+const frames=[...host.children], segs=[...$('prog').children];
+let cur=-1, timer=null, playing=false;
+const pad=n=>String(n).padStart(2,'0');
+
+function go(n){
+  n=Math.max(0,Math.min(N-1,n));
+  frames.forEach((f,k)=>{ if(k!==n) f.classList.remove('cur','on'); });
+  const f=frames[n]; f.classList.remove('on'); void f.getBoundingClientRect(); f.classList.add('cur','on');
+  cur=n; const s=SCENES[n];
+  $('act').innerHTML=`<em>${pad(n+1)}</em>${s.act}`; $('shot').textContent=s.shot;
+  $('caption').innerHTML=s.cap; $('count').textContent=`${pad(n+1)} / ${pad(N)}`;
+  segs.forEach((g,k)=>{ g.className='seg'+(k<n?' done':k===n?' cur':''); });
+  document.body.style.setProperty('--dur',s.dur+'s');
+  if(location.hash!=='#'+(n+1)) history.replaceState(null,'','#'+(n+1));
+  clearTimeout(timer);
+  if(playing){ const i=segs[n].firstChild; i.style.animation='none'; void i.offsetWidth; i.style.animation='';
+    timer=setTimeout(()=> cur<N-1 ? go(cur+1) : setPlay(false), s.dur*1000); }
+}
+function setPlay(on){
+  playing=on; document.body.classList.toggle('playing',on);
+  $('pl').textContent=on?'Durdur':'Oynat';
+  $('pi').innerHTML= on ? '<path d="M3 2h3v10H3zM8 2h3v10H8z" fill="currentColor"/>' : '<path d="M3 1.5v11l9-5.5z" fill="currentColor"/>';
+  if(on && cur===N-1) go(0); else go(cur);
+}
+const next=()=>go(cur+1), prev=()=>go(cur-1);
+$('next').onclick=next; $('prev').onclick=prev; $('play').onclick=()=>setPlay(!playing);
+addEventListener('keydown',e=>{
+  if(e.target.tagName==='BUTTON' && (e.key===' '||e.key==='Enter')) return;
+  if(['ArrowRight',' ','PageDown','Enter'].includes(e.key)){ e.preventDefault(); next(); }
+  else if(['ArrowLeft','PageUp','Backspace'].includes(e.key)){ e.preventDefault(); prev(); }
+  else if(e.key==='Home') go(0); else if(e.key==='End') go(N-1);
+  else if(e.key==='p') setPlay(!playing);
+});
+// dokunma: kaydır ya da dokun (sol üçte bir = geri)
+let px=null, py=null;
+const panel=$('panel');
+panel.addEventListener('pointerdown',e=>{px=e.clientX; py=e.clientY;});
+panel.addEventListener('pointerup',e=>{
+  if(px===null) return; const dx=e.clientX-px, dy=e.clientY-py; px=null;
+  if(Math.abs(dx)>40 && Math.abs(dx)>Math.abs(dy)) return dx<0?next():prev();
+  if(Math.abs(dx)<10 && Math.abs(dy)<10){ const r=panel.getBoundingClientRect(); (e.clientX-r.left < r.width/3) ? prev() : next(); }
+});
+const fromHash=()=>{ const n=parseInt(location.hash.slice(1),10); return isNaN(n)?0:n-1; };
+addEventListener('hashchange',()=>{ const n=fromHash(); if(n!==cur) go(n); });
+go(fromHash());
+</script>
+</body>
+</html>

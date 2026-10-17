@@ -1,0 +1,344 @@
+{
+  "title": "İlk haftan",
+  "subtitle": "Ardıç İK · ilk hafta",
+  "lang": "tr",
+  "accent": "amber",
+  "theme": "paper",
+  "cast": [
+    {
+      "id": "elif",
+      "name": "Elif",
+      "look": {
+        "hair": "long",
+        "top": "sweater"
+      },
+      "hero": true
+    },
+    {
+      "id": "kerem",
+      "name": "Kerem",
+      "look": {
+        "hair": "curly",
+        "top": "shirt",
+        "glasses": true
+      }
+    },
+    {
+      "id": "nur",
+      "name": "Nur",
+      "look": {
+        "hair": "bun",
+        "top": "jacket"
+      }
+    }
+  ],
+  "frames": [
+    {
+      "lens": "title",
+      "kind": "open",
+      "kicker": "İLK HAFTA",
+      "headline": "Cuma günü Elif *ilk işini* teslim ediyor.",
+      "sub": "Herkesi tanıyor, her erişimi açık, kime soracağını biliyor.",
+      "caption": "Tek cümlede: ilk hafta bir bekleme odası değil. Elif cuma günü **ilk gerçek işini** ekibine gösteriyor.",
+      "notes": "Ardıç kurgusal bir şirket. Önce hafta sonundaki hali söylüyorum, sonra oraya nasıl gidildiğini."
+    },
+    {
+      "lens": "moment",
+      "kicker": "PAZARTESİ",
+      "set": "office",
+      "shot": "wide",
+      "people": [
+        {
+          "who": "elif",
+          "pose": "stand",
+          "mood": "happy",
+          "at": "center-left"
+        },
+        {
+          "who": "kerem",
+          "pose": "stand",
+          "mood": "happy",
+          "at": "right",
+          "say": "Hoş geldin Elif! Masan hazır."
+        }
+      ],
+      "props": [
+        {
+          "kind": "laptop",
+          "at": "center",
+          "screen": [
+            {
+              "type": "header",
+              "text": "Hoş geldin, Elif"
+            },
+            {
+              "type": "check",
+              "text": "Hesapların açık"
+            }
+          ]
+        },
+        {
+          "kind": "clock",
+          "at": "center",
+          "label": "09:00"
+        },
+        {
+          "kind": "plant",
+          "at": "left"
+        }
+      ],
+      "highlight": "elif",
+      "caption": "Pazartesi 09:00. Masa, bilgisayar ve buddy'si **Kerem** onu bekliyor; ilk saat formla değil, tanışmayla geçiyor."
+    },
+    {
+      "lens": "timeline",
+      "kicker": "HAFTANIN PLANI",
+      "items": [
+        {
+          "when": "Pzt",
+          "what": "Tanışma, masa, tüm erişimler"
+        },
+        {
+          "when": "Sal",
+          "what": "Kerem'in yanında: ekip nasıl çalışır"
+        },
+        {
+          "when": "Çar",
+          "what": "Nur'la ilk 30 günün hedefleri"
+        },
+        {
+          "when": "Per",
+          "what": "İlk küçük işe başlangıç"
+        },
+        {
+          "when": "Cum",
+          "what": "İlk işi ekibe göster",
+          "accent": true
+        }
+      ],
+      "caption": "Her günün tek bir amacı var. Hafta, cuma günü **ilk gerçek işle** bitiyor; gerisi buna hazırlık."
+    },
+    {
+      "lens": "flow",
+      "kicker": "KİME GİDİLİR",
+      "actors": [
+        {
+          "id": "elif",
+          "kind": "person",
+          "label": "Elif",
+          "sub": "yeni başladı",
+          "at": [
+            0,
+            1
+          ]
+        },
+        {
+          "id": "kerem",
+          "kind": "person",
+          "label": "Kerem",
+          "sub": "buddy",
+          "at": [
+            2,
+            1
+          ]
+        },
+        {
+          "id": "it",
+          "kind": "server",
+          "label": "IT",
+          "sub": "cihaz, şifre",
+          "at": [
+            2,
+            0
+          ]
+        },
+        {
+          "id": "nur",
+          "kind": "person",
+          "label": "Nur",
+          "sub": "yöneticin",
+          "at": [
+            3,
+            1
+          ]
+        },
+        {
+          "id": "ik",
+          "kind": "doc",
+          "label": "İK",
+          "sub": "sözleşme, izin",
+          "at": [
+            2,
+            2
+          ]
+        }
+      ],
+      "flows": [
+        {
+          "from": "elif",
+          "to": "kerem",
+          "type": "request",
+          "label": "her soru önce buraya",
+          "new": true
+        },
+        {
+          "from": "kerem",
+          "to": "it",
+          "type": "info",
+          "label": "erişim, şifre"
+        },
+        {
+          "from": "kerem",
+          "to": "nur",
+          "type": "info",
+          "label": "öncelik, ilk iş"
+        },
+        {
+          "from": "kerem",
+          "to": "ik",
+          "type": "info",
+          "label": "izin, bordro"
+        }
+      ],
+      "caption": "Elif'in tek bir adresi var: **Kerem**. Cevabı bilmiyorsa doğru kişiyi o bulur; Elif kimseyi aramak zorunda kalmaz."
+    },
+    {
+      "lens": "screen",
+      "kicker": "İLK GÜN",
+      "device": "phone",
+      "ui": [
+        {
+          "type": "header",
+          "text": "İlk gün · Elif"
+        },
+        {
+          "type": "progress",
+          "text": "5 / 6 erişim hazır",
+          "accent": true
+        },
+        {
+          "type": "check",
+          "items": [
+            "E-posta ve takvim",
+            "Slack, ekip kanalları",
+            "Bina kartı",
+            "Ortak dosyalar",
+            "İK portalı"
+          ]
+        },
+        {
+          "type": "list",
+          "items": [
+            "Muhasebe · Nur onaylıyor"
+          ]
+        },
+        {
+          "type": "divider",
+          "text": "takıldığın an"
+        },
+        {
+          "type": "button",
+          "text": "Kerem’e sor"
+        }
+      ],
+      "annotate": [
+        {
+          "at": 1,
+          "text": "Elif gelmeden açıldı"
+        }
+      ],
+      "stamp": "örnek ekran",
+      "caption": "Hesaplar Elif gelmeden açılıyor. İlk gün ekranı neyin hazır, neyin beklediğini **tek bakışta** gösteriyor."
+    },
+    {
+      "lens": "number",
+      "kicker": "BUGÜN",
+      "big": "3 gün",
+      "label": "bugün bir yeni gelenin laptop ve erişim beklediği süre",
+      "sub": "Yeni süreçte hedef: ilk gün öğleden önce her şey açık.",
+      "viz": {
+        "kind": "bars",
+        "unit": "erişim bekleme (gün)",
+        "data": [
+          {
+            "label": "Bugün",
+            "value": 3,
+            "accent": true
+          },
+          {
+            "label": "Yeni süreç",
+            "value": 0.5
+          }
+        ]
+      },
+      "who": "elif",
+      "stamp": "örnek veri",
+      "caption": "Bugün yeni gelenler ilk günlerini **erişim bekleyerek** geçiriyor. Motivasyonun en yüksek olduğu günler boşa gidiyor."
+    },
+    {
+      "lens": "compare",
+      "kicker": "NE DEĞİŞİYOR",
+      "left": {
+        "label": "Bugün",
+        "tone": "muted",
+        "lines": [
+          "Laptop birkaç gün sonra gelir",
+          "Kime soracağı belli değil",
+          "İlk iş haftalar sonra"
+        ]
+      },
+      "right": {
+        "label": "Yeni süreç",
+        "tone": "accent",
+        "lines": [
+          "Her şey pazartesi 09:00'da hazır",
+          "Her soru önce Kerem'e",
+          "İlk iş cuma günü"
+        ]
+      },
+      "caption": "Fark büyük bir program değil: **hazırlığın Elif gelmeden** yapılması ve tek bir adres."
+    },
+    {
+      "lens": "moment",
+      "kicker": "CUMA",
+      "set": "meeting",
+      "shot": "wide",
+      "people": [
+        {
+          "who": "nur",
+          "pose": "sit",
+          "mood": "happy",
+          "at": "left",
+          "say": "İlk haftada mı? Harika."
+        },
+        {
+          "who": "kerem",
+          "pose": "cheer",
+          "mood": "happy",
+          "at": "center-left"
+        },
+        {
+          "who": "elif",
+          "pose": "stand",
+          "mood": "happy",
+          "at": "right"
+        }
+      ],
+      "highlight": "elif",
+      "caption": "Cuma 16:00. Elif ilk küçük işini ekibe gösteriyor. Artık soru soran değil, **katkı veren** biri."
+    },
+    {
+      "lens": "title",
+      "kind": "ask",
+      "kicker": "YÖNETİCİLERDEN",
+      "headline": "Elif gelmeden: *üç şey.*",
+      "items": [
+        "Erişim talebi 5 gün önceden",
+        "Buddy: ilk hafta günde 2 saat",
+        "Cuma için küçük bir ilk iş"
+      ],
+      "sign": "tamam?",
+      "caption": "Bu üçü sizden; gerisini İK ve IT üstleniyor. Bir sonraki yeni gelen de pazartesi böyle karşılansın."
+    }
+  ]
+}
