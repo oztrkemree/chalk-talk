@@ -79,6 +79,31 @@ Every talk below was written by an agent from the real source, and every arrow i
 
 `→` / `space` steps, `P` plays, `V` proof view, `T` light/dark, click a block or arrow for its code.
 
+## Frames: explain anything, not just code
+
+The second skill, **`frames`**, turns anything you need to explain into a 60–120 second story in
+one HTML file: a pitch, a PRD, a strategy memo, an incident review, a lesson, a code walkthrough.
+One idea per frame, each drawn with the lens that fits its question (`title`, `moment`, `flow`,
+`number`, `whatif`, `compare`, `screen`, `timeline`), in one calm ink-on-paper style with a
+single accent color. It plays by itself when forwarded, presents live (`F`, notes with `N`) and
+reflows to a phone.
+
+> pitch the split-bill feature to my VP as a story
+
+| story | for |
+|---|---|
+| [Ödeyen kişi cezalandırılmasın](https://oztrkemree.github.io/chalk-talk/skills/frames/examples/hesabi-bol.html) | product pitch to a VP (Turkish) |
+| [Your bedtime voice, wherever you are](https://oztrkemree.github.io/chalk-talk/skills/frames/examples/startup-pitch.html) | seed pitch |
+| [Free forever ends](https://oztrkemree.github.io/chalk-talk/skills/frames/examples/strategy-memo.html) | strategy memo, all hands |
+| [One config change stopped checkout](https://oztrkemree.github.io/chalk-talk/skills/frames/examples/incident-review.html) | incident review |
+| [Save swaps one module, not the page](https://oztrkemree.github.io/chalk-talk/skills/frames/examples/code-onboarding.html) | code onboarding (Vite HMR, arrows proven) |
+| [A vaccine is a practice run](https://oztrkemree.github.io/chalk-talk/skills/frames/examples/lesson-vaccines.html) | lesson |
+| [İlk haftan](https://oztrkemree.github.io/chalk-talk/skills/frames/examples/ise-baslama.html) | onboarding a new hire (Turkish) |
+
+The agent writes a small story file ([SPEC](skills/frames/SPEC.md)); the engine draws and lays
+it out. `node skills/frames/scripts/build.mjs story.json` validates and builds,
+`check.mjs` renders every frame wide and tall to PNG, `record.mjs` makes a GIF.
+
 ## Explain a pull request
 
 > explain this PR with a chalk talk

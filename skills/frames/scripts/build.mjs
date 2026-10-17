@@ -33,16 +33,19 @@ const isNum = v => typeof v === 'number' && isFinite(v);
 /* ---------- vocabulary (SPEC.md) ---------- */
 const ACCENTS = ['tomato', 'blue', 'green', 'amber', 'plum'];
 const THEMES = ['paper', 'night'];
+// core's ctx.icon set (engine/core.js ICONS)
+const ICONS = ('person group store bank card money phone laptop server db queue doc truck box clock check cross link chat mail '
+  + 'key lock gear chart star heart bolt globe home cart bag food coffee car calendar flag search eye warn sparkle').split(' ');
 const SPOTS = ['left', 'center-left', 'center', 'center-right', 'right'];
 const COMMON = ['lens', 'kicker', 'caption', 'dur', 'stamp', 'notes', 'id'];
 const LENSES = {
   title: ['headline', 'sub', 'kind', 'items', 'sign', 'label'],
   moment: ['set', 'shot', 'people', 'props', 'insert', 'split', 'highlight'],
   flow: ['actors', 'flows', 'continue', 'compare', 'focus'],
-  number: ['big', 'label', 'sub', 'viz', 'who'],
+  number: ['big', 'label', 'sub', 'viz', 'who', 'format', 'currency', 'compact'],
   whatif: ['headline', 'vars', 'outputs', 'viz'],
   compare: ['left', 'right', 'before', 'after'],
-  screen: ['device', 'ui', 'annotate'],
+  screen: ['device', 'ui', 'annotate', 'align'],
   timeline: ['items'],
 };
 const ENUM = {
@@ -165,14 +168,17 @@ export function validate(story, { lenses: registered } = {}) {
   };
 
   // number formats: ₺ $ € £ % n x compact, or "currency" with an ISO code ("currency": "EUR")
+  // a trailing "k" ("$k", "₺k", "nk") is the compact short form of that format
   const formatCheck = (where, o) => {
-    enumCheck(where, 'format', o.format, ENUM.format);
+    const base = typeof o.format === 'string' && o.format.length > 1 && o.format.endsWith('k') && ENUM.format.includes(o.format.slice(0, -1)) ? o.format.slice(0, -1) : o.format;
+    enumCheck(where, 'format', base, ENUM.format);
+    if (o.compact != null && typeof o.compact !== 'boolean') W(where, `"compact" must be true or false ("$22k" instead of "$22,000"), got ${JSON.stringify(o.compact)}`);
     if (o.format === 'currency' && !(typeof o.currency === 'string' && /^[A-Za-z]{3}$/.test(o.currency)))
       W(where, `format "currency" needs a 3-letter "currency" code like "EUR", got ${JSON.stringify(o.currency)}; plain numbers shown`);
     if (o.currency != null && o.format !== 'currency' && o.format != null) H(where, `"currency" is only used with format "currency"`);
   };
   const vizExtras = (where, v) => {
-    if (v.format != null) formatCheck(`${where} viz`, v);
+    if (v.format != null || v.compact != null) formatCheck(`${where} viz`, v);
     if (v.zero != null && typeof v.zero !== 'boolean') W(`${where} viz`, `"zero" must be true or false (start the axis at 0), got ${JSON.stringify(v.zero)}`);
   };
 
@@ -284,7 +290,7 @@ export function validate(story, { lenses: registered } = {}) {
           own.push(a.id);
           const an = `${w} actor "${a.id}"`;
           const update = known.includes(a.id);    // continue: { id, sub } changes an earlier actor, the rest is inherited
-          if (a.kind == null) { if (!update) W(an, `no "kind"; one of ${oneOf(ENUM.actor)}`); } else enumCheck(an, 'kind', a.kind, ENUM.actor);
+          if (a.kind == null) { if (!update) W(an, `no "kind"; one of ${oneOf(ENUM.actor)}`); } else if (!ICONS.includes(a.kind)) enumCheck(an, 'kind', a.kind, ENUM.actor);   // a core icon name draws that icon
           if (!isStr(a.label) && !(update && a.label == null)) W(an, 'no "label"');
           enumCheck(an, 'state', a.state, ENUM.state);
           if (a.at != null) {
@@ -324,6 +330,10 @@ export function validate(story, { lenses: registered } = {}) {
         need('big', 'the one number, e.g. "%31" or "1.240 ₺"');
         if (typeof f.big === 'string' && f.big.length > 12) W(w, `big "${f.big}" is long; the big number reads best ≤ 12 characters`);
         castRef(w, 'who', f.who);
+        if (f.format != null || f.compact != null || f.currency != null) {
+          formatCheck(w, f);
+          if (typeof f.big === 'string') H(w, '"format" only shapes a numeric "big" (e.g. "big": 22000, "format": "$k")');
+        }
         if (f.viz != null) {
           if (!isObj(f.viz)) { E(w, '"viz" must be an object { "kind", "data" }'); break; }
           if (f.viz.kind == null) E(w, `viz needs "kind": one of ${oneOf(ENUM.viz)}`); else enumCheck(w, 'viz.kind', f.viz.kind, ENUM.viz);
@@ -391,7 +401,10 @@ export function validate(story, { lenses: registered } = {}) {
         ui.forEach((u, j) => {
           if (!isObj(u)) return E(`${w} ui[${j}]`, 'must be an object { "type", "text" }');
           if (u.type == null) E(`${w} ui[${j}]`, `needs "type": one of ${oneOf(ENUM.ui)}`); else enumCheck(`${w} ui[${j}]`, 'type', u.type, ENUM.ui);
-          if (u.icon != null && !isStr(u.icon)) W(`${w} ui[${j}]`, `"icon" must be an icon name like "heart", got ${JSON.stringify(u.icon)}`);
+          if (u.icon != null) {
+            if (!isStr(u.icon) || !ICONS.includes(u.icon)) W(`${w} ui[${j}]`, `"icon" must be one of the core icons (${ICONS.join(' ')}), got ${JSON.stringify(u.icon)}${isStr(u.icon) ? didYouMean(u.icon, ICONS) : ''}`);
+            else if (u.type !== 'image') H(`${w} ui[${j}]`, '"icon" only shows on a "type": "image" item');
+          }
         });
         accentCount(ui.filter(u => isObj(u) && u.accent).length, 'ui elements with "accent"');
         list('annotate').forEach((a, j) => {

@@ -522,12 +522,27 @@
 
     /* ---- camera: the layout is the union (stable), the framing fits what this frame shows ---- */
     // what is on screen in Cx for the given states: actors + their labels, flow lines + their labels
-    const frameBox = (Cx, sts) => {
-      const bb = { x0: Infinity, y0: Infinity, x1: -Infinity, y1: -Infinity };
+    // With frame index k: when that frame fades many actors (focus), frame only its new part (+ focus) and the
+    // actors joined to it; older faded parts may crop at the stage edges (bb.crop)
+    const frameBox = (Cx, sts, k) => {
+      const bb = { x0: Infinity, y0: Infinity, x1: -Infinity, y1: -Infinity, crop: false };
       const grow = b => { if (!b) return; bb.x0 = Math.min(bb.x0, b.x0); bb.y0 = Math.min(bb.y0, b.y0); bb.x1 = Math.max(bb.x1, b.x1); bb.y1 = Math.max(bb.y1, b.y1); };
-      const keys = new Set(Cx.flows.filter(x => sts.some(st => vF(Cx, x, st))).map(x => x.key));
-      nodes.forEach(n => { if (sts.some(st => vA(Cx, n.id, st))) { grow(n.box); grow(n.lbox); } });
-      plans.forEach((pl, i) => { if (keys.has(pl.f.key)) { lines[i].forEach(l => grow(l.box)); if (pl.lab) { grow(pl.lab.pill); grow(pl.lab.text); } } });
+      const fl = Cx.flows.filter(x => sts.some(st => vF(Cx, x, st))), keys = new Set(fl.map(x => x.key));
+      const vis = [...nodes.keys()].filter(id => sts.some(st => vA(Cx, id, st)));
+      const fo = k == null ? new Set() : new Set(arr(F[k].focus).map(String).filter(id => nodes.has(id)));
+      let keep = null;
+      if (fo.size && vis.filter(id => !fo.has(id)).length >= 3) {
+        const core = new Set([...fo, ...vis.filter(id => Cx.actors.get(id)._k === k)]);
+        fl.forEach(x => { if (x._k === k) { core.add(x.from); core.add(x.to); } });
+        keep = new Set(core);
+        fl.forEach(x => { if (core.has(x.from)) keep.add(x.to); if (core.has(x.to)) keep.add(x.from); });
+        bb.crop = keep.size < vis.length;
+      }
+      const kept = id => !keep || keep.has(id);
+      nodes.forEach(n => { if (vis.includes(n.id) && kept(n.id)) { grow(n.box); grow(n.lbox); } });
+      plans.forEach((pl, i) => {
+        if (keys.has(pl.f.key) && kept(pl.f.from) && kept(pl.f.to)) { lines[i].forEach(l => grow(l.box)); if (pl.lab) { grow(pl.lab.pill); grow(pl.lab.text); } }
+      });
       return isFinite(bb.x0) ? bb : null;
     };
     // fit + centre; inside a continue chain the camera may come closer (type up to ~1.6× its base size)
@@ -537,17 +552,30 @@
       return { bb, s, tx: (A.x0 + A.x1) / 2 - s * (bb.x0 + bb.x1) / 2, ty: (A.y0 + A.y1) / 2 - s * (bb.y0 + bb.y1) / 2 };
     };
     const both = ['after', 'before'];
-    const K = cam(frameBox(C, frame.compare ? both : [state]) || frameBox(U, both));
+    const sts0 = frame.compare ? both : [state];
+    const K = cam(frameBox(C, sts0, ctx.index) || frameBox(U, both));
     const { bb, s, tx, ty } = K;
     if (s < 0.84) ctx.issue('warn', `diagram is crowded (scaled to ${Math.round(s * 100)}%); use fewer actors or shorter labels`);
     const defs = ctx.el('defs', {}, ctx.stage);
-    const root = ctx.el('g', { class: 'flow', transform: `translate(${r1(tx)} ${r1(ty)})${s !== 1 ? ` scale(${s.toFixed(4)})` : ''}` }, ctx.stage);
+    let host = ctx.stage;
+    if (bb.crop) {   // a window below the legend; the faded parts cut off fade out at the sides they leave by
+      const H = ctx.H, top = Math.max(0, ty + s * bb.y0 - (tall ? 22 : 18)), fb = frameBox(C, sts0);
+      const o = { x0: tx + s * fb.x0, y0: ty + s * fb.y0, x1: tx + s * fb.x1, y1: ty + s * fb.y1 }, e = 26, far = 400;
+      host = ctx.el('svg', { x: 0, y: r1(top), width: W, height: r1(H - top), viewBox: `0 ${r1(top)} ${W} ${r1(H - top)}`, overflow: 'hidden', 'data-crop': 1 }, ctx.stage);
+      const fid = ctx.id('flow-cropf'), mid = ctx.id('flow-crop');
+      ctx.el('feGaussianBlur', { stdDeviation: 12 }, ctx.el('filter', { id: fid, x: -far, y: -far, width: W + 2 * far, height: H + 2 * far, filterUnits: 'userSpaceOnUse' }, defs));
+      const m = ctx.el('mask', { id: mid, maskUnits: 'userSpaceOnUse', x: -far, y: -far, width: W + 2 * far, height: H + 2 * far }, defs);
+      const x0 = o.x0 < 0 ? e : -far, x1 = o.x1 > W ? W - e : W + far, y0 = o.y0 < top ? top + e : -far, y1 = o.y1 > H ? H - e : H + far;
+      ctx.el('rect', { x: x0, y: y0, width: x1 - x0, height: y1 - y0, fill: '#fff', filter: `url(#${fid})` }, m);
+      host = ctx.el('g', { mask: `url(#${mid})` }, host);
+    }
+    const root = ctx.el('g', { class: 'flow', transform: `translate(${r1(tx)} ${r1(ty)})${s !== 1 ? ` scale(${s.toFixed(4)})` : ''}` }, host);
     const gLines = ctx.el('g', {}, root), gActors = ctx.el('g', {}, root), gLabels = ctx.el('g', {}, root);
     leg.place(tx + s * bb.x0, tx + s * bb.x1, ty + s * bb.y0);
     // a continue frame starts at the previous frame's framing and glides to this one (seekable; ends natural)
     let camMs = 0;
     if (chain.length > 1 && !toggle) {
-      const pk = chain[chain.length - 2], pb = frameBox(collect(ctx, F, chain.slice(0, -1), false), F[pk].compare ? both : ['after']);
+      const pk = chain[chain.length - 2], pb = frameBox(collect(ctx, F, chain.slice(0, -1), false), F[pk].compare ? both : ['after'], pk);
       const P = pb && cam(pb), k = P ? P.s / s : 1;
       if (P && (Math.abs(k - 1) > 0.004 || Math.hypot(P.tx - tx, P.ty - ty) > 1)) {
         camMs = 1000;

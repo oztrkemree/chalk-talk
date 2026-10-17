@@ -374,7 +374,7 @@
         ctx.text(byline, member.name || member.id, M + r * 2 + 16, y + r * 1.15, { font: 'mono', size: tall ? 26 : 19, ls: 0.14, upper: true, color: 'ink2', weight: 500, valign: 'middle', maxW: colW - r * 2, lines: 1 });
         // clearance over the figure: "$", "€", "£", "(" and ascenders (k, l, d…) rise above the digits' cap height
         const bs = tall ? 300 : hasViz ? 290 : 360;
-        y += r * 2.3 + (tall ? 30 : 22) + bs * (/^[\d\s.,%+−-]*$/.test(big) ? 0.06 : 0.16);
+        y += r * 2.3 + (tall ? 30 : 22) + bs * (/^[\d\s.,%+−-]*$/.test(big) ? 0.06 : 0.22);
       }
       const bigT = ctx.text(block, big, M - (tall ? 6 : 8), y, { font: 'serif', size: tall ? 300 : hasViz ? 290 : 360, minSize: tall ? 120 : 110, maxW: colW, lines: 1, weight: 500, ls: -0.035, lh: 0.94 });
       y = bigT.top + bigT.h;
@@ -836,7 +836,8 @@
         }
         ctx.rough(ctx.el('rect', { x, y, width: w, height: ih, rx: 18, fill: 'none', stroke: acc ? t.accent : t.ink2, 'stroke-width': 2, opacity: acc ? 1 : 0.5 }, g), 1);
         let h = ih;
-        if (text) h += T(text, x, y + ih + 10, { size: f(18), color: 'ink2', maxW: w, lines: 2, lh: 1.3 }).h + 10;
+        const cap = it.caption != null ? str(it.caption) : text;   // "caption" or "text": the line under the picture
+        if (cap) h += T(cap, x, y + ih + 10, { size: f(18), color: 'ink2', maxW: w, lines: 2, lh: 1.3 }).h + 10;
         return h;
       }
       case 'divider': {

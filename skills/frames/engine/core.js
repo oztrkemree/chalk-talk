@@ -580,7 +580,12 @@ function render(tgt, i, asp, animate) {
   }
   if (tgt === OFF) {   // overflow check, only on the still validation render
     for (const g of [tgt.stage, tgt.over]) {
-      let b; try { b = g.getBBox(); } catch (_) { continue; }
+      // a lens may crop on purpose (data-crop: a nested <svg> viewport); getBBox ignores the crop, so skip it
+      const crops = [...g.querySelectorAll('[data-crop]')];
+      crops.forEach(c => { c.style.display = 'none'; });
+      let b; try { b = g.getBBox(); } catch (_) { b = null; }
+      crops.forEach(c => { c.style.display = ''; });
+      if (!b) continue;
       if (!b.width && !b.height) continue;
       const o = Math.max(-b.x, -b.y, b.x + b.width - W, b.y + b.height - H);
       if (o > 4) ctx.issue('warn', `drawing overflows the ${W}×${H} stage by ${Math.round(o)} units`);

@@ -416,7 +416,9 @@
       case 'point': {
         // pt.k shortens the reach (x measured from the shoulder), pt.low points at chest height (clear of faces)
         const k = pt ? pt.k : 1, X = x => r1(62 + (x - 62) * k);
-        const P = pt && pt.low ? [92, 100, 104, 136, 110, 166, 108, 178, 106, 200, 104, 170, 108] : [88, 104, 90, 140, 74, 172, 58, 184, 52, 206, 42, 176, 56];
+        // pt.up: raised toward a thing on the wall above (the neighbours' faces stay clear)
+        const P = pt && pt.up ? [88, 92, 64, 112, 20, 120, -18, 122, -28, 128, -52, 120, -22]
+          : pt && pt.low ? [92, 100, 104, 136, 110, 166, 108, 178, 106, 200, 104, 170, 108] : [88, 104, 90, 140, 74, 172, 58, 184, 52, 206, 42, 176, 56];
         return arm(-f, rest) + tube(mir(f, `M62 ${P[0]}C${X(P[1])} ${P[2]} ${X(P[3])} ${P[4]} ${X(P[5])} ${P[6]}`), fill) +
           tube(mir(f, `M${X(P[7])} ${P[8]}L${X(P[9])} ${P[10]}`), skin, 9) + hand(X(P[11]) * f, P[12]);
       }
@@ -467,7 +469,7 @@
     const id = ctx.id('mo-clip');
     const cp = ctx.el('clipPath', { id }, K.defs);
     ctx.el('rect', { x: P.x + 2, y: P.y + 2, width: P.w - 4, height: P.h - 4 }, cp);
-    P.g = ctx.el('g', { 'clip-path': `url(#${id})` }, ctx.stage);
+    P.g = ctx.el('g', { 'clip-path': `url(#${id})`, 'data-crop': 1 }, ctx.stage);   // clipped: core's overflow check skips it
     P.top = ctx.el('g', { class: 'mo-bubbles' }, ctx.stage);
     return P;
   }
@@ -475,7 +477,7 @@
     const id = K.ctx.id('mo-clip');
     const cp = K.ctx.el('clipPath', { id }, K.defs);
     K.ctx.el('rect', { x: box.x + 2, y: box.y + 2, width: box.w - 4, height: box.h - 4 }, cp);
-    return K.ctx.el('g', { 'clip-path': `url(#${id})` }, parent);
+    return K.ctx.el('g', { 'clip-path': `url(#${id})`, 'data-crop': 1 }, parent);
   }
 
   /* --------------------------------------------------------------- scene */
@@ -587,7 +589,7 @@
     if (stack) { ppl[0].f = 1; ppl[1].f = -1; }
     // keep reaching arms inside the frame (a shrug or a point at the edge would leave the stage)
     const keepIn = p => {
-      const reach = { shrug: [146, 146], cheer: [112, 112], point: [96, 62 + 152 * (p.pt ? p.pt.k : 1)], think: [96, 96], walk: [160, 112] }[p.pose] || [96, 96];
+      const reach = { shrug: [146, 146], cheer: [112, 112], point: [96, 62 + (p.pt && p.pt.up ? 70 : 152) * (p.pt ? p.pt.k : 1)], think: [96, 96], walk: [160, 112] }[p.pose] || [96, 96];
       const [l, r] = p.f > 0 ? reach : [reach[1], reach[0]];
       const lo = box.x + l * p.s + 6, hi = box.x + box.w - r * p.s - 6;
       if (lo < hi) p.x = clamp(p.x, lo, hi);
@@ -634,6 +636,9 @@
           const y2 = y + lab - lab2, need = ph * o.ps + 18;
           if (y2 - need < box.y) o.ps *= Math.max(0.45, (y2 - box.y - 18) / (ph * o.ps));
           o.y = Math.max(y2, box.y + ph * o.ps + 14);
+          // a second row of wall things: lower (still above the heads) or higher (still inside the panel)
+          const yMax = ceil - 26 - lab2, yMin = box.y + ph * o.ps + 14;
+          if (o.dy) o.y = clamp(o.y + o.dy, yMin, Math.max(yMin, yMax));
         };
         fitY();
         // two wall things never overlap: slide to the nearest free stretch of wall, else shrink and try again
@@ -643,7 +648,12 @@
           for (let xx = box.x + half + 8; xx <= box.x + box.w - half - 8; xx += 8) {
             if (!placedWall.some(r => hits(r, wallRect(o, xx))) && (best == null || Math.abs(xx - o.x) < Math.abs(best - o.x))) best = xx;
           }
-          if (best != null) o.x = best; else o.ps *= 0.8;
+          if (best != null) o.x = best;
+          else {
+            const rowH = wallRect(o, 0).y1 - wallRect(o, 0).y0 + 16, x0 = o.x, y0 = o.y;
+            const row = [rowH, -rowH].find(d => { o.dy = d; fitY(); return Math.abs(o.y - y0 - d) < 2 && !placedWall.some(r => hits(r, wallRect(o, o.x))); });
+            if (row == null) { o.dy = 0; o.x = x0; o.ps *= 0.8; }
+          }
           fitY();
         }
         placedWall.push(wallRect(o, o.x));
@@ -669,7 +679,9 @@
       if (tgt && Math.abs(tgt.x - p.x) > 40) p.f = Math.sign(tgt.x - p.x);
       else if (Math.abs(rr - rl) > 20) p.f = rr > rl ? 1 : -1;
       const kHi = ((p.f > 0 ? rr : rl) - 22 - 62) / 144, kLo = (roomTo(p.f, 94, 120) - 16 - 62) / 140;
-      p.pt = kHi >= 0.62 || kHi >= kLo ? { k: clamp(kHi, 0.3, 1), low: false } : { k: clamp(kLo, 0.3, 1), low: true };
+      const ru = tgt && tgt.zone === 'wall' && Math.abs(tgt.x - p.x) > 40 ? roomTo(p.f, -60, 90) : 0;
+      p.pt = kHi >= 0.62 ? { k: clamp(kHi, 0.3, 1), low: false } : ru >= 100 ? { k: clamp((ru - 12 - 62) / 66, 0.4, 1), up: true }
+        : kHi >= kLo ? { k: clamp(kHi, 0.3, 1), low: false } : { k: clamp(kLo, 0.3, 1), low: true };
       keepIn(p);
     });
     xs.forEach((_, k) => { xs[k] = ppl[k].x; });
@@ -820,11 +832,12 @@
         y = big ? FY - 40 * s : FY;
         if (zone === 'side') { y = FY - 132 * s; sideTable(K, lay, x, FY, s); }
       }
-      const e = prop(K, lay, pr, x, y, ps, acc, zone === 'wall' && pr.kind === 'whiteboard', box);
+      const e = prop(K, lay, zone === 'side' ? Object.assign({}, pr, { labelUp: true }) : pr, x, y, ps, acc, zone === 'wall' && pr.kind === 'whiteboard', box);
       if (e) {
         propEls.push({ e, acc, zone });
         const pw = (PROP_W[pr.kind] || 120) * ps, ph = (PROP_H[pr.kind] || 100) * ps;
-        soft.push({ x0: x - pw / 2, x1: x + pw / 2, y0: y - ph, y1: y + (pr.label ? K.min * 2.8 + 14 : 0) });
+        const lh = pr.label ? K.min * 2.8 + 14 : 0;
+        soft.push(zone === 'side' ? { x0: x - pw / 2, x1: x + pw / 2, y0: y - ph - lh, y1: y } : { x0: x - pw / 2, x1: x + pw / 2, y0: y - ph, y1: y + lh });
       }
     });
 
@@ -1163,10 +1176,13 @@
       const T = ctx.text(g, label, x, y + (pr.kind === 'clock' || pr.kind === 'calendar' || pr.kind === 'chart' ? 16 : 14) * Math.max(1, s * 0.8), {
         font: 'mono', size: K.min + (K.tall ? 0 : 1), color: acc ? 'accent' : 'ink2', anchor: 'middle', ls: 0.06, maxW: Math.max(160, 220 * s), lines: 2, lh: 1.2,
       });
-      // the label stays inside the panel (it slides in from the edge instead of being cut)
-      if (bounds && T.el) {
-        const dx = clamp(x, bounds.x + T.w / 2 + 10, bounds.x + bounds.w - T.w / 2 - 10) - x;
-        if (Math.abs(dx) > 0.5) T.el.setAttribute('transform', `translate(${r1(dx)} 0)`);
+      // the label stays inside the panel (it slides in from the edge instead of being cut); on a side table
+      // (its leg runs below) or at the panel's bottom edge it sits above the thing instead
+      if (T.el) {
+        const dx = bounds ? clamp(x, bounds.x + T.w / 2 + 10, bounds.x + bounds.w - T.w / 2 - 10) - x : 0;
+        const below = y + 16 * Math.max(1, s * 0.8) + T.h, up = pr.labelUp || (bounds && below > bounds.y + bounds.h - 8);
+        const dy = up ? -(below - y) - (PROP_H[pr.kind] || 100) * s - 8 : 0;
+        if (Math.abs(dx) > 0.5 || dy) T.el.setAttribute('transform', `translate(${r1(dx)} ${r1(dy)})`);
       }
     }
     return g;
