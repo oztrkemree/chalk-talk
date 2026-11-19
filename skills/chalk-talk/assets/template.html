@@ -274,7 +274,7 @@
 html,body{margin:0;height:100%}
 body{background-color:var(--bg); background-image:var(--bg-image); background-size:var(--bg-size); color:var(--ink); font-family:var(--ui-f); -webkit-font-smoothing:antialiased; transition:background-color .35s ease}
 .app{width:min(100%, calc((100vh - 150px) * 16 / 9)); min-width:min(100%, 640px); margin:0 auto; padding:10px 16px 14px}
-#board{width:100%; height:auto; display:block; overflow:visible; user-select:none; -webkit-user-select:none; cursor:pointer; touch-action:pan-y}
+#board{width:100%; height:auto; display:block; overflow:visible; user-select:none; -webkit-user-select:none; cursor:pointer; touch-action:pan-y pinch-zoom}
 
 /* ---------- category colors: a node sets --cbg / --cfg, its parts use them ---------- */
 .c-sky{--cbg:var(--c-sky-bg);--cfg:var(--c-sky-fg)} .c-mint{--cbg:var(--c-mint-bg);--cfg:var(--c-mint-fg)}
@@ -397,12 +397,13 @@ body{background-color:var(--bg); background-image:var(--bg-image); background-si
 .floor-ripple{fill:none; stroke:var(--accent); stroke-width:2.2}
 .fx{opacity:0}
 .fx-t{transform-box:fill-box; transform-origin:center}
-.title-bg{fill:var(--bg); opacity:0; transition:opacity .6s ease}
-.cam-close .title-bg{opacity:.92}
+.cam-close #board{overflow:hidden}   /* a close-up never spills onto the caption bar */
+#world .cam-out{opacity:0; pointer-events:none}   /* what a close-up would cut in half, or slide under the title, steps out */
+.cam-moving #world{will-change:transform}
 .pk-code{pointer-events:none}
 .pk-code :is(rect,path){fill:var(--ink)}
-.pk-code text{fill:var(--bg)}
-.pk-code .pk-src{opacity:.62; font-weight:500}
+.pk-code text.t-packet{fill:var(--bg)}   /* two classes: has to beat the chalk rule for .t-packet */
+.pk-code text.pk-src{opacity:.72; font-weight:500}
 .pk-glow{fill:var(--accent); opacity:.5}
 .pk-tail circle{fill:var(--accent)}
 .packet.t-ok :is(.pk-glow,.pk-tail circle){fill:var(--ok)} .packet.t-error :is(.pk-glow,.pk-tail circle){fill:var(--error)}
@@ -477,10 +478,14 @@ body{background-color:var(--bg); background-image:var(--bg-image); background-si
 /* ---------- caption bar ---------- */
 .bar{padding:6px 2px 0}
 .progress{display:flex; gap:4px; margin:0 0 14px}
-.progress button{all:unset; cursor:pointer; flex:1; height:3px; border-radius:2px; background:var(--line); transition:background-color .3s ease}
-.progress button.done{background:var(--line-2)}
-.progress button[aria-current="step"]{background:var(--accent)}
-.progress button:hover{background:var(--muted)}
+/* the bar stays 3px; the padding is the hit area (23px), clipped out of the paint */
+.progress button{all:unset; cursor:pointer; flex:1; height:3px; padding-block:10px; margin-block:-10px; background-clip:content-box; border-radius:2px; background-color:var(--line); transition:background-color .3s ease}
+.progress button.done{background-color:var(--line-2)}
+.progress button[aria-current="step"]{background-color:var(--accent)}
+.progress button:hover{background-color:var(--muted)}
+/* autoplay: the current segment fills while the step is on, so waiting never looks like a stall */
+.progress button.timing{background-color:var(--line-2); background-image:linear-gradient(var(--accent),var(--accent)); background-repeat:no-repeat; background-size:0% 100%; animation:dwell var(--dwell, 4s) linear forwards}
+@keyframes dwell{to{background-size:100% 100%}}
 .progress button:focus-visible{outline:2px solid var(--accent); outline-offset:3px}
 .cap{display:grid; grid-template-columns:auto 1fr auto; gap:24px; align-items:start}
 .count{font-family:var(--ui-mono); font-size:13px; letter-spacing:.06em; color:var(--muted); padding-top:5px; white-space:nowrap}
@@ -494,7 +499,7 @@ body{background-color:var(--bg); background-image:var(--bg-image); background-si
 .ctl button{all:unset; cursor:pointer; width:36px; height:36px; display:grid; place-items:center; border-radius:var(--btn-r); border:1px solid var(--line-2); color:var(--ink); background:var(--card); transition:transform .15s ease, border-color .2s ease}
 .ctl button:hover{border-color:var(--ink-2)}
 .ctl button:active{transform:scale(.95)}
-.ctl button:focus-visible{outline:2px solid var(--accent); outline-offset:3px}
+.ctl button:focus-visible,#code-close:focus-visible,#code-links a:focus-visible{outline:2px solid var(--accent); outline-offset:3px}
 .ctl button[disabled]{opacity:.35; cursor:default}
 .ctl button.primary{background:var(--ink); color:var(--bg); border-color:var(--ink)}
 .ctl button[hidden]{display:none}
@@ -619,6 +624,7 @@ html:not(.diff-before) .edge.chg-removed :is(.edge-line,.iso-path){stroke-dashar
         <button id="proof" aria-label="Proof view: which arrows are backed by code" aria-pressed="false" title="Proof view (V)" hidden><svg viewBox="0 0 24 24"><path d="M12 3l7.5 3v6c0 4.5-3.2 7.8-7.5 9-4.3-1.2-7.5-4.5-7.5-9V6z"/><path d="M8.8 12.2l2.3 2.3 4.3-4.6"/></svg></button>
         <button id="diff" aria-label="Before / after the change" aria-pressed="false" title="Before / after (D)" hidden><svg viewBox="0 0 24 24"><path d="M12 3.5v9M7.5 8h9M7.5 18.5h9"/></svg></button>
         <button id="theme" aria-label="Switch light / dark" title="Light / dark (T)"><svg viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 0 18z" fill="currentColor"/><circle cx="12" cy="12" r="9"/></svg></button>
+        <button id="sound" aria-label="Mute sound" title="Mute (M)"><svg viewBox="0 0 24 24"><path d="M4 9.5h3l4.5-3.5v12L7 14.5H4z"/><path id="sound-i" d="M15.5 9a4.2 4.2 0 0 1 0 6M18 6.5a7.8 7.8 0 0 1 0 11"/></svg></button>
       </div>
     </div>
   </section>
@@ -1872,7 +1878,6 @@ function draw() {
   const f = el('filter', { id: 'ct-shadow', x: '-30%', y: '-30%', width: '160%', height: '190%' }, defs);
   el('feDropShadow', { dx: 0, dy: 1, stdDeviation: 1.2, class: 'sh-drop' }, f);
   el('feDropShadow', { dx: 0, dy: 8, stdDeviation: 14, class: 'sh-drop' }, f);
-  el('feGaussianBlur', { stdDeviation: 16 }, el('filter', { id: 'ct-soft', x: '-20%', y: '-40%', width: '140%', height: '180%' }, defs));
   if (ISO) isoDefs(defs);
   if (CHALK) ['haze', 'dust'].forEach(k => el('rect', { x: 0, y: 0, width: W, height: H, class: 'chalk-' + k, filter: `url(#chalk-${k})` }, board));   // old erasures and dust on the slate
   L.world = el('g', { id: 'world' }, board);
@@ -1978,9 +1983,7 @@ function computeTitleBox() {
 }
 function drawTitle() {
   if (!S.title && !S.subtitle) return;
-  const g = L.title, eb = eyebrowText(), tb = pad(titleBox, 10);
-  // when the camera moves in, the board can slide under the title: a soft wiped patch keeps it readable
-  el('rect', { x: f1(tb.x), y: f1(tb.y), width: f1(tb.w), height: f1(tb.h), rx: 20, class: 'title-bg', filter: 'url(#ct-soft)' }, g);
+  const g = L.title, eb = eyebrowText();
   if (eb && S.title) text(g, caseFor(eb, 'eyebrow'), 70, 58, 't-eyebrow', 'start');
   if (S.title) text(g, S.title, 68, 100, 't-title', 'start');
   if (S.subtitle) text(g, S.subtitle, 70, 142, 't-subtitle', 'start');
@@ -2211,24 +2214,30 @@ function clearStep() {
 /* The camera is the director: it moves in on what the step is about (what is new, flowing or
    focused; never above 1.6x) and pulls back to the whole board for the recap.
    "camera": "wide" keeps the old framing of everything visible (max 1.3x). */
-function camera(st) {
-  if (S.camera === false) return 'none';
-  const close = S.camera !== 'wide' && !st.recap && st.activeSet.size > 0;
-  const rs = [];
-  (close ? st.activeSet : st.visible).forEach(id => {
-    const o = all.get(id);
-    if (!o || !st.visible.has(id)) return;
-    if (o.type === 'node' || o.type === 'group') rs.push(o.box);
-    if (o.type === 'edge') { if (o.lbox) rs.push(o.lbox); rs.push(ptsBounds(o.pts)); }
-  });
+function camera(st) {   // -> { s, tx, ty, close } or null for the untouched board
+  if (S.camera === false) return null;
+  const boxes = ids => {
+    const rs = [];
+    ids.forEach(id => {
+      const o = all.get(id);
+      if (!o || !st.visible.has(id)) return;
+      if (o.type === 'node' || o.type === 'group') rs.push(o.box);
+      if (o.type === 'edge') { if (o.lbox) rs.push(o.lbox); rs.push(ptsBounds(o.pts)); }
+    });
+    return rs;
+  };
+  // a sequence diagram reads top to bottom as one page: it keeps the wide framing
+  let rs = S.camera !== 'wide' && !SEQ && !st.recap ? boxes(st.activeSet) : [];
+  const close = rs.length > 0;
+  if (!close) rs = boxes(st.visible);
   (st.noteGeo || []).forEach(n => rs.push(n.R));
-  if (!rs.length) return 'none';
+  if (!rs.length) return null;
   const bb = pad(unionRect(rs), close ? 90 : 28);   // close-ups keep some air, so the neighbours stay in view
-  const s = clamp(Math.min(AREA.w / bb.w, AREA.h / bb.h), 1, close ? 1.6 : 1.3);
+  // flat cards carry bigger type than iso blocks: past 1.35x their labels outgrow the title
+  const s = clamp(Math.min(AREA.w / bb.w, AREA.h / bb.h), 1, close ? (ISO ? 1.6 : 1.35) : 1.3);
   const all0 = pad(unionRect([...nodes.values()].map(n => n.box).concat([...groups.values()].map(g => g.box))), 28);
-  if (s === 1 && bb.w >= all0.w - 2 && bb.h >= all0.h - 2) return 'none';
-  const tx = AREA.x + AREA.w / 2 - (bb.x + bb.w / 2) * s, ty = AREA.y + AREA.h / 2 - (bb.y + bb.h / 2) * s;
-  return `translate(${f1(tx)}px, ${f1(ty)}px) scale(${f1(s * 1000) / 1000})`;
+  if (s === 1 && bb.w >= all0.w - 2 && bb.h >= all0.h - 2) return null;
+  return { s, close, tx: AREA.x + AREA.w / 2 - (bb.x + bb.w / 2) * s, ty: AREA.y + AREA.h / 2 - (bb.y + bb.h / 2) * s };
 }
 
 /* Portrait phones: a 16:9 board would be unreadable, so the board turns 4:5 and the
@@ -2256,12 +2265,34 @@ function portraitCrop(st) {
   const w = Math.max(bb.w, bb.h * ratio, 560), h = w / ratio;
   return [bb.x + bb.w / 2 - w / 2, bb.y + bb.h / 2 - h / 2, w, h];
 }
-let framed = false;
+let framed = false, camS = 1, camTimer = 0;
 function frame(st) {
   const smoothly = ANIM && framed; framed = true;
-  if (PORTRAIT.matches) { L.world.style.transform = 'none'; setViewBox(portraitCrop(st), smoothly); }
-  else { setViewBox([0, 0, W, H], false); L.world.style.transform = camera(st); }
-  document.documentElement.classList.toggle('cam-close', !PORTRAIT.matches && L.world.style.transform !== 'none');
+  const c = PORTRAIT.matches ? null : camera(st), was = L.world.style.transform || 'none';
+  const now = c ? `translate(${f1(c.tx)}px, ${f1(c.ty)}px) scale(${f1(c.s * 1000) / 1000})` : 'none';
+  if (PORTRAIT.matches) setViewBox(portraitCrop(st), smoothly); else setViewBox([0, 0, W, H], false);
+  if (now !== was && smoothly) {   // promote the layer only while it moves, so the end state is drawn sharp
+    document.documentElement.classList.add('cam-moving');
+    clearTimeout(camTimer); camTimer = setTimeout(() => document.documentElement.classList.remove('cam-moving'), 1050);
+  }
+  L.world.style.transform = now;
+  camS = c ? c.s : 1;
+  document.documentElement.classList.toggle('cam-close', !!c);
+  // A close-up leaves some older things half in the frame or under the title. Those step out;
+  // what the step is about is always inside AREA, so it is never one of them.
+  const tb = pad(titleBox, 8);
+  const cut = b => {
+    if (!c || !c.close || !b) return false;
+    const r = rect(b.x * c.s + c.tx, b.y * c.s + c.ty, b.w * c.s, b.h * c.s);
+    if (r.x >= W || r.y >= H || r.x + r.w <= 0 || r.y + r.h <= 0) return false;   // fully outside: the clip hides it
+    return r.x < 0 || r.y < 0 || r.x + r.w > W || r.y + r.h > H || (titleBox.w > 0 && hit(tb, r));
+  };
+  all.forEach((o, id) => {
+    const act = st.activeSet.has(id);
+    const outG = !act && o.type === 'node' && cut(o.box), outL = !act && (o.type === 'edge' ? cut(o.lbox) : outG);
+    if (o.g) o.g.classList.toggle('cam-out', outG);
+    if (o.lg) o.lg.classList.toggle('cam-out', outL);
+  });
 }
 
 function enter(k, animate) {
@@ -2327,9 +2358,11 @@ function focusRing(o) {
 }
 
 const CARD_MS = 1300;   // how long a proven hop's line of code stays open
+const IDLE_PASSES = 3;  // packet passes on a step nobody is playing, before the board rests
 function startFlows(st, delay) {
   const items = st.flow.map(f => ({ ...f, e: edges.get(f.edge) })).filter(i => i.e && i.e.pathEl && !diffHidden(i.e));
   if (!items.length) return 0;
+  const cardBoxes = [];
   items.forEach(it => {
     it.len = it.e.pathEl.getTotalLength();
     it.dur = clamp(it.len / 0.40, 700, 1900);
@@ -2367,20 +2400,33 @@ function startFlows(st, delay) {
     it.g = g; dyn.push(g);
     // a proven hop shows its receipt: where the packet lands it opens into the verified line of code
     const pr = it.e.proof, cd = it.e.code;
-    if (ANIM && PROOF && !it.reverse && pr && pr.status === 'verified' && pr.hit && cd && cd.text != null) {
+    // (not in a sequence diagram: the next message row is too close for a card)
+    if (ANIM && PROOF && !SEQ && !it.reverse && pr && pr.status === 'verified' && pr.hit && cd && cd.text != null) {
       let line = [...(cd.text.split('\n')[pr.hit - cd.start] || '').trim()];
       if (line.length) {
         if (line.length > 46) line = [...line.slice(0, 45), '…'];
         const src = `${String(cd.file).split('/').pop()}:${pr.hit}`, w = Math.max(tw(line.join(''), 'packet'), tw(src, 'packet')) + 28;
-        // under the middle of the path: labels float above blocks and arrows, the floor below is free
-        const pt = it.e.pathEl.getPointAtLength(it.len * 0.5);
-        const card = el('g', { class: 'pk-code' }, L.packets), inner = el('g', {}, card);
-        el('rect', { x: f1(-w / 2), y: 8, width: f1(w), height: 50, rx: 9 }, inner);
-        el('path', { d: 'M-7 9L0 0L7 9Z' }, inner);
-        text(inner, line.join(''), 0, 26, 't-packet');
-        text(inner, '✓ ' + src, 0, 44, 't-packet pk-src');
-        card.setAttribute('transform', `translate(${f1(pt.x)} ${f1(pt.y + 8)})`);
-        card.style.opacity = 0; it.card = card; it.cardIn = inner; dyn.push(card);
+        // The card keeps its size on screen whatever the camera does (k), and takes the first spot
+        // beside the path that covers no label and no block; the receipt must not hide what it proves.
+        const k = 1.15 / camS, cw = w * k, ch = 58 * k;   // a touch larger than a packet label: it is the point of the hop
+        const taken = [...edges.values()].filter(e => e.lbox && st.visible.has(e.id)).map(e => e.lbox)
+          .concat([...nodes.values()].filter(n => st.visible.has(n.id)).map(n => n.box), cardBoxes);
+        let spot = null, least = Infinity;
+        search: for (const gap of [8 * k, 40 * k]) for (const p of [0.5, 0.36, 0.64, 0.24, 0.76]) for (const up of [false, true]) {
+          const pt = it.e.pathEl.getPointAtLength(it.len * p);
+          const r = rect(pt.x - cw / 2, up ? pt.y - gap - ch : pt.y + gap, cw, ch);
+          const over = taken.reduce((a, b) => a + (hit(b, r) ? Math.max(0, Math.min(b.x + b.w, r.x + r.w) - Math.max(b.x, r.x)) * Math.max(0, Math.min(b.y + b.h, r.y + r.h) - Math.max(b.y, r.y)) : 0), 0);
+          if (over < least) { least = over; spot = { pt, up, r, gap }; }
+          if (!over) break search;
+        }
+        cardBoxes.push(spot.r);
+        const up = spot.up, gap = spot.gap, card = el('g', { class: 'pk-code' }, L.packets), inner = el('g', {}, card);
+        el('rect', { x: f1(-w / 2), y: up ? -58 : 8, width: f1(w), height: 50, rx: 9 }, inner);
+        el('path', { d: up ? 'M-7 -9L0 0L7 -9Z' : 'M-7 9L0 0L7 9Z' }, inner);
+        text(inner, line.join(''), 0, up ? -40 : 26, 't-packet');
+        text(inner, '✓ ' + src, 0, up ? -22 : 44, 't-packet pk-src');
+        card.setAttribute('transform', `translate(${f1(spot.pt.x)} ${f1(spot.pt.y + (up ? -gap : gap))})`);
+        card.style.opacity = 0; it.card = card; it.cardIn = inner; it.cardK = k; it.cardUp = up; dyn.push(card);
       }
     }
   });
@@ -2438,14 +2484,19 @@ function startFlows(st, delay) {
     items.forEach(it => {
       if (it.card) {   // pops open as the packet lands, holds, fades
         const q = (tt - it.start - it.dur + 120) / CARD_MS, on = q >= 0 && q <= 1;
-        it.card.style.opacity = on ? Math.min(1, q * 8, (1 - q) * 5) : 0;
-        if (on) { const e = easeInOut(Math.min(1, q * 6)); it.cardIn.setAttribute('transform', `translate(0 ${f1(10 * e - 10)}) scale(${f1((0.7 + 0.3 * e) * 100) / 100})`); }
+        if (on || it.cardOn) {   // nothing to write while it stays closed
+          it.cardOn = on;
+          it.card.style.opacity = on ? Math.min(1, q * 8, (1 - q) * 5) : 0;
+          if (on) { const e = easeInOut(Math.min(1, q * 6)), dy = (it.cardUp ? 10 : -10) * (1 - e) * it.cardK; it.cardIn.setAttribute('transform', `translate(0 ${f1(dy)}) scale(${f1((0.7 + 0.3 * e) * it.cardK * 1000) / 1000})`); }
+          if (on && live && c === 0 && it.rang !== c) { it.rang = c; SFX.proof(); }
+        }
       }
       const p = (tt - it.start) / it.dur, src = nodes.get(it.reverse ? it.e.to : it.e.from), dst = nodes.get(it.reverse ? it.e.from : it.e.to);
-      if (live && p >= 0 && it.left !== c) { it.left = c; liveFx.push(...fxDepart(src, 0, liveSeen)); }
+      // sounds only on the first pass: a loop that keeps ticking is noise
+      if (live && p >= 0 && it.left !== c) { it.left = c; liveFx.push(...fxDepart(src, 0, liveSeen)); if (c === 0) SFX.send(); }
       if (p < 0 || p > 1) {
         it.g.style.opacity = 0; if (it.tail) it.tail.style.opacity = 0;
-        if (live && p > 1 && it.pulsed !== c) { it.pulsed = c; liveFx.push(...fxArrive(dst, 0, liveSeen)); }
+        if (live && p > 1 && it.pulsed !== c) { it.pulsed = c; liveFx.push(...fxArrive(dst, 0, liveSeen)); if (c === 0) SFX[it.g.classList.contains('t-error') ? 'fail' : 'land'](); }
         return;
       }
       const op = Math.min(1, p * 9, (1 - p) * 9);
@@ -2455,9 +2506,46 @@ function startFlows(st, delay) {
   };
   if (seekMode) return delay + cycle;
   const begin = performance.now() + delay;
-  const tick = now => { flowAt(now - begin, true); flowRAF = requestAnimationFrame(tick); };
+  // Left alone, the packets make three passes and rest; autoplay keeps them going until it moves on.
+  const tick = now => {
+    if (!playing && now - begin >= IDLE_PASSES * cycle) { flowAt(-1, true); flowRAF = 0; return; }
+    flowAt(now - begin, true); flowRAF = requestAnimationFrame(tick);
+  };
   flowRAF = requestAnimationFrame(tick);
   return delay + cycle;
+}
+
+/* ---------- sound ----------
+   Five small synthesized cues, no audio files: a step arriving, a packet leaving and landing, a
+   proven hop's receipt, the recap. M or the speaker button mutes; "sound": false in the scene
+   starts muted. Browsers only allow audio after a click or key press, so a page opened with
+   ?play stays silent until the viewer touches it. Never in still frames or recordings. */
+let soundOn = S.sound !== false, AC = null, touched = false;
+function tone(freq, dur, { type = 'sine', gain = 0.05, to = freq, at = 0 } = {}) {
+  if (!soundOn || !touched || !ANIM || seekMode || document.hidden) return;
+  try {
+    AC = AC || new (window.AudioContext || window.webkitAudioContext)();
+    if (AC.state !== 'running') { AC.resume().catch(() => {}); return; }   // queued notes would all fire at once later
+    const t0 = AC.currentTime + at, o = AC.createOscillator(), g = AC.createGain();
+    o.type = type; o.frequency.setValueAtTime(freq, t0);
+    if (to !== freq) o.frequency.exponentialRampToValueAtTime(to, t0 + dur);
+    g.gain.setValueAtTime(0.0001, t0); g.gain.exponentialRampToValueAtTime(gain, t0 + 0.012); g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+    o.connect(g); g.connect(AC.destination); o.start(t0); o.stop(t0 + dur + 0.03);
+  } catch (_) {}
+}
+const SFX = {
+  step: () => { tone(392, 0.16, { type: 'triangle' }); tone(587, 0.22, { type: 'triangle', gain: 0.045, at: 0.07 }); },
+  send: () => tone(740, 0.09, { to: 980, gain: 0.028 }),
+  land: () => tone(240, 0.14, { to: 160, gain: 0.07 }),
+  fail: () => tone(196, 0.3, { type: 'triangle', to: 130, gain: 0.06 }),
+  proof: () => { tone(1175, 0.18, { gain: 0.032 }); tone(1760, 0.26, { gain: 0.028, at: 0.06 }); },
+  recap: () => [523, 659, 784, 1047].forEach((f, i) => tone(f, 0.28, { type: 'triangle', gain: 0.04, at: i * 0.09 })),
+};
+function setSound(on) {
+  soundOn = on;
+  $('sound').setAttribute('aria-label', on ? 'Mute sound' : 'Turn sound on');
+  $('sound').title = on ? 'Mute (M)' : 'Sound on (M)';
+  $('sound-i').setAttribute('d', on ? 'M15.5 9a4.2 4.2 0 0 1 0 6M18 6.5a7.8 7.8 0 0 1 0 11' : 'M15.5 9.5l5 5M20.5 9.5l-5 5');
 }
 
 /* ---------- caption bar ---------- */
@@ -2504,20 +2592,30 @@ function go(k, opts = {}) {
   cur = k; seekK = -1;
   const timing = enter(k, animate);
   updateBar();
+  if (animate) SFX[steps[k].recap ? 'recap' : 'step']();
   if (!opts.keepHash) { try { history.replaceState(null, '', '#' + (k + 1)); } catch (_) {} }
   if (playing) schedule(timing);
 }
+const timingBtn = () => document.querySelector('.progress button.timing');
 function schedule(timing) {
   clearTimeout(playTimer);
+  const old = timingBtn(); if (old) old.classList.remove('timing');
   const last = cur >= steps.length - 1;
   if (last && !LOOP) { stop(); return; }
   const st = steps[cur];
   const words = (st.title + ' ' + st.say).split(/\s+/).filter(Boolean).length;
-  const read = typeof st.wait === 'number' ? st.wait * 1000 : Math.max(2600, 900 + words * 290);
-  playTimer = setTimeout(() => last ? go(0) : go(cur + 1), Math.max(timing.t + read, timing.flowT || 0) + (last ? 1200 : 0));
+  const read = typeof st.wait === 'number' ? st.wait * 1000 : Math.max(2200, 700 + words * 250);
+  // Leave between two packet passes, never in the middle of a hop: flowT is the delay plus one
+  // pass with its rest, so the first pass boundary after the reading time is where the step ends.
+  let wait = timing.t + read;
+  if (timing.flowT) { const pass = timing.flowT - flowDelay; wait = flowDelay + Math.max(1, Math.ceil((wait - flowDelay) / pass)) * pass - 250; }
+  wait += last ? 1200 : 0;
+  const b = document.querySelectorAll('.progress button')[cur];
+  if (b) { b.style.setProperty('--dwell', wait + 'ms'); void b.offsetWidth; b.classList.add('timing'); }
+  playTimer = setTimeout(() => last ? go(0) : go(cur + 1), wait);
 }
-function play() { playing = true; $('play').setAttribute('aria-label', 'Pause'); $('play-i').setAttribute('d', 'M8 5.5v13M16 5.5v13'); if (cur >= steps.length - 1) go(0); else schedule({ t: 600, flowT: 0 }); }
-function stop() { playing = false; clearTimeout(playTimer); $('play').setAttribute('aria-label', 'Play'); $('play-i').setAttribute('d', 'M8 5.5v13l10.5-6.5z'); }
+function play() { playing = true; $('play').setAttribute('aria-label', 'Pause'); $('play').title = 'Pause (P)'; $('play-i').setAttribute('d', 'M8 5.5v13M16 5.5v13'); go(cur >= steps.length - 1 ? 0 : cur, { keepHash: true }); }
+function stop() { playing = false; clearTimeout(playTimer); const b = timingBtn(); if (b) b.classList.remove('timing'); $('play').setAttribute('aria-label', 'Play'); $('play').title = 'Play (P)'; $('play-i').setAttribute('d', 'M8 5.5v13l10.5-6.5z'); }
 
 /* ---------- code panel: the real code behind a node or arrow ---------- */
 const EDITORS = {
@@ -2573,12 +2671,17 @@ function openCode(o) {
   body.scrollTop = 0;
   const first = body.querySelector('.hit') || body.querySelector('.mark');
   if (first) body.scrollTop = Math.max(0, first.offsetTop - body.clientHeight / 3);
+  if (!panel.contains(document.activeElement)) codeBack = document.activeElement;
   $('code-close').focus({ preventScroll: true });
 }
+let codeBack = null;   // where keyboard focus was before the panel took it
 function closeCode() {
   if (!codeFor) return;
   codeFor = null;
-  const panel = $('code'); panel.classList.remove('open'); panel.setAttribute('aria-hidden', 'true');
+  const panel = $('code'), had = panel.contains(document.activeElement);
+  panel.classList.remove('open'); panel.setAttribute('aria-hidden', 'true');
+  if (had && codeBack && codeBack.focus) codeBack.focus({ preventScroll: true });   // the close button is about to be hidden
+  codeBack = null;
 }
 // C opens the code of what the current step is about: its focus, then what it flows, then what it adds.
 function stepCodeTarget() {
@@ -2633,10 +2736,16 @@ function wire() {
     applyTheme();
   };
   DARK.addEventListener('change', applyTheme);
+  $('sound').onclick = () => { setSound(!soundOn); try { localStorage.setItem('chalk-talk-sound', soundOn ? 'on' : 'off'); } catch (_) {} if (soundOn) SFX.proof(); };
+  ['pointerdown', 'keydown'].forEach(t => addEventListener(t, () => { touched = true; }, { capture: true, once: true }));
   document.addEventListener('keydown', ev => {
     if (ev.metaKey || ev.ctrlKey || ev.altKey) return;
-    const k = ev.key;
+    const k = ev.key, on = ev.target.closest ? ev.target : null;
     if (k === 'Escape') { closeCode(); return; }
+    // a focused button or link keeps Space and Enter for itself, and the open code panel keeps the
+    // keys that scroll it; otherwise they would change the step and close the panel
+    if (on && (k === ' ' || k === 'Enter') && on.closest('button, a')) return;
+    if (on && codeFor && on.closest('#code') && /^(Arrow|Page|Home|End| )/.test(k)) return;
     if (k === 'c' || k === 'C') { if (codeFor) closeCode(); else { const o = stepCodeTarget(); if (o) openCode(o); } return; }
     if (k === 'ArrowRight' || k === ' ' || k === 'PageDown' || k === 'j') { ev.preventDefault(); stop(); go(cur + 1); }
     else if (k === 'ArrowLeft' || k === 'PageUp' || k === 'k') { ev.preventDefault(); stop(); go(cur - 1); }
@@ -2644,6 +2753,7 @@ function wire() {
     else if (k === 'End') { stop(); go(steps.length - 1); }
     else if (k === 'p' || k === 'P') playing ? stop() : play();
     else if (k === 't' || k === 'T') $('theme').click();
+    else if (k === 'm' || k === 'M') $('sound').click();
     else if (k === 'v' || k === 'V') setProofView(!proofView);
     else if (k === 'd' || k === 'D') setDiffView(diffView === 'before' ? 'after' : 'before');
     else if (/^[1-9]$/.test(k)) { stop(); go(+k - 1); }
@@ -2762,6 +2872,9 @@ async function boot() {
   document.documentElement.lang = LANG;
   if (!ANIM) document.documentElement.classList.add('still');
   if (!SNAP) { try { const saved = localStorage.getItem('chalk-talk-theme'); if (saved === 'light' || saved === 'dark') themeChoice = saved; } catch (_) {} }
+  if (!SNAP) { try { const saved = localStorage.getItem('chalk-talk-sound'); if (saved === 'on' || saved === 'off') soundOn = saved === 'on'; } catch (_) {} }
+  setSound(soundOn);
+  $('sound').hidden = !ANIM;   // no motion, no cues to play
   if (qs.get('theme')) themeChoice = THEME_ALIAS[qs.get('theme')] || null;
   applyTheme();
   if (S.title) { $('mtitle').textContent = S.title; if (S.subtitle) { const sm = document.createElement('small'); sm.textContent = S.subtitle; $('mtitle').appendChild(sm); } }
