@@ -401,7 +401,6 @@ body{background-color:var(--bg); background-image:var(--bg-image); background-si
    so nothing spills onto the caption bar and the floor grid can keep running to the page edge */
 #world .cam-out{opacity:0 !important; pointer-events:none}
 #world .elabel.cam-out{transition:opacity .45s ease}
-.cam-moving #world{will-change:transform}
 .pk-code{pointer-events:none}
 .pk-code :is(rect,path){fill:var(--ink)}
 .pk-code text.t-packet{fill:var(--bg)}   /* two classes: has to beat the chalk rule for .t-packet */
@@ -2267,16 +2266,13 @@ function portraitCrop(st) {
   const w = Math.max(bb.w, bb.h * ratio, 560), h = w / ratio;
   return [bb.x + bb.w / 2 - w / 2, bb.y + bb.h / 2 - h / 2, w, h];
 }
-let framed = false, camS = 1, camTimer = 0;
+let framed = false, camS = 1;
 function frame(st) {
   const smoothly = ANIM && framed; framed = true;
-  const c = PORTRAIT.matches ? null : camera(st), was = L.world.style.transform || 'none';
+  const c = PORTRAIT.matches ? null : camera(st);
   const now = c ? `translate(${f1(c.tx)}px, ${f1(c.ty)}px) scale(${f1(c.s * 1000) / 1000})` : 'none';
   if (PORTRAIT.matches) setViewBox(portraitCrop(st), smoothly); else setViewBox([0, 0, W, H], false);
-  if (now !== was && smoothly) {   // promote the layer only while it moves, so the end state is drawn sharp
-    document.documentElement.classList.add('cam-moving');
-    clearTimeout(camTimer); camTimer = setTimeout(() => document.documentElement.classList.remove('cam-moving'), 1050);
-  }
+  // shortcut: the move animates a transform on an SVG <g>, which Chrome lays out again every frame (about 20x the layout of a step without the camera; will-change changes nothing). Upgrade by moving the world into its own <svg> and transforming that HTML box if the move stutters on real phones.
   L.world.style.transform = now;
   camS = c ? c.s : 1;
   // A close-up leaves some older things half in the frame or under the title. Those step out;
