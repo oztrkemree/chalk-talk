@@ -197,7 +197,7 @@
 [data-style="iso"][data-theme="dark"]{
   --bg:#0B1221; --card:#152034; --line:#22314A; --line-2:#33445F; --chip:#1A2740;
   --ink:#EAF1FB; --ink-2:#A9B8CE; --muted:#7788A2; --edge:#8BA2C2; --track:#16233A; --grid-line:#162238;
-  --accent:#FF7A8E; --on-accent:#0B1221; --accent-soft:rgba(255,122,142,.16);
+  --accent:#FF7A8E; --on-accent:#0B1221; --on-tone:var(--on-accent); --accent-ink:var(--accent); --accent-soft:rgba(255,122,142,.16);
   --num-bg:#EAF1FB; --num-fg:#0B1221;
   --pill:#17243A; --pill-line:rgba(255,255,255,.06); --pill-shadow:rgba(0,0,0,.45);
   --shade:rgba(0,0,0,.42); --hl:rgba(255,255,255,.28); --groove:rgba(0,0,0,.25); --led:#3DF0A0;
@@ -406,6 +406,8 @@ body{background-color:var(--bg); background-image:var(--bg-image); background-si
 [data-stage][data-theme="dark"]{--bg:#05080F; --grid-line:#101A2C; --track:#0F1A2D}
 .stage-dark{display:none; pointer-events:none}
 [data-stage][data-theme="dark"] .stage-dark{display:inline}
+.pk-trace,.pk-ring,.pk-spark,.stage-glow{display:none}   /* stage effects exist only on a dark stage */
+[data-stage][data-theme="dark"] :is(.pk-trace,.pk-ring,.pk-spark,.stage-glow){display:inline}
 .pk-trace{fill:none; stroke:var(--accent); stroke-width:3; stroke-linecap:round; stroke-linejoin:round; pointer-events:none}
 .pk-trace.glow{stroke-width:11; filter:url(#iso-blur)}
 .pk-ring{fill:none; stroke:var(--accent); stroke-width:2.4; pointer-events:none}
@@ -413,19 +415,20 @@ body{background-color:var(--bg); background-image:var(--bg-image); background-si
 :is(.pk-trace,.pk-ring).t-warn{stroke:var(--warn)} :is(.pk-trace,.pk-ring).t-info{stroke:var(--info)}
 [data-stage][data-theme="dark"] .pk-glow{opacity:.95}
 [data-stage][data-theme="dark"] .el.dim{opacity:.34}   /* the dark already does the fading */
-[data-stage] .txt h2{font-size:25px} [data-stage] .txt p{font-size:18.5px}
+[data-stage][data-theme="dark"] .txt h2{font-size:25px} [data-stage][data-theme="dark"] .txt p{font-size:18.5px}
 .stage-light{display:none; pointer-events:none; mix-blend-mode:screen}
 [data-stage][data-theme="dark"] .stage-light{display:inline}
 .stage-beam{filter:blur(16px)}
 .stage-pool{fill:#CFE0FF; opacity:.055; filter:blur(22px)}
 .stage-dust circle{fill:#E8F0FF; opacity:0; animation:mote 6s linear infinite}
+.still .stage-dust circle{animation:none}
 @keyframes mote{0%{opacity:0; transform:translate(0,14px)} 25%{opacity:.5} 75%{opacity:.35} 100%{opacity:0; transform:translate(10px,-34px)}}
 .stage-glow{pointer-events:none; mix-blend-mode:screen; filter:blur(20px)}   /* a lit block throws its own colour on the floor */
 .pk-spark{fill:var(--accent); pointer-events:none}
 .pk-spark.t-ok{fill:var(--ok)} .pk-spark.t-error{fill:var(--error)} .pk-spark.t-warn{fill:var(--warn)} .pk-spark.t-info{fill:var(--info)}
 /* the caption is spoken, not shown: its words arrive one after another */
-[data-stage] #p .w{display:inline-block; opacity:0; animation:wordIn .5s cubic-bezier(.2,.7,.2,1) forwards}
-@keyframes wordIn{from{opacity:0; transform:translateY(7px); filter:blur(4px)} to{opacity:1; transform:none; filter:none}}
+[data-stage] #p .w{opacity:0; animation:wordIn .5s cubic-bezier(.2,.7,.2,1) forwards}   /* inline, so punctuation never wraps away from its word */
+@keyframes wordIn{from{opacity:0; filter:blur(5px)} to{opacity:1; filter:none}}
 /* opening card: the title alone in the dark, then the lights */
 .intro{position:fixed; inset:0; z-index:20; display:grid; place-content:center; gap:14px; padding:8vw; text-align:center; background:var(--bg); cursor:pointer; animation:introOut .7s ease 2.3s forwards}
 .intro h1{margin:0; font-family:var(--ui-title-f); font-weight:600; font-size:clamp(30px, 5.2vw, 76px); line-height:1.06; letter-spacing:-.025em; color:var(--ink); text-wrap:balance; animation:introIn 1s cubic-bezier(.2,.7,.2,1) both}
@@ -542,7 +545,7 @@ body{background-color:var(--bg); background-image:var(--bg-image); background-si
 [data-style="editorial"] .count{font:600 30px/1 var(--display); color:var(--accent); letter-spacing:0; padding-top:0}
 [data-style="editorial"] .count #n{color:var(--accent)}
 [data-style="editorial"] .count .of{font-size:15px; color:var(--muted)}
-[data-style="editorial"] .progress button{height:2px; border-radius:0}
+[data-style="editorial"] .progress button{height:2px; padding-block:10.5px; margin-block:-10.5px; border-radius:0}
 [data-style="blueprint"] .txt h2{font-size:18px; letter-spacing:0}
 [data-style="blueprint"] .progress button{border-radius:0}
 .credit{position:fixed; right:12px; bottom:8px; font:11px var(--ui-mono); color:var(--muted); opacity:.55}
@@ -2257,7 +2260,7 @@ let liveFx = [];   // reactions in the live loop, reset when the packets start o
 function clearStep() {
   running.forEach(a => a.cancel()); running = [];
   liveFx.forEach(a => a.cancel()); liveFx = [];
-  cancelAnimationFrame(flowRAF); flowRAF = 0; flowAt = null; flowItems = [];
+  cancelAnimationFrame(flowRAF); flowRAF = 0; flowAt = null; flowItems = []; flowRested = false;
   dyn.forEach(n => n.remove()); dyn = [];
   edges.forEach(e => e.g && e.g.classList.remove('hot'));
 }
@@ -2631,7 +2634,7 @@ function startFlows(st, delay) {
   // Left alone, the packets make three passes and rest; autoplay keeps them going until it moves on.
   const tick = now => {
     // (only in the quiet end of a pass, so pausing a long autoplay step never cuts a packet off mid-hop)
-    if (!playing && now - begin >= IDLE_PASSES * cycle && (now - begin) % cycle >= cycle - 200) { flowAt(-1, true); flowRAF = 0; return; }
+    if (!playing && now - begin >= IDLE_PASSES * cycle - 200 && (now - begin) % cycle >= cycle - 200) { flowAt(-1, true); flowRAF = 0; flowRested = true; return; }
     flowAt(now - begin, true); flowRAF = requestAnimationFrame(tick);
   };
   flowRAF = requestAnimationFrame(tick);
@@ -2696,7 +2699,7 @@ function updateBar() {
   $('n').textContent = two(cur + 1);
   $('h').textContent = st.title;
   $('p').innerHTML = md(st.say);
-  if (STAGE && ANIM && !seekMode && capFor !== cur) {   // once per step: a proof or theme toggle must not replay it
+  if (STAGE && ANIM && !seekMode && capFor !== cur && document.documentElement.dataset.theme === 'dark') {   // once per step: a proof or theme toggle must not replay it
     let i = 0;
     const words = n => [...n.childNodes].forEach(c => {
       if (c.nodeType !== 3) { words(c); return; }
@@ -2752,7 +2755,8 @@ function schedule(timing) {
   if (b) { b.style.setProperty('--dwell', wait + 'ms'); void b.offsetWidth; b.classList.add('timing'); }
   playTimer = setTimeout(() => last ? go(0) : go(cur + 1), wait);
 }
-function play() { playing = true; $('play').setAttribute('aria-label', 'Pause'); $('play').title = 'Pause (P)'; $('play-i').setAttribute('d', 'M8 5.5v13M16 5.5v13'); if (cur >= steps.length - 1) go(0); else go(cur, { keepHash: true }); }
+function play() { playing = true; $('play').setAttribute('aria-label', 'Pause'); $('play').title = 'Pause (P)'; $('play-i').setAttribute('d', 'M8 5.5v13M16 5.5v13'); if (cur >= steps.length - 1) go(0); else if (flowRested) go(cur, { keepHash: true }); else schedule({ t: 600, flowT: 0 }); }   // a rested step starts its packets again; a live one is left alone, its entrance may still be playing
+let flowRested = false;   // the packets of this step made their idle passes and stopped
 function stop() { playing = false; clearTimeout(playTimer); const b = timingBtn(); if (b) b.classList.remove('timing'); $('play').setAttribute('aria-label', 'Play'); $('play').title = 'Play (P)'; $('play-i').setAttribute('d', 'M8 5.5v13l10.5-6.5z'); }
 
 /* ---------- code panel: the real code behind a node or arrow ---------- */
@@ -2981,6 +2985,7 @@ function seekEnter(k) {
     running.push(...fxDepart(nodes.get(it.reverse ? it.e.to : it.e.from), flowDelay + it.start, seen));
     running.push(...fxArrive(nodes.get(it.reverse ? it.e.from : it.e.to), flowDelay + it.start + it.dur, seen));
   });
+  if (STAGE && k === 0) spotFrom = spotTo;   // nothing comes before step 1: the spot is simply there, whatever was sought before
   seekK = k;
 }
 function seek(k, ms = 0) {
@@ -3044,7 +3049,7 @@ async function boot() {
   if (qs.get('diff') === 'before') setDiffView('before');
   wire();
   const begin = () => { if (qs.has('play') && ANIM) play(); };
-  if (STAGE && ANIM && start === 0 && S.title && !qs.has('nointro')) {
+  if (STAGE && ANIM && start === 0 && S.title && !qs.has('nointro') && resolveTheme() === 'dark') {
     // The title alone in the dark, then the first step plays again from its entrance. Any key or click skips.
     const card = document.createElement('div'), h = document.createElement('h1');
     card.className = 'intro'; h.textContent = S.title; card.append(h);
@@ -3053,13 +3058,15 @@ async function boot() {
     let done = false;
     const lift = () => {
       if (done) return; done = true;
-      card.remove(); removeEventListener('keydown', lift, true);
+      card.remove(); removeEventListener('keydown', key, true);
       if (!seekMode && cur === 0) { cur = -1; capFor = -1; go(0, { keepHash: true }); }
       begin();
     };
+    // the key that lifts the card does nothing else: Space must not also step past the first step
+    const key = ev => { if (ev.metaKey || ev.ctrlKey || ev.altKey) return; ev.stopImmediatePropagation(); ev.preventDefault(); lift(); };
     card.addEventListener('animationend', ev => { if (ev.animationName === 'introOut') lift(); });
     card.addEventListener('click', ev => { ev.stopPropagation(); lift(); });
-    addEventListener('keydown', lift, true);
+    addEventListener('keydown', key, true);
   } else begin();
   document.documentElement.dataset.chalk = 'ready';
   readyResolve(window.chalk);
