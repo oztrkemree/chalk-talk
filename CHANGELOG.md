@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.3.0
 
 - **Stricter proof** (both skills). A `calls` string now has to match whole names (`"t("` no longer passes because the range contains `split(`), a match on a comment line doesn't count, and a range over 120 lines with `calls` is `broken` instead of proving anything. A talk that passed only by one of these turns `!` on the next build.
 - `build.mjs --strict` exits 1 when a proof is broken, so CI can catch a talk whose code has moved. The page is still written.
