@@ -18,10 +18,12 @@ page's script tag early; write it as `<\/script` (valid JSON, same text).
 9. [Notes and tags](#notes-and-tags)
 10. [Sequence layout](#sequence-layout)
 11. [Styles](#styles)
-12. [Layout rules the engine applies](#layout-rules-the-engine-applies)
-13. [Viewer controls and URL options](#viewer-controls-and-url-options)
-14. [Recording API](#recording-api)
-15. [Report messages and how to fix them](#report-messages-and-how-to-fix-them)
+12. [Stage](#stage)
+13. [Sound](#sound)
+14. [Layout rules the engine applies](#layout-rules-the-engine-applies)
+15. [Viewer controls and URL options](#viewer-controls-and-url-options)
+16. [Recording API](#recording-api)
+17. [Report messages and how to fix them](#report-messages-and-how-to-fix-them)
 
 ## Top level
 
@@ -37,7 +39,9 @@ page's script tag early; write it as `<\/script` (valid JSON, same text).
 | `spacing` | number | `1` | Multiplies the gaps between grid tracks. `0.8` tighter, `1.3` airier. |
 | `root` | string | none | Directory that node and edge `code` paths are relative to, itself relative to the scene file. Default: where the build runs, then the scene's folder. |
 | `editor` | `"vscode"` \| `"cursor"` \| `"zed"` \| `"idea"` \| `"none"` | `"vscode"` | Which editor the code panel's "open" link targets. Shown only when the page is opened from the author's disk. |
-| `camera` | boolean | `true` | Early steps with few things get a gentle zoom (max 1.3x) that eases out as the board fills. |
+| `camera` | `true` \| `"wide"` \| `false` | `true` | The camera moves in on what each step is about (what is new, flowing or focused; up to 1.6x in iso and chalk, 1.35x in the flat styles) and pulls back for the recap. Older things a close-up would cut in half or slide under the title step out of the picture. `"wide"` frames everything visible instead (max 1.3x); `false` never moves. A sequence diagram always uses the wide framing. |
+| `stage` | boolean | `false` | Plays the talk as a lit scene, see [Stage](#stage). Iso style, dark theme. |
+| `sound` | boolean | `true` | `false` starts muted. The viewer toggles it with `M`. See [Sound](#sound). |
 | `center` | boolean | `true` | Centers the drawing in the board area. |
 | `proof` | boolean | `true` when any node or edge has `code` (or an edge has `inferred`) | `false` hides all proof UI (marks, proof view, summary line). See [Proof](#proof). |
 | `diff` | object | none | Turns on [change mode](#change-mode): `{ "title": "PR #123 · Add retry queue", "base": "main", "head": "feat/x", "url": "https://github.com/..." }`. Only `title` is needed. |
@@ -285,8 +289,41 @@ previews another style without editing the scene; `CHALK_STYLE=` does the same f
 the floor, its status light blinks, a server's bays light up, a database lid ripples (a write), a
 browser or phone screen flashes, a message drops onto a queue; a packet leaving a queue takes the
 head message and the rest move up. The focused block settles once and its light breathes slowly.
-Nothing else moves on an idle board. All of it is driven by the step clock, so `chalk.seek(k, ms)`
+Left alone, the packets of a step make three passes and then rest; autoplay keeps them going
+until it moves on. All of it is driven by the step clock, so `chalk.seek(k, ms)`
 draws the same frame every time; `?snap` and reduced motion show the calm still picture.
+
+**Receipt.** When a packet lands on a `verified` edge, a small dark card opens beside the path
+for about a second with the matched line of code and `✓ file:line`. It keeps its size whatever
+the camera does and takes the first spot that covers no label and no block. Not in sequence
+diagrams, not on replies (`reverse`), not in the recap (the count line is there).
+
+## Stage
+
+`"stage": true` (or `?stage` on any iso talk) plays the talk as a lit scene instead of a diagram.
+Use it when the talk is meant to be watched: a demo, a README GIF, a presentation.
+
+- The house is dark. A spotlight, with a visible beam and dust drifting through it, sits on what
+  the step is about and glides there from the previous step. In the recap the house lights come up.
+- Every block the step is about throws its own colour on the floor.
+- The path lights up behind a packet and cools after it lands; the landing throws a ring and a few
+  sparks, in the packet's tone (`ok` green, `error` red).
+- In the recap no path cools: the whole trip glows at once.
+- The caption's words arrive one after another.
+- A talk opened at step 1 starts with its title alone in the dark. Any key or click skips it,
+  `?nointro` turns it off, recordings never show it.
+
+Stage needs the iso style and shows in the dark theme (it starts dark; `T` to light turns the
+effects off). The spotlight runs on the step clock, so `record.mjs` captures it. Still frames
+(`?snap`, `check.mjs`) show the plain board, so layout checks are not affected.
+
+## Sound
+
+Five short synthesized cues, no audio files: a step arriving, a packet leaving, a packet landing
+(lower for an `error` packet), a receipt, the recap. They play on the first pass of a step only.
+`M` or the speaker button mutes and the choice is remembered; `"sound": false` starts a talk
+muted for everyone. Browsers allow audio only after a click or key press, so a page opened with
+`?play` is silent until the viewer touches it. Never in still frames or recordings.
 
 ## Layout rules the engine applies
 
@@ -309,10 +346,14 @@ draws the same frame every time; `?snap` and reduced motion show the calm still 
 
 ## Viewer controls and URL options
 
-← / → / space step, `P` autoplay, `T` light / dark, `C` code of the current step, `V` proof
-view, `D` before / after, `1`–`9` jump, `Esc` closes the code panel; `#3` opens step 3. URL:
-`?theme=dark`, `?style=studio`, `?play` (autoplay; `?play=loop` starts over after the recap), `?proof` (start in proof view), `?diff=before`, `?snap` (still
+← / → / space step, `P` autoplay, `T` light / dark, `M` sound, `C` code of the current step, `V` proof
+view, `D` before / after, `1`–`9` jump, `Esc` closes the code panel; `#3` opens step 3. A focused
+button keeps Space and Enter for itself, and the open code panel keeps the keys that scroll it. URL:
+`?theme=dark`, `?style=studio`, `?stage`, `?nointro`, `?play` (autoplay; `?play=loop` starts over after the recap), `?proof` (start in proof view), `?diff=before`, `?snap` (still
 frame), `?debug` (boxes problems in red).
+
+During autoplay the current segment of the progress bar fills while the step is on, and a step
+ends between two packet passes, never in the middle of a hop.
 
 ## Recording API
 
