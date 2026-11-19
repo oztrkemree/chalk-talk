@@ -470,18 +470,18 @@ const fileLines = abs => {    // same split as Python's str.splitlines()
 // Whitespace is free around punctuation, but a name must match whole ("t(" is not in "split(")
 // and a match on a comment line does not count. Keep in sync with skills/chalk-talk/scripts/build.mjs.
 // shortcut: only whole-line comments are skipped (// /* * # -- <!--), not trailing ones or docstrings; upgrade to per-language comment parsing if agents start citing those.
-const WORD = /[\w$]/, COMMENT_LINE = /^\s*(\/\/|\/\*|\*(\s|\/|$)|#(\s|!|$)|--\s|<!--)/;
+const WORD = /[\p{L}\p{N}_$]/u, COMMENT_LINE = /^\s*(\/\/|\/\*|\*(\s|\/|$)|#(\s|!|$)|--\s|<!--)/;
 function findCall(src, needle) {
   const toks = String(needle).trim().split(/\s+/).filter(Boolean);
   if (!toks.length) return { line: 0 };
   let re = '', prev = '';
-  for (const tok of toks) for (let i = 0; i < tok.length; i++) {
-    const c = tok[i], names = WORD.test(prev) && WORD.test(c);
+  for (const tok of toks) for (const [i, c] of [...tok].entries()) {   // by code point: names are not only ASCII
+    const names = WORD.test(prev) && WORD.test(c);
     if (prev) re += i ? (names ? '' : '\\s*') : (names ? '\\s+' : '\\s*');
     re += c.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     prev = c;
   }
-  const rx = new RegExp((WORD.test(toks[0][0]) ? '(?<![\\w$])' : '') + re + (WORD.test(prev) ? '(?![\\w$])' : ''), 'g');
+  const rx = new RegExp((WORD.test([...toks[0]][0]) ? '(?<![\\p{L}\\p{N}_$])' : '') + re + (WORD.test(prev) ? '(?![\\p{L}\\p{N}_$])' : ''), 'gu');
   const text = src.lines.slice(src.start - 1, src.end).join('\n');
   let m, comment = false;
   while ((m = rx.exec(text))) {

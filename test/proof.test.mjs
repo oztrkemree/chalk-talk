@@ -19,6 +19,8 @@ const SRC = [
   'const out = db',                            // 4
   '  .query(sql);',                            // 5
   'send(out);',                                // 6
+  'yenidençağır(x);',                          // 7
+  'çağır(y);',                                 // 8
 ].join('\n');
 const LONG = Array.from({ length: 130 }, (_, i) => i === 124 ? 'send(out);' : `const v${i} = ${i};`).join('\n');
 
@@ -33,6 +35,8 @@ const CASES = [
   ['a call that is only in a comment proves nothing', 'src.js:1-1', 'db.query(', 'broken', 'comment'],
   ['"t(" is not the tail of "split("', 'src.js:1-6', 't(', 'broken', 'not found'],
   ['"spli" is not the head of "split"', 'src.js:1-6', 'spli', 'broken', 'not found'],
+  ['names are not only ASCII: "çağır(" is not the tail of "yenidençağır("', 'src.js:7-7', 'çağır(', 'broken', 'not found'],
+  ['a non-ASCII name still matches whole', 'src.js:7-8', 'çağır(', 'verified', 8],
   ['a whole call still matches', 'src.js:1-6', 'split(input)', 'verified', 3],
   ['spaces in the calls string are free around punctuation', 'src.js:1-6', 'send( out )', 'verified', 6],
   ['a range over 120 lines is too wide to prove a hop', 'long.js:1-130', 'send(out)', 'broken', '120'],
