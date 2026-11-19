@@ -129,7 +129,7 @@ and after. Drop the GIF into the PR description and reviewers see the change bef
 npx skills add oztrkemree/chalk-talk
 ```
 
-**By hand**: copy `skills/chalk-talk` into your agent's skills folder (`~/.claude/skills/`, `~/.codex/skills/`, ...).
+**By hand**: copy `skills/chalk-talk` (and `skills/frames`) into your agent's skills folder (`~/.claude/skills/`, `~/.codex/skills/`, ...).
 
 The scripts need Node 18+ (Windows, macOS, Linux). The visual self-check uses any installed
 Chrome, Edge, Brave or Chromium.

@@ -1,6 +1,6 @@
 {
   "name": "chalk-talk",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Ask how your code works and watch the journey: a step-by-step animated walkthrough in one HTML page, every arrow traced to a real line of code.",
   "author": { "name": "Emre Ozturk" },
   "homepage": "https://github.com/oztrkemree/chalk-talk",
