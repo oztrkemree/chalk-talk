@@ -402,6 +402,18 @@ body{background-color:var(--bg); background-image:var(--bg-image); background-si
    so nothing spills onto the caption bar and the floor grid can keep running to the page edge */
 #world .cam-out{opacity:0 !important; pointer-events:none}
 #world .elabel.cam-out{transition:opacity .45s ease}
+/* ---------- stage: the talk as a lit scene ---------- */
+[data-stage][data-theme="dark"]{--bg:#05080F; --grid-line:#101A2C; --track:#0F1A2D}
+.stage-dark{display:none; pointer-events:none}
+[data-stage][data-theme="dark"] .stage-dark{display:inline}
+.pk-trace{fill:none; stroke:var(--accent); stroke-width:3; stroke-linecap:round; stroke-linejoin:round; pointer-events:none}
+.pk-trace.glow{stroke-width:11; filter:url(#iso-blur)}
+.pk-ring{fill:none; stroke:var(--accent); stroke-width:2.4; pointer-events:none}
+:is(.pk-trace,.pk-ring).t-ok{stroke:var(--ok)} :is(.pk-trace,.pk-ring).t-error{stroke:var(--error)}
+:is(.pk-trace,.pk-ring).t-warn{stroke:var(--warn)} :is(.pk-trace,.pk-ring).t-info{stroke:var(--info)}
+[data-stage][data-theme="dark"] .pk-glow{opacity:.95}
+[data-stage][data-theme="dark"] .el.dim{opacity:.34}   /* the dark already does the fading */
+[data-stage] .txt h2{font-size:25px} [data-stage] .txt p{font-size:18.5px}
 .pk-code{pointer-events:none}
 .pk-code :is(rect,path){fill:var(--ink)}
 .pk-code text.t-packet{fill:var(--bg)}   /* two classes: has to beat the chalk rule for .t-packet */
@@ -699,6 +711,7 @@ if (S.style && !STYLES[S.style]) issue('warn', 'scene', `unknown style "${S.styl
 const ST = STYLES[STYLE_NAME];
 const ISO = !!ST.iso;
 const CHALK = !!ST.chalk;   // chalk is the iso geometry drawn as a teacher's board
+const STAGE = ISO && !CHALK && !SNAP && (S.stage === true || qs.has('stage'));   // the lit-scene look, see spotlight()
 document.documentElement.dataset.style = STYLE_NAME;
 const LANG = S.lang || 'en';
 
@@ -1884,6 +1897,11 @@ function draw() {
   if (CHALK) ['haze', 'dust'].forEach(k => el('rect', { x: 0, y: 0, width: W, height: H, class: 'chalk-' + k, filter: `url(#chalk-${k})` }, board));   // old erasures and dust on the slate
   L.world = el('g', { id: 'world' }, board);
   ['floor', 'groups', 'edges', 'floorfx', 'nodes', 'labels', 'notes', 'focus', 'packets', 'debug'].forEach(k => L[k] = el('g', { id: 'L-' + k }, L.world));
+  if (STAGE) {   // the dark of the house: clear in the middle of the spot, falling off to near black, over the board and under the title
+    L.spot = el('radialGradient', { id: 'stage-spot', gradientUnits: 'userSpaceOnUse', cx: spotNow[0], cy: spotNow[1], r: spotNow[2] }, defs);
+    [[0, 0], [0.46, 0], [0.74, 0.5], [1, 0.84]].forEach(([offset, a]) => el('stop', { offset, 'stop-color': '#02040A', 'stop-opacity': a }, L.spot));
+    el('rect', { x: -W, y: -H, width: 3 * W, height: 3 * H, class: 'stage-dark', fill: 'url(#stage-spot)' }, board);
+  }
   L.title = el('g', { id: 'L-title' }, board);
   drawTitle();
   if (ISO) el('rect', { x: -1200, y: -900, width: 4000, height: 2700, fill: 'url(#iso-grid)', mask: 'url(#iso-mask)' }, L.floor);
@@ -2267,6 +2285,35 @@ function portraitCrop(st) {
   const w = Math.max(bb.w, bb.h * ratio, 560), h = w / ratio;
   return [bb.x + bb.w / 2 - w / 2, bb.y + bb.h / 2 - h / 2, w, h];
 }
+/* Stage ("stage": true or ?stage; iso, dark): the talk as a lit scene. A spotlight sits on what
+   the step is about and glides there from the last step; the recap brings the house lights up.
+   spotAt(ms) draws it ms after the step began, so the live page and seek() share one clock. */
+let spotNow = [W / 2, H / 2, 4200], spotFrom = spotNow, spotTo = spotNow, spotRAF = 0;
+function spotAt(ms) {
+  const e = easeInOut(Math.min(1, Math.max(0, ms) / 950));
+  spotNow = spotFrom.map((v, i) => v + (spotTo[i] - v) * e);
+  if (L.spot) ['cx', 'cy', 'r'].forEach((a, i) => L.spot.setAttribute(a, f1(spotNow[i])));
+}
+function spotlight(st, c, smoothly) {
+  const rs = [];
+  if (!st.recap) st.activeSet.forEach(id => {
+    const o = all.get(id);
+    if (!o || !st.visible.has(id)) return;
+    if (o.type === 'node') rs.push(o.box);
+    if (o.type === 'edge') { rs.push(ptsBounds(o.pts)); if (o.lbox) rs.push(o.lbox); }
+  });
+  spotFrom = spotNow.slice();
+  spotTo = [W / 2, H / 2, 4200];   // house lights: the whole board
+  if (rs.length) {
+    const bb = unionRect(rs), s = c ? c.s : 1;
+    spotTo = [(bb.x + bb.w / 2) * s + (c ? c.tx : 0), (bb.y + bb.h / 2) * s + (c ? c.ty : 0), (Math.max(bb.w, bb.h * 1.5) * s * 0.5 + 115) / 0.46];
+  }
+  cancelAnimationFrame(spotRAF);
+  if (!smoothly || seekMode) { spotAt(Infinity); return; }   // seek() then places it by its own clock
+  const t0 = performance.now(), tick = now => { spotAt(now - t0); if (now - t0 < 950) spotRAF = requestAnimationFrame(tick); };
+  spotRAF = requestAnimationFrame(tick);
+}
+
 let framed = false, camS = 1;
 function frame(st) {
   const smoothly = ANIM && framed; framed = true;
@@ -2276,6 +2323,7 @@ function frame(st) {
   // shortcut: the move animates a transform on an SVG <g>, which Chrome lays out again every frame (about 20x the layout of a step without the camera; will-change changes nothing). Upgrade by moving the world into its own <svg> and transforming that HTML box if the move stutters on real phones.
   L.world.style.transform = now;
   camS = c ? c.s : 1;
+  if (STAGE) spotlight(st, c, smoothly);
   // A close-up leaves some older things half in the frame or under the title. Those step out;
   // what the step is about is always inside AREA, so it is never one of them.
   const tb = pad(titleBox, 8);
@@ -2399,10 +2447,16 @@ function startFlows(st, delay) {
     }
     g.style.opacity = 0;
     it.g = g; dyn.push(g);
+    if (STAGE && ANIM) {   // on a stage the path lights up behind the packet and the landing rings
+      const d = it.e.pathEl.getAttribute('d'), tc = tone ? ' t-' + tone : '', end = it.e.pathEl.getPointAtLength(it.reverse ? 0 : it.len);
+      it.trace = ['pk-trace glow', 'pk-trace'].map(c => el('path', { d, class: c + tc, 'stroke-dasharray': `${f1(it.len)} ${f1(it.len)}`, 'stroke-dashoffset': f1(it.len) }, L.floorfx));
+      it.ring = el('ellipse', { cx: f1(end.x), cy: f1(end.y), rx: 1, ry: 0.5, class: 'pk-ring' + tc }, L.floorfx);
+      [...it.trace, it.ring].forEach(x => { x.style.opacity = 0; dyn.push(x); });
+    }
     // a proven hop shows its receipt: where the packet lands it opens into the verified line of code
     const pr = it.e.proof, cd = it.e.code;
     // (not in a sequence diagram: the next message row is too close for a card)
-    if (ANIM && PROOF && !SEQ && !it.reverse && pr && pr.status === 'verified' && pr.hit && cd && cd.text != null) {
+    if (ANIM && PROOF && !SEQ && !st.recap && !it.reverse && pr && pr.status === 'verified' && pr.hit && cd && cd.text != null) {
       let line = [...(cd.text.split('\n')[pr.hit - cd.start] || '').trim()];
       if (line.length) {
         if (line.length > 46) line = [...line.slice(0, 45), '…'];
@@ -2479,10 +2533,21 @@ function startFlows(st, delay) {
   flowItems = items; flowDelay = delay; flowSpan = span + (items.some(it => it.card) ? CARD_MS : 0);   // recorders wait for the last receipt
   let liveCycle = -1, liveSeen = new Map();
   flowAt = (tt0, live) => {
-    if (tt0 < 0) { items.forEach(it => { it.g.style.opacity = 0; if (it.tail) it.tail.style.opacity = 0; if (it.card) it.card.style.opacity = 0; }); return; }
+    if (tt0 < 0) { items.forEach(it => { [it.g, it.tail, it.card, it.ring, ...(it.trace || [])].forEach(x => { if (x) x.style.opacity = 0; }); it.traceOn = it.cardOn = false; }); return; }
     const c = Math.floor(tt0 / cycle), tt = tt0 % cycle;
     if (live && c !== liveCycle) { liveCycle = c; liveFx.forEach(a => a.cancel()); liveFx = []; liveSeen = new Map(); }
     items.forEach(it => {
+      if (it.trace) {   // the lit path grows with the packet, then cools; the ring opens where it lands
+        const q = (tt - it.start) / it.dur, cool = (tt - it.start - it.dur) / 1000, on = q >= 0 && cool <= 1;
+        if (on || it.traceOn) {
+          it.traceOn = on;
+          const off = it.len * (1 - easeInOut(Math.min(1, Math.max(0, q)))) * (it.reverse ? -1 : 1), op = !on ? 0 : cool > 0 ? 1 - cool : 1;
+          it.trace.forEach((t, i) => { t.setAttribute('stroke-dashoffset', f1(off)); t.style.opacity = i ? op : op * 0.55; });
+          const r = cool >= 0 && cool <= 0.7 ? cool / 0.7 : -1, rx = 10 + 52 * (1 - (1 - r) * (1 - r));
+          it.ring.style.opacity = r < 0 ? 0 : (1 - r) * 0.9;
+          if (r >= 0) { it.ring.setAttribute('rx', f1(rx)); it.ring.setAttribute('ry', f1(rx * 0.5)); }
+        }
+      }
       if (it.card) {   // pops open as the packet lands, holds, fades
         const q = (tt - it.start - it.dur + 120) / CARD_MS, on = q >= 0 && q <= 1;
         if (on || it.cardOn) {   // nothing to write while it stays closed
@@ -2721,7 +2786,7 @@ const THEME_ALIAS = { light: 'light', dark: 'dark', paper: 'light', chalk: 'dark
 const DARK = matchMedia('(prefers-color-scheme: dark)');
 let themeChoice = null;
 function resolveTheme() {
-  return themeChoice || THEME_ALIAS[qs.get('theme')] || THEME_ALIAS[S.theme] || ST.theme || (DARK.matches ? 'dark' : 'light');
+  return themeChoice || THEME_ALIAS[qs.get('theme')] || THEME_ALIAS[S.theme] || ST.theme || (STAGE || DARK.matches ? 'dark' : 'light');   // a stage is dark unless the viewer flips it
 }
 function applyTheme() { document.documentElement.dataset.theme = resolveTheme(); }
 
@@ -2853,6 +2918,7 @@ function seek(k, ms = 0) {
   ms = Math.max(0, +ms || 0);
   running.forEach(a => { a.pause(); a.currentTime = ms; });
   if (flowAt) flowAt(ms - flowDelay, false);
+  if (STAGE) spotAt(ms);
 }
 // ms until step k has finished moving: entrances, notes, focus, camera and one pass of its packets
 function duration(k) {
@@ -2874,6 +2940,7 @@ function fatal(msg) {
 async function boot() {
   if (S.title) { document.title = S.title; $('sr-title').textContent = S.title + (S.subtitle ? ' - ' + S.subtitle : ''); }
   document.documentElement.lang = LANG;
+  if (STAGE) document.documentElement.dataset.stage = '';
   if (!ANIM) document.documentElement.classList.add('still');
   if (!SNAP) { try { const saved = localStorage.getItem('chalk-talk-theme'); if (saved === 'light' || saved === 'dark') themeChoice = saved; } catch (_) {} }
   if (!SNAP) { try { const saved = localStorage.getItem('chalk-talk-sound'); if (saved === 'off' || (saved === 'on' && S.sound !== false)) soundOn = saved === 'on'; } catch (_) {} }   // a talk its author muted starts muted for everyone
