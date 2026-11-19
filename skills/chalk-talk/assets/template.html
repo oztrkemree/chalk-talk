@@ -397,8 +397,10 @@ body{background-color:var(--bg); background-image:var(--bg-image); background-si
 .floor-ripple{fill:none; stroke:var(--accent); stroke-width:2.2}
 .fx{opacity:0}
 .fx-t{transform-box:fill-box; transform-origin:center}
-.cam-close #board{overflow:hidden}   /* a close-up never spills onto the caption bar */
-#world .cam-out{opacity:0; pointer-events:none}   /* what a close-up would cut in half, or slide under the title, steps out */
+/* what a close-up would push off the board, cut in half or slide under the title steps out,
+   so nothing spills onto the caption bar and the floor grid can keep running to the page edge */
+#world .cam-out{opacity:0 !important; pointer-events:none}
+#world .elabel.cam-out{transition:opacity .45s ease}
 .cam-moving #world{will-change:transform}
 .pk-code{pointer-events:none}
 .pk-code :is(rect,path){fill:var(--ink)}
@@ -2277,21 +2279,23 @@ function frame(st) {
   }
   L.world.style.transform = now;
   camS = c ? c.s : 1;
-  document.documentElement.classList.toggle('cam-close', !!c);
   // A close-up leaves some older things half in the frame or under the title. Those step out;
   // what the step is about is always inside AREA, so it is never one of them.
   const tb = pad(titleBox, 8);
-  const cut = b => {
+  const cut = b => {   // not wholly on the board, or under the title
     if (!c || !c.close || !b) return false;
     const r = rect(b.x * c.s + c.tx, b.y * c.s + c.ty, b.w * c.s, b.h * c.s);
-    if (r.x >= W || r.y >= H || r.x + r.w <= 0 || r.y + r.h <= 0) return false;   // fully outside: the clip hides it
     return r.x < 0 || r.y < 0 || r.x + r.w > W || r.y + r.h > H || (titleBox.w > 0 && hit(tb, r));
   };
+  const gone = new Set();
+  all.forEach((o, id) => { if (o.type !== 'edge' && !st.activeSet.has(id) && cut(o.box)) gone.add(id); });
   all.forEach((o, id) => {
-    const act = st.activeSet.has(id);
-    const outG = !act && o.type === 'node' && cut(o.box), outL = !act && (o.type === 'edge' ? cut(o.lbox) : outG);
+    // an arrow leaves with either of its ends, so none points into empty space; its label can also leave alone
+    const edge = o.type === 'edge', outG = edge ? !st.activeSet.has(id) && (gone.has(o.from) || gone.has(o.to)) : gone.has(id);
+    const outL = outG || (edge && !st.activeSet.has(id) && cut(o.lbox));
+    const lg = o.lg || (edge && o.g ? o.g.querySelector('.elabel') : null);   // flat styles keep the label inside the edge
     if (o.g) o.g.classList.toggle('cam-out', outG);
-    if (o.lg) o.lg.classList.toggle('cam-out', outL);
+    if (lg) lg.classList.toggle('cam-out', outL);
   });
 }
 
@@ -2422,7 +2426,7 @@ function startFlows(st, delay) {
         cardBoxes.push(spot.r);
         const up = spot.up, gap = spot.gap, card = el('g', { class: 'pk-code' }, L.packets), inner = el('g', {}, card);
         el('rect', { x: f1(-w / 2), y: up ? -58 : 8, width: f1(w), height: 50, rx: 9 }, inner);
-        el('path', { d: up ? 'M-7 -9L0 0L7 -9Z' : 'M-7 9L0 0L7 9Z' }, inner);
+        if (gap < 20 * k) el('path', { d: up ? 'M-7 -9L0 0L7 -9Z' : 'M-7 9L0 0L7 9Z' }, inner);   // a pointer only when it reaches the path
         text(inner, line.join(''), 0, up ? -40 : 26, 't-packet');
         text(inner, '✓ ' + src, 0, up ? -22 : 44, 't-packet pk-src');
         card.setAttribute('transform', `translate(${f1(spot.pt.x)} ${f1(spot.pt.y + (up ? -gap : gap))})`);
@@ -2508,7 +2512,8 @@ function startFlows(st, delay) {
   const begin = performance.now() + delay;
   // Left alone, the packets make three passes and rest; autoplay keeps them going until it moves on.
   const tick = now => {
-    if (!playing && now - begin >= IDLE_PASSES * cycle) { flowAt(-1, true); flowRAF = 0; return; }
+    // (only in the quiet end of a pass, so pausing a long autoplay step never cuts a packet off mid-hop)
+    if (!playing && now - begin >= IDLE_PASSES * cycle && (now - begin) % cycle >= cycle - 200) { flowAt(-1, true); flowRAF = 0; return; }
     flowAt(now - begin, true); flowRAF = requestAnimationFrame(tick);
   };
   flowRAF = requestAnimationFrame(tick);
@@ -2608,13 +2613,13 @@ function schedule(timing) {
   // Leave between two packet passes, never in the middle of a hop: flowT is the delay plus one
   // pass with its rest, so the first pass boundary after the reading time is where the step ends.
   let wait = timing.t + read;
-  if (timing.flowT) { const pass = timing.flowT - flowDelay; wait = flowDelay + Math.max(1, Math.ceil((wait - flowDelay) / pass)) * pass - 250; }
+  if (timing.flowT && ANIM) { const pass = timing.flowT - flowDelay; wait = flowDelay + Math.max(1, Math.ceil((wait - flowDelay) / pass)) * pass - 250; }
   wait += last ? 1200 : 0;
   const b = document.querySelectorAll('.progress button')[cur];
   if (b) { b.style.setProperty('--dwell', wait + 'ms'); void b.offsetWidth; b.classList.add('timing'); }
   playTimer = setTimeout(() => last ? go(0) : go(cur + 1), wait);
 }
-function play() { playing = true; $('play').setAttribute('aria-label', 'Pause'); $('play').title = 'Pause (P)'; $('play-i').setAttribute('d', 'M8 5.5v13M16 5.5v13'); go(cur >= steps.length - 1 ? 0 : cur, { keepHash: true }); }
+function play() { playing = true; $('play').setAttribute('aria-label', 'Pause'); $('play').title = 'Pause (P)'; $('play-i').setAttribute('d', 'M8 5.5v13M16 5.5v13'); if (cur >= steps.length - 1) go(0); else go(cur, { keepHash: true }); }
 function stop() { playing = false; clearTimeout(playTimer); const b = timingBtn(); if (b) b.classList.remove('timing'); $('play').setAttribute('aria-label', 'Play'); $('play').title = 'Play (P)'; $('play-i').setAttribute('d', 'M8 5.5v13l10.5-6.5z'); }
 
 /* ---------- code panel: the real code behind a node or arrow ---------- */
@@ -2737,6 +2742,8 @@ function wire() {
   };
   DARK.addEventListener('change', applyTheme);
   $('sound').onclick = () => { setSound(!soundOn); try { localStorage.setItem('chalk-talk-sound', soundOn ? 'on' : 'off'); } catch (_) {} if (soundOn) SFX.proof(); };
+  // a mouse click leaves keyboard focus where it was, so Space still means "next" after clicking a control
+  document.querySelector('.bar').addEventListener('mousedown', ev => { if (ev.target.closest('button')) ev.preventDefault(); });
   ['pointerdown', 'keydown'].forEach(t => addEventListener(t, () => { touched = true; }, { capture: true, once: true }));
   document.addEventListener('keydown', ev => {
     if (ev.metaKey || ev.ctrlKey || ev.altKey) return;
@@ -2872,7 +2879,7 @@ async function boot() {
   document.documentElement.lang = LANG;
   if (!ANIM) document.documentElement.classList.add('still');
   if (!SNAP) { try { const saved = localStorage.getItem('chalk-talk-theme'); if (saved === 'light' || saved === 'dark') themeChoice = saved; } catch (_) {} }
-  if (!SNAP) { try { const saved = localStorage.getItem('chalk-talk-sound'); if (saved === 'on' || saved === 'off') soundOn = saved === 'on'; } catch (_) {} }
+  if (!SNAP) { try { const saved = localStorage.getItem('chalk-talk-sound'); if (saved === 'off' || (saved === 'on' && S.sound !== false)) soundOn = saved === 'on'; } catch (_) {} }   // a talk its author muted starts muted for everyone
   setSound(soundOn);
   $('sound').hidden = !ANIM;   // no motion, no cues to play
   if (qs.get('theme')) themeChoice = THEME_ALIAS[qs.get('theme')] || null;
