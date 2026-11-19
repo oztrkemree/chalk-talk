@@ -1,8 +1,9 @@
 #!/usr/bin/env node
 // Build a chalk-talk frames story: check the story, then inline the engine and the story into one HTML file.
 //
-//   node build.mjs path/to/name.story.json [out.html]
+//   node build.mjs [--strict] path/to/name.story.json [out.html]
 //
+// --strict exits 1 when any flow's proof is broken (the page is still written), for CI.
 // Default output: the story path with ".story.json" (or ".json") replaced by ".html".
 // Errors (unknown lens, missing fields, broken references, bad whatif expressions) stop the build;
 // warnings and hints are printed and the page is still written. Rules: ../SPEC.md.
@@ -16,7 +17,8 @@
 // directory, else the story's directory. Inside a GitHub checkout a permalink is added.
 // CHALK_SHARE=1 leaves local absolute paths out (for pages sent to other people).
 // Proof: every flow gets proof.status verified | cited | inferred | unproven | broken
-// ("calls" strings must appear in the cited lines, whitespace ignored; "inferred" is an honest guess).
+// ("calls" strings must appear in the cited lines, as whole names and outside comment lines;
+// "inferred" is an honest guess).
 import fs from 'node:fs';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
@@ -464,18 +466,31 @@ const fileLines = abs => {    // same split as Python's str.splitlines()
   if (ls.length && ls[ls.length - 1] === '') ls.pop();
   return ls;
 };
-function findCall(src, needle) {    // line of `needle` in the cited range, all whitespace ignored; 0 = absent
-  const want = String(needle).replace(/\s+/g, '');
-  if (!want) return 0;
-  let flat = '';
-  const lineOf = [];
-  for (let ln = src.start; ln <= src.end; ln++) {
-    const s = src.lines[ln - 1].replace(/\s+/g, '');
-    flat += s;
-    for (let i = 0; i < s.length; i++) lineOf.push(ln);
+// Where does `needle` occur in lines[start-1..end-1]? -> { line } 1-based, or { line: 0, comment }.
+// Whitespace is free around punctuation, but a name must match whole ("t(" is not in "split(")
+// and a match on a comment line does not count. Keep in sync with skills/chalk-talk/scripts/build.mjs.
+// shortcut: only whole-line comments are skipped (// /* * # -- <!--), not trailing ones or docstrings; upgrade to per-language comment parsing if agents start citing those.
+const WORD = /[\p{L}\p{N}_$]/u, COMMENT_LINE = /^\s*(\/\/|\/\*|\*(\s|\/|$)|#(\s|!|$)|--\s|<!--)/;
+function findCall(src, needle) {
+  const toks = String(needle).trim().split(/\s+/).filter(Boolean);
+  if (!toks.length) return { line: 0 };
+  let re = '', prev = '';
+  for (const tok of toks) for (const [i, c] of [...tok].entries()) {   // by code point: names are not only ASCII
+    const names = WORD.test(prev) && WORD.test(c);
+    if (prev) re += i ? (names ? '' : '\\s*') : (names ? '\\s+' : '\\s*');
+    re += c.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    prev = c;
   }
-  const at = flat.indexOf(want);
-  return at < 0 ? 0 : lineOf[at];
+  const rx = new RegExp((WORD.test([...toks[0]][0]) ? '(?<![\\p{L}\\p{N}_$])' : '') + re + (WORD.test(prev) ? '(?![\\p{L}\\p{N}_$])' : ''), 'gu');
+  const text = src.lines.slice(src.start - 1, src.end).join('\n');
+  let m, comment = false;
+  while ((m = rx.exec(text))) {
+    const line = src.start + text.slice(0, m.index).split('\n').length - 1;
+    if (!COMMENT_LINE.test(src.lines[line - 1])) return { line };
+    comment = true;
+    rx.lastIndex = m.index + 1;
+  }
+  return { line: 0, comment };
 }
 function proofOf(flow, src) {
   if (src) {
@@ -486,10 +501,12 @@ function proofOf(flow, src) {
     const at = { file: src.file, start: src.start, end: src.end };
     const calls = arr(flow.calls);
     if (!calls.length) return { status: 'cited', ...at };
+    const span = src.end - src.start + 1;
+    if (span > MAX_LINES) return { status: 'broken', ...at, why: `${range} is ${span} lines, too wide to prove a hop; cite ${MAX_LINES} lines or fewer around the call` };
     let hit = 0;
     for (const c of calls) {
-      const ln = findCall(src, c);
-      if (!ln) return { status: 'broken', ...at, why: `calls ${JSON.stringify(String(c))} not found in ${range}` };
+      const { line: ln, comment } = findCall(src, c);
+      if (!ln) return { status: 'broken', ...at, why: `calls ${JSON.stringify(String(c))} ${comment ? 'only appears in a comment' : 'not found'} in ${range}` };
       hit = hit || ln;
     }
     return { status: 'verified', ...at, hit };
@@ -561,8 +578,9 @@ export const registeredLenses = files => [...new Set(files.filter(f => fs.exists
 /* ---------- main ---------- */
 function main() {
   const die = msg => { console.error('build: ' + msg); process.exit(1); };
-  const [storyPath, outArg] = process.argv.slice(2);
-  if (!storyPath) die('usage: node build.mjs story.json [out.html]');
+  const args = process.argv.slice(2), strict = args.includes('--strict');   // --strict: exit 1 on a broken proof (for CI)
+  const [storyPath, outArg] = args.filter(a => a !== '--strict');
+  if (!storyPath) die('usage: node build.mjs [--strict] story.json [out.html]');
   if (!fs.existsSync(storyPath) || !fs.statSync(storyPath).isFile()) die('no such story file: ' + storyPath);
   const out = outArg || (storyPath.endsWith('.story.json') ? storyPath.slice(0, -11) + '.html'
     : storyPath.endsWith('.json') ? storyPath.slice(0, -5) + '.html' : storyPath + '.html');
@@ -603,6 +621,7 @@ function main() {
   fs.mkdirSync(path.dirname(path.resolve(out)), { recursive: true });
   fs.writeFileSync(out, page);
   console.log(out);
+  if (strict && proof.summary && proof.summary.broken) die('--strict: broken proof (the page was still written, open it to see the ! marks)');
 }
 
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) main();

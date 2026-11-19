@@ -13,11 +13,13 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+      - name: Proof rules
+        run: node --test test/proof.test.mjs
       - name: Build examples
         shell: bash
         run: |
           for s in skills/chalk-talk/examples/*.scene.json; do
-            node skills/chalk-talk/scripts/build.mjs "$s" "$RUNNER_TEMP/$(basename "$s" .scene.json).html"
+            node skills/chalk-talk/scripts/build.mjs --strict "$s" "$RUNNER_TEMP/$(basename "$s" .scene.json).html"
           done
       - name: Check examples (layout + proof)
         if: matrix.os == 'ubuntu-latest'

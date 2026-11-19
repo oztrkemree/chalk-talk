@@ -1,8 +1,9 @@
 #!/usr/bin/env node
 // Build a chalk talk: put a scene JSON into the template and write one self-contained HTML file.
 //
-//   node build.mjs path/to/name.scene.json [out.html]
+//   node build.mjs [--strict] path/to/name.scene.json [out.html]
 //
+// --strict exits 1 when any edge's proof is broken (the page is still written), for CI.
 // Default output: the scene path with ".scene.json" (or ".json") replaced by ".html".
 //
 // A node or edge can point at the real code; the snippet gets embedded so clicking it shows the code:
@@ -15,7 +16,8 @@
 // CHALK_SHARE=1 leaves local absolute paths out (for pages sent to other people).
 //
 // Proof: every edge gets proof.status verified | cited | inferred | unproven | broken
-// (edge "calls" strings must appear in the cited lines; "inferred" is an honest guess).
+// (edge "calls" strings must appear in the cited lines, as whole names and outside comment lines;
+// "inferred" is an honest guess).
 import fs from 'node:fs';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
@@ -25,8 +27,9 @@ const MAX_LINES = 120, TOP_LINES = 40, AFTER_ONE = 24;
 const here = path.dirname(fileURLToPath(import.meta.url));
 const die = msg => { console.error('build: ' + msg); process.exit(1); };
 
-const [scenePath, outArg] = process.argv.slice(2);
-if (!scenePath) die('usage: node build.mjs scene.json [out.html]');
+const args = process.argv.slice(2), strict = args.includes('--strict');   // --strict: exit 1 on a broken proof (for CI)
+const [scenePath, outArg] = args.filter(a => a !== '--strict');
+if (!scenePath) die('usage: node build.mjs [--strict] scene.json [out.html]');
 if (!fs.existsSync(scenePath) || !fs.statSync(scenePath).isFile()) die('no such scene file: ' + scenePath);
 const out = outArg || (scenePath.endsWith('.scene.json') ? scenePath.slice(0, -11) + '.html'
   : scenePath.endsWith('.json') ? scenePath.slice(0, -5) + '.html' : scenePath + '.html');
@@ -106,19 +109,31 @@ function resolve(where, spec) {
   return { code, src };
 }
 
-// Where does `needle` occur in lines[start-1..end-1], ignoring all whitespace? -> 1-based line or 0.
+// Where does `needle` occur in lines[start-1..end-1]? -> { line } 1-based, or { line: 0, comment }.
+// Whitespace is free around punctuation, but a name must match whole ("t(" is not in "split(")
+// and a match on a comment line does not count. Keep in sync with skills/frames/scripts/build.mjs.
+// shortcut: only whole-line comments are skipped (// /* * # -- <!--), not trailing ones or docstrings; upgrade to per-language comment parsing if agents start citing those.
+const WORD = /[\p{L}\p{N}_$]/u, COMMENT_LINE = /^\s*(\/\/|\/\*|\*(\s|\/|$)|#(\s|!|$)|--\s|<!--)/;
 function findCall(src, needle) {
-  const want = String(needle).replace(/\s+/g, '');
-  if (!want) return 0;
-  let flat = '';
-  const lineOf = [];
-  for (let ln = src.start; ln <= src.end; ln++) {
-    const s = src.lines[ln - 1].replace(/\s+/g, '');
-    flat += s;
-    for (let i = 0; i < s.length; i++) lineOf.push(ln);
+  const toks = String(needle).trim().split(/\s+/).filter(Boolean);
+  if (!toks.length) return { line: 0 };
+  let re = '', prev = '';
+  for (const tok of toks) for (const [i, c] of [...tok].entries()) {   // by code point: names are not only ASCII
+    const names = WORD.test(prev) && WORD.test(c);
+    if (prev) re += i ? (names ? '' : '\\s*') : (names ? '\\s+' : '\\s*');
+    re += c.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    prev = c;
   }
-  const at = flat.indexOf(want);
-  return at < 0 ? 0 : lineOf[at];
+  const rx = new RegExp((WORD.test([...toks[0]][0]) ? '(?<![\\p{L}\\p{N}_$])' : '') + re + (WORD.test(prev) ? '(?![\\p{L}\\p{N}_$])' : ''), 'gu');
+  const text = src.lines.slice(src.start - 1, src.end).join('\n');
+  let m, comment = false;
+  while ((m = rx.exec(text))) {
+    const line = src.start + text.slice(0, m.index).split('\n').length - 1;
+    if (!COMMENT_LINE.test(src.lines[line - 1])) return { line };
+    comment = true;
+    rx.lastIndex = m.index + 1;
+  }
+  return { line: 0, comment };
 }
 
 function proofOf(edge, src) {
@@ -130,10 +145,12 @@ function proofOf(edge, src) {
     const at = { file: src.file, start: src.start, end: src.end };
     const calls = arr(edge.calls);
     if (!calls.length) return { status: 'cited', ...at };
+    const span = src.end - src.start + 1;
+    if (span > MAX_LINES) return { status: 'broken', ...at, why: `${range} is ${span} lines, too wide to prove a hop; cite ${MAX_LINES} lines or fewer around the call` };
     let hit = 0;
     for (const c of calls) {
-      const ln = findCall(src, c);
-      if (!ln) return { status: 'broken', ...at, why: `calls ${JSON.stringify(String(c))} not found in ${range}` };
+      const { line: ln, comment } = findCall(src, c);
+      if (!ln) return { status: 'broken', ...at, why: `calls ${JSON.stringify(String(c))} ${comment ? 'only appears in a comment' : 'not found'} in ${range}` };
       hit = hit || ln;      // the line of the first calls string
     }
     return { status: 'verified', ...at, hit };
@@ -182,3 +199,4 @@ if (at < 0) die('template has no __SCENE__ line');
 fs.mkdirSync(path.dirname(path.resolve(out)), { recursive: true });
 fs.writeFileSync(out, tpl.slice(0, at) + text.replace(/\r\n?/g, '\n') + tpl.slice(at + '__SCENE__'.length));
 console.log(out);
+if (strict && edges.some(e => e.proof && e.proof.status === 'broken')) die('--strict: broken proof (the page was still written, open it to see the ! marks)');

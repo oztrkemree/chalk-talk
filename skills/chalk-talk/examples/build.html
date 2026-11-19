@@ -664,13 +664,14 @@ html:not(.diff-before) .edge.chg-removed :is(.edge-line,.iso-path){stroke-dashar
    ],
    "code": {
     "file": "scripts/build.mjs",
-    "start": 146,
-    "end": 174,
-    "text": "const nodes = items('nodes'), edges = items('edges');\nconst proofOn = scene.proof !== false && (scene.proof === true ||\n  [...nodes, ...edges].some(x => 'code' in x) || edges.some(e => e.inferred != null));\nlet text = raw.replace(/\\r?\\n$/, '');\nif (raw.includes('\"code\"') || proofOn) {\n  const sources = new Map();\n  nodes.forEach((n, i) => { if ('code' in n) n.code = resolve(n.id || `nodes[${i}]`, n.code).code; });\n  edges.forEach((e, i) => {\n    if ('code' in e) { const r = resolve(e.id || `edges[${i}]`, e.code); e.code = r.code; sources.set(e, r.src); }\n    else if (e.calls != null && proofOn) warnings.push(`${e.id || `edges[${i}]`}: \"calls\" needs a \"code\" range to check against; ignored`);\n  });\n  for (const w of warnings) console.error('build: warn ' + w);\n\n  if (proofOn) {\n    const ids = new Map(edges.map((e, i) => [String(e.id || `e${i + 1}`), e]));\n    edges.forEach(e => { e.proof = proofOf(e, sources.get(e)); });\n    for (const [id, e] of ids) if (e.proof.status === 'broken') console.error(`WARNING proof: edge ${id} -> ${e.proof.why}`);\n    const flowed = new Set(items('steps').flatMap(st => arr(st.flow).map(f => String(typeof f === 'string' ? f : f && f.edge))));\n    const counted = [...ids].filter(([id]) => flowed.has(id)).map(([, e]) => e);\n    const pool = counted.length ? counted : edges;\n    const sum = { total: pool.length, verified: 0, cited: 0, inferred: 0, unproven: 0, broken: 0 };\n    pool.forEach(e => sum[e.proof.status]++);\n    scene.proofSummary = sum;\n    const traced = sum.verified + sum.cited;\n    console.error(`proof: ${traced}/${sum.total} hops traced to code (${sum.verified} verified, ${sum.cited} cited) · ${sum.inferred} inferred` +\n      (sum.unproven ? ` · ${sum.unproven} unproven` : '') + ` · ${sum.broken} broken`);\n  }\n  text = JSON.stringify(scene, null, 1);\n}",
+    "start": 162,
+    "end": 191,
+    "text": "// Old build.sh only rewrote the scene when it mentioned \"code\"; untouched scenes stay byte-identical.\nconst nodes = items('nodes'), edges = items('edges');\nconst proofOn = scene.proof !== false && (scene.proof === true ||\n  [...nodes, ...edges].some(x => 'code' in x) || edges.some(e => e.inferred != null));\nlet text = raw.replace(/\\r?\\n$/, '');\nif (raw.includes('\"code\"') || proofOn) {\n  const sources = new Map();\n  nodes.forEach((n, i) => { if ('code' in n) n.code = resolve(n.id || `nodes[${i}]`, n.code).code; });\n  edges.forEach((e, i) => {\n    if ('code' in e) { const r = resolve(e.id || `edges[${i}]`, e.code); e.code = r.code; sources.set(e, r.src); }\n    else if (e.calls != null && proofOn) warnings.push(`${e.id || `edges[${i}]`}: \"calls\" needs a \"code\" range to check against; ignored`);\n  });\n  for (const w of warnings) console.error('build: warn ' + w);\n\n  if (proofOn) {\n    const ids = new Map(edges.map((e, i) => [String(e.id || `e${i + 1}`), e]));\n    edges.forEach(e => { e.proof = proofOf(e, sources.get(e)); });\n    for (const [id, e] of ids) if (e.proof.status === 'broken') console.error(`WARNING proof: edge ${id} -> ${e.proof.why}`);\n    const flowed = new Set(items('steps').flatMap(st => arr(st.flow).map(f => String(typeof f === 'string' ? f : f && f.edge))));\n    const counted = [...ids].filter(([id]) => flowed.has(id)).map(([, e]) => e);\n    const pool = counted.length ? counted : edges;\n    const sum = { total: pool.length, verified: 0, cited: 0, inferred: 0, unproven: 0, broken: 0 };\n    pool.forEach(e => sum[e.proof.status]++);\n    scene.proofSummary = sum;\n    const traced = sum.verified + sum.cited;\n    console.error(`proof: ${traced}/${sum.total} hops traced to code (${sum.verified} verified, ${sum.cited} cited) · ${sum.inferred} inferred` +\n      (sum.unproven ? ` · ${sum.unproven} unproven` : '') + ` · ${sum.broken} broken`);\n  }\n  text = JSON.stringify(scene, null, 1);\n}",
     "mark": [
-     159,
-     161
-    ]
+     177,
+     179
+    ],
+    "url": "https://github.com/oztrkemree/chalk-talk/blob/8c0abbb82faceaeb4102621429c86b26eaeb32c0/skills/chalk-talk/scripts/build.mjs#L162-L191"
    }
   },
   {
@@ -686,13 +687,14 @@ html:not(.diff-before) .edge.chg-removed :is(.edge-line,.iso-path){stroke-dashar
    ],
    "code": {
     "file": "scripts/build.mjs",
-    "start": 109,
-    "end": 143,
-    "text": "// Where does `needle` occur in lines[start-1..end-1], ignoring all whitespace? -> 1-based line or 0.\nfunction findCall(src, needle) {\n  const want = String(needle).replace(/\\s+/g, '');\n  if (!want) return 0;\n  let flat = '';\n  const lineOf = [];\n  for (let ln = src.start; ln <= src.end; ln++) {\n    const s = src.lines[ln - 1].replace(/\\s+/g, '');\n    flat += s;\n    for (let i = 0; i < s.length; i++) lineOf.push(ln);\n  }\n  const at = flat.indexOf(want);\n  return at < 0 ? 0 : lineOf[at];\n}\n\nfunction proofOf(edge, src) {\n  if (src) {\n    const range = src.start ? `${src.file}:${src.start}-${src.end}` : src.file;\n    if (src.bad) return { status: 'broken', why: 'code is not \"path:start-end\" or {\"file\", \"lines\"}' };\n    if (src.missing) return { status: 'broken', file: src.file, why: `file ${src.file} not found` };\n    if (src.outOfRange) return { status: 'broken', file: src.file, why: `lines ${src.start}-${src.asked} not in ${src.file} (${src.lines.length} lines)` };\n    const at = { file: src.file, start: src.start, end: src.end };\n    const calls = arr(edge.calls);\n    if (!calls.length) return { status: 'cited', ...at };\n    let hit = 0;\n    for (const c of calls) {\n      const ln = findCall(src, c);\n      if (!ln) return { status: 'broken', ...at, why: `calls ${JSON.stringify(String(c))} not found in ${range}` };\n      hit = hit || ln;      // the line of the first calls string\n    }\n    return { status: 'verified', ...at, hit };\n  }\n  if (typeof edge.inferred === 'string' && edge.inferred.trim()) return { status: 'inferred', why: edge.inferred };\n  return { status: 'unproven' };\n}",
+    "start": 112,
+    "end": 160,
+    "text": "// Where does `needle` occur in lines[start-1..end-1]? -> { line } 1-based, or { line: 0, comment }.\n// Whitespace is free around punctuation, but a name must match whole (\"t(\" is not in \"split(\")\n// and a match on a comment line does not count. Keep in sync with skills/frames/scripts/build.mjs.\n// shortcut: only whole-line comments are skipped (// /* * # -- <!--), not trailing ones or docstrings; upgrade to per-language comment parsing if agents start citing those.\nconst WORD = /[\\w$]/, COMMENT_LINE = /^\\s*(\\/\\/|\\/\\*|\\*(\\s|\\/|$)|#(\\s|!|$)|--\\s|<!--)/;\nfunction findCall(src, needle) {\n  const toks = String(needle).trim().split(/\\s+/).filter(Boolean);\n  if (!toks.length) return { line: 0 };\n  let re = '', prev = '';\n  for (const tok of toks) for (let i = 0; i < tok.length; i++) {\n    const c = tok[i], names = WORD.test(prev) && WORD.test(c);\n    if (prev) re += i ? (names ? '' : '\\\\s*') : (names ? '\\\\s+' : '\\\\s*');\n    re += c.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&');\n    prev = c;\n  }\n  const rx = new RegExp((WORD.test(toks[0][0]) ? '(?<![\\\\w$])' : '') + re + (WORD.test(prev) ? '(?![\\\\w$])' : ''), 'g');\n  const text = src.lines.slice(src.start - 1, src.end).join('\\n');\n  let m, comment = false;\n  while ((m = rx.exec(text))) {\n    const line = src.start + text.slice(0, m.index).split('\\n').length - 1;\n    if (!COMMENT_LINE.test(src.lines[line - 1])) return { line };\n    comment = true;\n    rx.lastIndex = m.index + 1;\n  }\n  return { line: 0, comment };\n}\n\nfunction proofOf(edge, src) {\n  if (src) {\n    const range = src.start ? `${src.file}:${src.start}-${src.end}` : src.file;\n    if (src.bad) return { status: 'broken', why: 'code is not \"path:start-end\" or {\"file\", \"lines\"}' };\n    if (src.missing) return { status: 'broken', file: src.file, why: `file ${src.file} not found` };\n    if (src.outOfRange) return { status: 'broken', file: src.file, why: `lines ${src.start}-${src.asked} not in ${src.file} (${src.lines.length} lines)` };\n    const at = { file: src.file, start: src.start, end: src.end };\n    const calls = arr(edge.calls);\n    if (!calls.length) return { status: 'cited', ...at };\n    const span = src.end - src.start + 1;\n    if (span > MAX_LINES) return { status: 'broken', ...at, why: `${range} is ${span} lines, too wide to prove a hop; cite ${MAX_LINES} lines or fewer around the call` };\n    let hit = 0;\n    for (const c of calls) {\n      const { line: ln, comment } = findCall(src, c);\n      if (!ln) return { status: 'broken', ...at, why: `calls ${JSON.stringify(String(c))} ${comment ? 'only appears in a comment' : 'not found'} in ${range}` };\n      hit = hit || ln;      // the line of the first calls string\n    }\n    return { status: 'verified', ...at, hit };\n  }\n  if (typeof edge.inferred === 'string' && edge.inferred.trim()) return { status: 'inferred', why: edge.inferred };\n  return { status: 'unproven' };\n}",
     "mark": [
-     133,
-     139
-    ]
+     147,
+     156
+    ],
+    "url": "https://github.com/oztrkemree/chalk-talk/blob/8c0abbb82faceaeb4102621429c86b26eaeb32c0/skills/chalk-talk/scripts/build.mjs#L112-L160"
    }
   },
   {
@@ -753,17 +755,18 @@ html:not(.diff-before) .edge.chg-removed :is(.edge-line,.iso-path){stroke-dashar
    "packet": "scene",
    "code": {
     "file": "scripts/build.mjs",
-    "start": 34,
-    "end": 36,
-    "text": "const raw = fs.readFileSync(scenePath, 'utf8');\nlet scene;\ntry { scene = JSON.parse(raw); } catch (err) { die(`${scenePath} is not valid JSON: ${err.message}`); }"
+    "start": 37,
+    "end": 39,
+    "text": "const raw = fs.readFileSync(scenePath, 'utf8');\nlet scene;\ntry { scene = JSON.parse(raw); } catch (err) { die(`${scenePath} is not valid JSON: ${err.message}`); }",
+    "url": "https://github.com/oztrkemree/chalk-talk/blob/8c0abbb82faceaeb4102621429c86b26eaeb32c0/skills/chalk-talk/scripts/build.mjs#L37-L39"
    },
    "calls": "JSON.parse(raw)",
    "proof": {
     "status": "verified",
     "file": "scripts/build.mjs",
-    "start": 34,
-    "end": 36,
-    "hit": 36
+    "start": 37,
+    "end": 39,
+    "hit": 39
    }
   },
   {
@@ -775,17 +778,18 @@ html:not(.diff-before) .edge.chg-removed :is(.edge-line,.iso-path){stroke-dashar
    "packet": "file:12-40",
    "code": {
     "file": "scripts/build.mjs",
-    "start": 84,
-    "end": 89,
-    "text": "function resolve(where, spec) {\n  const p = parse(spec);\n  if (!p) { warnings.push(`${where}: \"code\" should be \"path:start-end\" or {\"file\", \"lines\"}`); return { code: null, src: { bad: true } }; }\n  const abs = roots.map(r => path.resolve(r, p.file)).find(f => { try { return fs.statSync(f).isFile(); } catch { return false; } });\n  if (!abs) { warnings.push(`${where}: code file not found: ${p.file}`); return { code: { file: p.file, missing: true }, src: { file: p.file, missing: true } }; }\n  const lines = fileLines(abs);"
+    "start": 87,
+    "end": 92,
+    "text": "function resolve(where, spec) {\n  const p = parse(spec);\n  if (!p) { warnings.push(`${where}: \"code\" should be \"path:start-end\" or {\"file\", \"lines\"}`); return { code: null, src: { bad: true } }; }\n  const abs = roots.map(r => path.resolve(r, p.file)).find(f => { try { return fs.statSync(f).isFile(); } catch { return false; } });\n  if (!abs) { warnings.push(`${where}: code file not found: ${p.file}`); return { code: { file: p.file, missing: true }, src: { file: p.file, missing: true } }; }\n  const lines = fileLines(abs);",
+    "url": "https://github.com/oztrkemree/chalk-talk/blob/8c0abbb82faceaeb4102621429c86b26eaeb32c0/skills/chalk-talk/scripts/build.mjs#L87-L92"
    },
    "calls": "fileLines(abs)",
    "proof": {
     "status": "verified",
     "file": "scripts/build.mjs",
-    "start": 84,
-    "end": 89,
-    "hit": 89
+    "start": 87,
+    "end": 92,
+    "hit": 92
    }
   },
   {
@@ -797,17 +801,18 @@ html:not(.diff-before) .edge.chg-removed :is(.edge-line,.iso-path){stroke-dashar
    "packet": "calls",
    "code": {
     "file": "scripts/build.mjs",
-    "start": 159,
-    "end": 161,
-    "text": "  if (proofOn) {\n    const ids = new Map(edges.map((e, i) => [String(e.id || `e${i + 1}`), e]));\n    edges.forEach(e => { e.proof = proofOf(e, sources.get(e)); });"
+    "start": 177,
+    "end": 179,
+    "text": "    const ids = new Map(edges.map((e, i) => [String(e.id || `e${i + 1}`), e]));\n    edges.forEach(e => { e.proof = proofOf(e, sources.get(e)); });\n    for (const [id, e] of ids) if (e.proof.status === 'broken') console.error(`WARNING proof: edge ${id} -> ${e.proof.why}`);",
+    "url": "https://github.com/oztrkemree/chalk-talk/blob/8c0abbb82faceaeb4102621429c86b26eaeb32c0/skills/chalk-talk/scripts/build.mjs#L177-L179"
    },
    "calls": "proofOf(e, sources.get(e))",
    "proof": {
     "status": "verified",
     "file": "scripts/build.mjs",
-    "start": 159,
-    "end": 161,
-    "hit": 161
+    "start": 177,
+    "end": 179,
+    "hit": 178
    }
   },
   {
@@ -819,17 +824,18 @@ html:not(.diff-before) .edge.chg-removed :is(.edge-line,.iso-path){stroke-dashar
    "style": "dashed",
    "code": {
     "file": "scripts/build.mjs",
-    "start": 133,
-    "end": 139,
-    "text": "    let hit = 0;\n    for (const c of calls) {\n      const ln = findCall(src, c);\n      if (!ln) return { status: 'broken', ...at, why: `calls ${JSON.stringify(String(c))} not found in ${range}` };\n      hit = hit || ln;      // the line of the first calls string\n    }\n    return { status: 'verified', ...at, hit };"
+    "start": 147,
+    "end": 156,
+    "text": "    if (!calls.length) return { status: 'cited', ...at };\n    const span = src.end - src.start + 1;\n    if (span > MAX_LINES) return { status: 'broken', ...at, why: `${range} is ${span} lines, too wide to prove a hop; cite ${MAX_LINES} lines or fewer around the call` };\n    let hit = 0;\n    for (const c of calls) {\n      const { line: ln, comment } = findCall(src, c);\n      if (!ln) return { status: 'broken', ...at, why: `calls ${JSON.stringify(String(c))} ${comment ? 'only appears in a comment' : 'not found'} in ${range}` };\n      hit = hit || ln;      // the line of the first calls string\n    }\n    return { status: 'verified', ...at, hit };",
+    "url": "https://github.com/oztrkemree/chalk-talk/blob/8c0abbb82faceaeb4102621429c86b26eaeb32c0/skills/chalk-talk/scripts/build.mjs#L147-L156"
    },
    "calls": "findCall(src, c)",
    "proof": {
     "status": "verified",
     "file": "scripts/build.mjs",
-    "start": 133,
-    "end": 139,
-    "hit": 135
+    "start": 147,
+    "end": 156,
+    "hit": 152
    }
   },
   {
@@ -840,17 +846,18 @@ html:not(.diff-before) .edge.chg-removed :is(.edge-line,.iso-path){stroke-dashar
    "packet": "engine",
    "code": {
     "file": "scripts/build.mjs",
-    "start": 179,
-    "end": 183,
-    "text": "const tpl = fs.readFileSync(path.join(here, '..', 'assets', 'template.html'), 'utf8').replace(/\\r\\n/g, '\\n');\nconst at = tpl.search(/^__SCENE__$/m);\nif (at < 0) die('template has no __SCENE__ line');\nfs.mkdirSync(path.dirname(path.resolve(out)), { recursive: true });\nfs.writeFileSync(out, tpl.slice(0, at) + text.replace(/\\r\\n?/g, '\\n') + tpl.slice(at + '__SCENE__'.length));"
+    "start": 196,
+    "end": 200,
+    "text": "const tpl = fs.readFileSync(path.join(here, '..', 'assets', 'template.html'), 'utf8').replace(/\\r\\n/g, '\\n');\nconst at = tpl.search(/^__SCENE__$/m);\nif (at < 0) die('template has no __SCENE__ line');\nfs.mkdirSync(path.dirname(path.resolve(out)), { recursive: true });\nfs.writeFileSync(out, tpl.slice(0, at) + text.replace(/\\r\\n?/g, '\\n') + tpl.slice(at + '__SCENE__'.length));",
+    "url": "https://github.com/oztrkemree/chalk-talk/blob/8c0abbb82faceaeb4102621429c86b26eaeb32c0/skills/chalk-talk/scripts/build.mjs#L196-L200"
    },
    "calls": "tpl.search(/^__SCENE__$/m)",
    "proof": {
     "status": "verified",
     "file": "scripts/build.mjs",
-    "start": 179,
-    "end": 183,
-    "hit": 180
+    "start": 196,
+    "end": 200,
+    "hit": 197
    }
   },
   {
@@ -863,17 +870,18 @@ html:not(.diff-before) .edge.chg-removed :is(.edge-line,.iso-path){stroke-dashar
    "tone": "ok",
    "code": {
     "file": "scripts/build.mjs",
-    "start": 182,
-    "end": 184,
-    "text": "fs.mkdirSync(path.dirname(path.resolve(out)), { recursive: true });\nfs.writeFileSync(out, tpl.slice(0, at) + text.replace(/\\r\\n?/g, '\\n') + tpl.slice(at + '__SCENE__'.length));\nconsole.log(out);"
+    "start": 199,
+    "end": 201,
+    "text": "fs.mkdirSync(path.dirname(path.resolve(out)), { recursive: true });\nfs.writeFileSync(out, tpl.slice(0, at) + text.replace(/\\r\\n?/g, '\\n') + tpl.slice(at + '__SCENE__'.length));\nconsole.log(out);",
+    "url": "https://github.com/oztrkemree/chalk-talk/blob/8c0abbb82faceaeb4102621429c86b26eaeb32c0/skills/chalk-talk/scripts/build.mjs#L199-L201"
    },
    "calls": "fs.writeFileSync(out",
    "proof": {
     "status": "verified",
     "file": "scripts/build.mjs",
-    "start": 182,
-    "end": 184,
-    "hit": 183
+    "start": 199,
+    "end": 201,
+    "hit": 200
    }
   }
  ],
