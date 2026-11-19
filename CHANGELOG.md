@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- **Stricter proof** (both skills). A `calls` string now has to match whole names (`"t("` no longer passes because the range contains `split(`), a match on a comment line doesn't count, and a range over 120 lines with `calls` is `broken` instead of proving anything. A talk that passed only by one of these turns `!` on the next build.
+- `build.mjs --strict` exits 1 when a proof is broken, so CI can catch a talk whose code has moved. The page is still written.
+- Tests for the proof rules: `node --test test/proof.test.mjs`.
 - **New skill: `frames`.** Explain anything (pitches, PRDs, strategy, incidents, lessons, code) as a 60–120 s story in one HTML file: one idea per frame, eight lenses, ink-on-paper style with one accent, present mode with notes, phone layout. Seven example stories in `skills/frames/examples/`.
 - `check.mjs` (frames) drives one headless Chrome at below-normal priority over the DevTools protocol and removes its temp profile.
 

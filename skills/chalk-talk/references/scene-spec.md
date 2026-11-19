@@ -87,7 +87,7 @@ under it in monospace.
 | `both` | boolean | `false` | Arrowheads on both ends. |
 | `arrow` | boolean | `true` | `false` draws a plain line (an association, not a flow). |
 | `code` | string or object | | The call site behind this arrow, same forms as node `code`, see [Code](#code) and [Proof](#proof). A click on its label shows it. |
-| `calls` | string or array | | Literal text that must appear inside the cited lines and proves the hop: `"db.query("`, `"res.send("`, `"publish('order.placed'"`. Whitespace runs are ignored when matching. The build marks the edge `verified` when every string is found. |
+| `calls` | string or array | | Literal text that must appear inside the cited lines and proves the hop: `"db.query("`, `"res.send("`, `"publish('order.placed'"`. Whitespace around punctuation is free, but names match whole (`"t("` is not found in `split(`), a match on a comment line doesn't count, and the cited range must be 120 lines or fewer. The build marks the edge `verified` when every string is found. |
 | `inferred` | string | | The honest reason a hop can't be pinned to a line: `"network boundary: browser fetch()"`, `"framework routes POST /orders here"`, `"user action"`. Shown as `?`. Use it instead of a `calls` you can't back up. |
 | `change` | `"added"` \| `"changed"` \| `"removed"` | | What a PR / branch does to this arrow, see [Change mode](#change-mode). |
 
@@ -140,7 +140,10 @@ it, plus `proofSummary: { total, verified, cited, inferred, unproven, broken }` 
 | `cited` | code cited, lines exist, no `calls` given | small check, ok tone |
 | `inferred` | the edge has `inferred` (`why` = the reason, shown as the tooltip) | `?`, warn tone |
 | `unproven` | no code, no `inferred` | none (a muted `?` on the path in proof view) |
-| `broken` | the file or range is missing, or a `calls` string isn't there (`why` says which) | `!`, error tone; the build warns and the report has an **error** |
+| `broken` | the file or range is missing, a `calls` string isn't there or only in a comment, or a range with `calls` is over 120 lines (`why` says which) | `!`, error tone; the build warns and the report has an **error** |
+
+`node build.mjs --strict scene.json` exits 1 when any edge is `broken` (the page is still
+written). Run it in CI to catch a talk whose code has moved.
 
 A scene loaded without the build falls back to: has `code` → `cited`, has `inferred` →
 `inferred`, else `unproven`. With proof on, an edge label's mark replaces its `</>` badge; a
