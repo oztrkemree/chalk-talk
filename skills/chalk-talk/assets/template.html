@@ -414,6 +414,25 @@ body{background-color:var(--bg); background-image:var(--bg-image); background-si
 [data-stage][data-theme="dark"] .pk-glow{opacity:.95}
 [data-stage][data-theme="dark"] .el.dim{opacity:.34}   /* the dark already does the fading */
 [data-stage] .txt h2{font-size:25px} [data-stage] .txt p{font-size:18.5px}
+.stage-light{display:none; pointer-events:none; mix-blend-mode:screen}
+[data-stage][data-theme="dark"] .stage-light{display:inline}
+.stage-beam{filter:blur(16px)}
+.stage-pool{fill:#CFE0FF; opacity:.055; filter:blur(22px)}
+.stage-dust circle{fill:#E8F0FF; opacity:0; animation:mote 6s linear infinite}
+@keyframes mote{0%{opacity:0; transform:translate(0,14px)} 25%{opacity:.5} 75%{opacity:.35} 100%{opacity:0; transform:translate(10px,-34px)}}
+.stage-glow{pointer-events:none; mix-blend-mode:screen; filter:blur(20px)}   /* a lit block throws its own colour on the floor */
+.pk-spark{fill:var(--accent); pointer-events:none}
+.pk-spark.t-ok{fill:var(--ok)} .pk-spark.t-error{fill:var(--error)} .pk-spark.t-warn{fill:var(--warn)} .pk-spark.t-info{fill:var(--info)}
+/* the caption is spoken, not shown: its words arrive one after another */
+[data-stage] #p .w{display:inline-block; opacity:0; animation:wordIn .5s cubic-bezier(.2,.7,.2,1) forwards}
+@keyframes wordIn{from{opacity:0; transform:translateY(7px); filter:blur(4px)} to{opacity:1; transform:none; filter:none}}
+/* opening card: the title alone in the dark, then the lights */
+.intro{position:fixed; inset:0; z-index:20; display:grid; place-content:center; gap:14px; padding:8vw; text-align:center; background:var(--bg); cursor:pointer; animation:introOut .7s ease 2.3s forwards}
+.intro h1{margin:0; font-family:var(--ui-title-f); font-weight:600; font-size:clamp(30px, 5.2vw, 76px); line-height:1.06; letter-spacing:-.025em; color:var(--ink); text-wrap:balance; animation:introIn 1s cubic-bezier(.2,.7,.2,1) both}
+.intro p{margin:0; font-family:var(--ui-f); font-size:clamp(15px, 1.6vw, 22px); color:var(--ink-2); animation:introIn 1s cubic-bezier(.2,.7,.2,1) .35s both}
+@keyframes introIn{from{opacity:0; transform:translateY(14px); filter:blur(10px)} to{opacity:1; transform:none; filter:none}}
+@keyframes introOut{to{opacity:0; visibility:hidden}}
+.seeking .intro{display:none}
 .pk-code{pointer-events:none}
 .pk-code :is(rect,path){fill:var(--ink)}
 .pk-code text.t-packet{fill:var(--bg)}   /* two classes: has to beat the chalk rule for .t-packet */
@@ -1901,6 +1920,18 @@ function draw() {
     L.spot = el('radialGradient', { id: 'stage-spot', gradientUnits: 'userSpaceOnUse', cx: spotNow[0], cy: spotNow[1], r: spotNow[2] }, defs);
     [[0, 0], [0.46, 0], [0.74, 0.5], [1, 0.84]].forEach(([offset, a]) => el('stop', { offset, 'stop-color': '#02040A', 'stop-opacity': a }, L.spot));
     el('rect', { x: -W, y: -H, width: 3 * W, height: 3 * H, class: 'stage-dark', fill: 'url(#stage-spot)' }, board);
+    // the light itself: a beam from the rig down to a pool on the floor, and dust drifting through it
+    const bg = el('linearGradient', { id: 'stage-beam', x1: 0, y1: 0, x2: 0, y2: 1 }, defs);
+    [[0, 0.2], [0.55, 0.07], [1, 0.02]].forEach(([offset, a]) => el('stop', { offset, 'stop-color': '#CFE0FF', 'stop-opacity': a }, bg));
+    L.light = el('g', { class: 'stage-light' }, board);
+    L.pool = el('ellipse', { class: 'stage-pool' }, L.light);
+    L.beam = el('path', { class: 'stage-beam', fill: 'url(#stage-beam)' }, L.light);
+    L.dust = el('g', { class: 'stage-dust' }, L.light);
+    for (let i = 0; i < 26; i++) {   // fixed pseudo-random spots, so every load and every recording looks the same
+      const a = (i * 137.5) % 360, r = 40 + (i * 71) % 250, m = el('circle', { cx: f1(Math.cos(a) * r), cy: f1(Math.sin(a) * r * 0.6 - 60), r: f1(0.8 + (i % 4) * 0.45) }, L.dust);
+      m.style.animationDuration = (5 + (i % 5) * 1.3) + 's'; m.style.animationDelay = (-(i * 0.47) % 6) + 's';
+    }
+    spotAt(Infinity);
   }
   L.title = el('g', { id: 'L-title' }, board);
   drawTitle();
@@ -2292,7 +2323,15 @@ let spotNow = [W / 2, H / 2, 4200], spotFrom = spotNow, spotTo = spotNow, spotRA
 function spotAt(ms) {
   const e = easeInOut(Math.min(1, Math.max(0, ms) / 950));
   spotNow = spotFrom.map((v, i) => v + (spotTo[i] - v) * e);
-  if (L.spot) ['cx', 'cy', 'r'].forEach((a, i) => L.spot.setAttribute(a, f1(spotNow[i])));
+  if (!L.spot) return;
+  ['cx', 'cy', 'r'].forEach((a, i) => L.spot.setAttribute(a, f1(spotNow[i])));
+  // the pool is the lit part of the floor (an ellipse: the floor is seen at an angle); the beam
+  // comes down to it from a rig above the top edge, leaning in from the middle of the house
+  const [cx, cy, r] = spotNow, rx = r * 0.46 * 0.82, ry = rx * 0.5, sx = cx + (W / 2 - cx) * 0.3;
+  L.light.style.opacity = f1(clamp((1700 - rx) / 500, 0, 1) * 100) / 100;   // house lights up: no beam
+  [['cx', cx], ['cy', cy], ['rx', rx], ['ry', ry]].forEach(([a, v]) => L.pool.setAttribute(a, f1(v)));
+  L.beam.setAttribute('d', `M${f1(sx - 46)} -120L${f1(sx + 46)} -120L${f1(cx + rx)} ${f1(cy)}L${f1(cx - rx)} ${f1(cy)}Z`);
+  L.dust.setAttribute('transform', `translate(${f1(cx)} ${f1(cy - 40)})`);
 }
 function spotlight(st, c, smoothly) {
   const rs = [];
@@ -2388,6 +2427,13 @@ function enter(k, animate) {
     if (o.led) running.push(o.led.animate([{ opacity: 1 }, { opacity: 0.3 }, { opacity: 1 }], { duration: 2800, delay: d + 700, iterations: Infinity, easing: 'ease-in-out' }));
   });
   if (animate && st.focus.length) t += 480;
+  if (STAGE && ANIM) st.activeSet.forEach(id => {   // every block the step is about glows on the floor in its own colour
+    const o = all.get(id), top = o && o.type === 'node' && o.fbox && st.visible.has(id) && o.g.querySelector('.iso-top');
+    if (!top) return;
+    const glow = el('path', { class: 'stage-glow', d: floorRR(pad(o.fbox, 30), 34), fill: getComputedStyle(top).fill });
+    L.floorfx.insertBefore(glow, L.floorfx.firstChild); dyn.push(glow);
+    running.push(glow.animate([{ opacity: 0 }, { opacity: 0.55, offset: 0.25 }, { opacity: 0.34, offset: 0.62 }, { opacity: 0.55 }], { duration: 3600, delay: animate ? 200 : 0, fill: 'backwards', iterations: Infinity, easing: 'ease-in-out' }));
+  });
   const flowT = startFlows(st, ANIM ? t + 200 : 0);
   return { t, flowT };
 }
@@ -2451,7 +2497,9 @@ function startFlows(st, delay) {
       const d = it.e.pathEl.getAttribute('d'), tc = tone ? ' t-' + tone : '', end = it.e.pathEl.getPointAtLength(it.reverse ? 0 : it.len);
       it.trace = ['pk-trace glow', 'pk-trace'].map(c => el('path', { d, class: c + tc, 'stroke-dasharray': `${f1(it.len)} ${f1(it.len)}`, 'stroke-dashoffset': f1(it.len) }, L.floorfx));
       it.ring = el('ellipse', { cx: f1(end.x), cy: f1(end.y), rx: 1, ry: 0.5, class: 'pk-ring' + tc }, L.floorfx);
-      [...it.trace, it.ring].forEach(x => { x.style.opacity = 0; dyn.push(x); });
+      it.sparks = el('g', {}, L.packets); it.end = end;
+      for (let j = 0; j < 9; j++) el('circle', { r: f1(1.6 + (j % 3) * 0.7), class: 'pk-spark' + tc }, it.sparks);
+      [...it.trace, it.ring, it.sparks].forEach(x => { x.style.opacity = 0; dyn.push(x); });
     }
     // a proven hop shows its receipt: where the packet lands it opens into the verified line of code
     const pr = it.e.proof, cd = it.e.code;
@@ -2533,19 +2581,27 @@ function startFlows(st, delay) {
   flowItems = items; flowDelay = delay; flowSpan = span + (items.some(it => it.card) ? CARD_MS : 0);   // recorders wait for the last receipt
   let liveCycle = -1, liveSeen = new Map();
   flowAt = (tt0, live) => {
-    if (tt0 < 0) { items.forEach(it => { [it.g, it.tail, it.card, it.ring, ...(it.trace || [])].forEach(x => { if (x) x.style.opacity = 0; }); it.traceOn = it.cardOn = false; }); return; }
+    if (tt0 < 0) { items.forEach(it => { [it.g, it.tail, it.card, it.ring, it.sparks, ...(it.trace || [])].forEach(x => { if (x) x.style.opacity = 0; }); it.traceOn = it.cardOn = false; }); return; }
     const c = Math.floor(tt0 / cycle), tt = tt0 % cycle;
     if (live && c !== liveCycle) { liveCycle = c; liveFx.forEach(a => a.cancel()); liveFx = []; liveSeen = new Map(); }
     items.forEach(it => {
       if (it.trace) {   // the lit path grows with the packet, then cools; the ring opens where it lands
-        const q = (tt - it.start) / it.dur, cool = (tt - it.start - it.dur) / 1000, on = q >= 0 && cool <= 1;
+        // in the recap nothing cools: every path stays lit until the pass ends, the whole trip glowing at once
+        const q = (tt - it.start) / it.dur, landed = tt - it.start - it.dur, cool = st.recap ? (tt - (cycle - 500)) / 500 : landed / 1000, on = q >= 0 && cool <= 1;
         if (on || it.traceOn) {
           it.traceOn = on;
           const off = it.len * (1 - easeInOut(Math.min(1, Math.max(0, q)))) * (it.reverse ? -1 : 1), op = !on ? 0 : cool > 0 ? 1 - cool : 1;
           it.trace.forEach((t, i) => { t.setAttribute('stroke-dashoffset', f1(off)); t.style.opacity = i ? op : op * 0.55; });
-          const r = cool >= 0 && cool <= 0.7 ? cool / 0.7 : -1, rx = 10 + 52 * (1 - (1 - r) * (1 - r));
+          const r = on && landed >= 0 && landed <= 700 ? landed / 700 : -1, out = 1 - (1 - r) * (1 - r), rx = 10 + 52 * out;
           it.ring.style.opacity = r < 0 ? 0 : (1 - r) * 0.9;
-          if (r >= 0) { it.ring.setAttribute('rx', f1(rx)); it.ring.setAttribute('ry', f1(rx * 0.5)); }
+          it.sparks.style.opacity = r < 0 ? 0 : 1 - r * r;
+          if (r >= 0) {
+            it.ring.setAttribute('rx', f1(rx)); it.ring.setAttribute('ry', f1(rx * 0.5));
+            it.sparks.childNodes.forEach((s, j) => {   // thrown out along the floor and up, then falling back
+              const a = j * 0.698 + 0.4, d = (34 + (j * 37 % 30)) * out;
+              s.setAttribute('cx', f1(it.end.x + Math.cos(a) * d)); s.setAttribute('cy', f1(it.end.y + Math.sin(a) * d * 0.5 - (22 + j % 4 * 9) * Math.sin(Math.PI * r)));
+            });
+          }
         }
       }
       if (it.card) {   // pops open as the packet lands, holds, fades
@@ -2634,11 +2690,26 @@ function buildBar() {
   });
   $('of').textContent = two(steps.length);
 }
+let capFor = -1;   // the step whose caption was last spoken
 function updateBar() {
   const st = steps[cur];
   $('n').textContent = two(cur + 1);
   $('h').textContent = st.title;
   $('p').innerHTML = md(st.say);
+  if (STAGE && ANIM && !seekMode && capFor !== cur) {   // once per step: a proof or theme toggle must not replay it
+    let i = 0;
+    const words = n => [...n.childNodes].forEach(c => {
+      if (c.nodeType !== 3) { words(c); return; }
+      const f = document.createDocumentFragment();
+      c.textContent.split(/(\s+)/).forEach(w => {
+        if (!w.trim()) { f.append(w); return; }
+        const s = document.createElement('span'); s.className = 'w'; s.style.animationDelay = (160 + i++ * 60) + 'ms'; s.textContent = w; f.append(s);
+      });
+      c.replaceWith(f);
+    });
+    words($('p'));
+  }
+  capFor = cur;
   const pl = $('pl'), s = proofSummary;
   pl.hidden = !(PROOF && s.total && (st.recap || proofView));
   if (!pl.hidden) {   // "6 of 7 hops traced to code · 1 inferred"
@@ -2972,7 +3043,24 @@ async function boot() {
   if (qs.has('proof')) setProofView(true);            // ?proof opens in proof view, ?diff=before in the before view
   if (qs.get('diff') === 'before') setDiffView('before');
   wire();
-  if (qs.has('play') && ANIM) play();
+  const begin = () => { if (qs.has('play') && ANIM) play(); };
+  if (STAGE && ANIM && start === 0 && S.title && !qs.has('nointro')) {
+    // The title alone in the dark, then the first step plays again from its entrance. Any key or click skips.
+    const card = document.createElement('div'), h = document.createElement('h1');
+    card.className = 'intro'; h.textContent = S.title; card.append(h);
+    if (S.subtitle) { const p = document.createElement('p'); p.textContent = S.subtitle; card.append(p); }
+    document.body.append(card);
+    let done = false;
+    const lift = () => {
+      if (done) return; done = true;
+      card.remove(); removeEventListener('keydown', lift, true);
+      if (!seekMode && cur === 0) { cur = -1; capFor = -1; go(0, { keepHash: true }); }
+      begin();
+    };
+    card.addEventListener('animationend', ev => { if (ev.animationName === 'introOut') lift(); });
+    card.addEventListener('click', ev => { ev.stopPropagation(); lift(); });
+    addEventListener('keydown', lift, true);
+  } else begin();
   document.documentElement.dataset.chalk = 'ready';
   readyResolve(window.chalk);
   if (timedOut) loaded.then(() => { readMetrics(); computeTitleBox(); layout(); draw(); const k = cur; cur = -1; go(k, { instant: true, keepHash: true }); });
