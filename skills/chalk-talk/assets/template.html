@@ -397,6 +397,12 @@ body{background-color:var(--bg); background-image:var(--bg-image); background-si
 .floor-ripple{fill:none; stroke:var(--accent); stroke-width:2.2}
 .fx{opacity:0}
 .fx-t{transform-box:fill-box; transform-origin:center}
+.title-bg{fill:var(--bg); opacity:0; transition:opacity .6s ease}
+.cam-close .title-bg{opacity:.92}
+.pk-code{pointer-events:none}
+.pk-code :is(rect,path){fill:var(--ink)}
+.pk-code text{fill:var(--bg)}
+.pk-code .pk-src{opacity:.62; font-weight:500}
 .pk-glow{fill:var(--accent); opacity:.5}
 .pk-tail circle{fill:var(--accent)}
 .packet.t-ok :is(.pk-glow,.pk-tail circle){fill:var(--ok)} .packet.t-error :is(.pk-glow,.pk-tail circle){fill:var(--error)}
@@ -1866,6 +1872,7 @@ function draw() {
   const f = el('filter', { id: 'ct-shadow', x: '-30%', y: '-30%', width: '160%', height: '190%' }, defs);
   el('feDropShadow', { dx: 0, dy: 1, stdDeviation: 1.2, class: 'sh-drop' }, f);
   el('feDropShadow', { dx: 0, dy: 8, stdDeviation: 14, class: 'sh-drop' }, f);
+  el('feGaussianBlur', { stdDeviation: 16 }, el('filter', { id: 'ct-soft', x: '-20%', y: '-40%', width: '140%', height: '180%' }, defs));
   if (ISO) isoDefs(defs);
   if (CHALK) ['haze', 'dust'].forEach(k => el('rect', { x: 0, y: 0, width: W, height: H, class: 'chalk-' + k, filter: `url(#chalk-${k})` }, board));   // old erasures and dust on the slate
   L.world = el('g', { id: 'world' }, board);
@@ -1971,7 +1978,9 @@ function computeTitleBox() {
 }
 function drawTitle() {
   if (!S.title && !S.subtitle) return;
-  const g = L.title, eb = eyebrowText();
+  const g = L.title, eb = eyebrowText(), tb = pad(titleBox, 10);
+  // when the camera moves in, the board can slide under the title: a soft wiped patch keeps it readable
+  el('rect', { x: f1(tb.x), y: f1(tb.y), width: f1(tb.w), height: f1(tb.h), rx: 20, class: 'title-bg', filter: 'url(#ct-soft)' }, g);
   if (eb && S.title) text(g, caseFor(eb, 'eyebrow'), 70, 58, 't-eyebrow', 'start');
   if (S.title) text(g, S.title, 68, 100, 't-title', 'start');
   if (S.subtitle) text(g, S.subtitle, 70, 142, 't-subtitle', 'start');
@@ -2199,20 +2208,23 @@ function clearStep() {
   edges.forEach(e => e.g && e.g.classList.remove('hot'));
 }
 
-/* The camera frames what is on the board: early steps with two boxes get a gentle zoom
-   (never above 1.3x), and it eases back out as the system grows. */
+/* The camera is the director: it moves in on what the step is about (what is new, flowing or
+   focused; never above 1.6x) and pulls back to the whole board for the recap.
+   "camera": "wide" keeps the old framing of everything visible (max 1.3x). */
 function camera(st) {
   if (S.camera === false) return 'none';
+  const close = S.camera !== 'wide' && !st.recap && st.activeSet.size > 0;
   const rs = [];
-  st.visible.forEach(id => {
+  (close ? st.activeSet : st.visible).forEach(id => {
     const o = all.get(id);
+    if (!o || !st.visible.has(id)) return;
     if (o.type === 'node' || o.type === 'group') rs.push(o.box);
     if (o.type === 'edge') { if (o.lbox) rs.push(o.lbox); rs.push(ptsBounds(o.pts)); }
   });
   (st.noteGeo || []).forEach(n => rs.push(n.R));
   if (!rs.length) return 'none';
-  const bb = pad(unionRect(rs), 28);
-  const s = clamp(Math.min(AREA.w / bb.w, AREA.h / bb.h), 1, 1.3);
+  const bb = pad(unionRect(rs), close ? 90 : 28);   // close-ups keep some air, so the neighbours stay in view
+  const s = clamp(Math.min(AREA.w / bb.w, AREA.h / bb.h), 1, close ? 1.6 : 1.3);
   const all0 = pad(unionRect([...nodes.values()].map(n => n.box).concat([...groups.values()].map(g => g.box))), 28);
   if (s === 1 && bb.w >= all0.w - 2 && bb.h >= all0.h - 2) return 'none';
   const tx = AREA.x + AREA.w / 2 - (bb.x + bb.w / 2) * s, ty = AREA.y + AREA.h / 2 - (bb.y + bb.h / 2) * s;
@@ -2249,6 +2261,7 @@ function frame(st) {
   const smoothly = ANIM && framed; framed = true;
   if (PORTRAIT.matches) { L.world.style.transform = 'none'; setViewBox(portraitCrop(st), smoothly); }
   else { setViewBox([0, 0, W, H], false); L.world.style.transform = camera(st); }
+  document.documentElement.classList.toggle('cam-close', !PORTRAIT.matches && L.world.style.transform !== 'none');
 }
 
 function enter(k, animate) {
@@ -2313,6 +2326,7 @@ function focusRing(o) {
   return g;
 }
 
+const CARD_MS = 1300;   // how long a proven hop's line of code stays open
 function startFlows(st, delay) {
   const items = st.flow.map(f => ({ ...f, e: edges.get(f.edge) })).filter(i => i.e && i.e.pathEl && !diffHidden(i.e));
   if (!items.length) return 0;
@@ -2351,6 +2365,24 @@ function startFlows(st, delay) {
     }
     g.style.opacity = 0;
     it.g = g; dyn.push(g);
+    // a proven hop shows its receipt: where the packet lands it opens into the verified line of code
+    const pr = it.e.proof, cd = it.e.code;
+    if (ANIM && PROOF && !it.reverse && pr && pr.status === 'verified' && pr.hit && cd && cd.text != null) {
+      let line = [...(cd.text.split('\n')[pr.hit - cd.start] || '').trim()];
+      if (line.length) {
+        if (line.length > 46) line = [...line.slice(0, 45), '…'];
+        const src = `${String(cd.file).split('/').pop()}:${pr.hit}`, w = Math.max(tw(line.join(''), 'packet'), tw(src, 'packet')) + 28;
+        // under the middle of the path: labels float above blocks and arrows, the floor below is free
+        const pt = it.e.pathEl.getPointAtLength(it.len * 0.5);
+        const card = el('g', { class: 'pk-code' }, L.packets), inner = el('g', {}, card);
+        el('rect', { x: f1(-w / 2), y: 8, width: f1(w), height: 50, rx: 9 }, inner);
+        el('path', { d: 'M-7 9L0 0L7 9Z' }, inner);
+        text(inner, line.join(''), 0, 26, 't-packet');
+        text(inner, '✓ ' + src, 0, 44, 't-packet pk-src');
+        card.setAttribute('transform', `translate(${f1(pt.x)} ${f1(pt.y + 8)})`);
+        card.style.opacity = 0; it.card = card; it.cardIn = inner; dyn.push(card);
+      }
+    }
   });
   let acc = 0;
   items.forEach(it => { it.start = st.together ? 0 : acc; acc += it.dur + 200; });
@@ -2397,13 +2429,18 @@ function startFlows(st, delay) {
     return span;
   }
   // where every packet is tt0 ms after the flows start: the live loop and seek() both draw from this
-  flowItems = items; flowDelay = delay; flowSpan = span;
+  flowItems = items; flowDelay = delay; flowSpan = span + (items.some(it => it.card) ? CARD_MS : 0);   // recorders wait for the last receipt
   let liveCycle = -1, liveSeen = new Map();
   flowAt = (tt0, live) => {
-    if (tt0 < 0) { items.forEach(it => { it.g.style.opacity = 0; if (it.tail) it.tail.style.opacity = 0; }); return; }
+    if (tt0 < 0) { items.forEach(it => { it.g.style.opacity = 0; if (it.tail) it.tail.style.opacity = 0; if (it.card) it.card.style.opacity = 0; }); return; }
     const c = Math.floor(tt0 / cycle), tt = tt0 % cycle;
     if (live && c !== liveCycle) { liveCycle = c; liveFx.forEach(a => a.cancel()); liveFx = []; liveSeen = new Map(); }
     items.forEach(it => {
+      if (it.card) {   // pops open as the packet lands, holds, fades
+        const q = (tt - it.start - it.dur + 120) / CARD_MS, on = q >= 0 && q <= 1;
+        it.card.style.opacity = on ? Math.min(1, q * 8, (1 - q) * 5) : 0;
+        if (on) { const e = easeInOut(Math.min(1, q * 6)); it.cardIn.setAttribute('transform', `translate(0 ${f1(10 * e - 10)}) scale(${f1((0.7 + 0.3 * e) * 100) / 100})`); }
+      }
       const p = (tt - it.start) / it.dur, src = nodes.get(it.reverse ? it.e.to : it.e.from), dst = nodes.get(it.reverse ? it.e.from : it.e.to);
       if (live && p >= 0 && it.left !== c) { it.left = c; liveFx.push(...fxDepart(src, 0, liveSeen)); }
       if (p < 0 || p > 1) {
