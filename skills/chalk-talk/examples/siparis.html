@@ -2837,8 +2837,8 @@ function startFlows(st, delay) {
   // where every packet is tt0 ms after the flows start: the live loop and seek() both draw from this
   flowItems = items; flowDelay = delay; flowSpan = span + (items.some(it => it.card) ? CARD_MS : 0);   // recorders wait for the last receipt
   let liveCycle = -1, liveSeen = new Map();
-  flowAt = (tt0, live) => {
-    if (tt0 < 0) { gates.forEach(({ n }) => gateSet(n, ...(live ? n.gate1 : n.gate0))); /* live: the rest after the passes; seek: before they start */ items.forEach(it => { [it.g, it.tail, it.card, it.ring, it.sparks, ...(it.trace || [])].forEach(x => { if (x) x.style.opacity = 0; }); it.traceOn = it.cardOn = false; }); return; }
+  flowAt = (tt0, live, rest) => {
+    if (tt0 < 0) { gates.forEach(({ n }) => gateSet(n, ...(rest ? n.gate1 : n.gate0))); /* resting after the passes, or still waiting to start */ items.forEach(it => { [it.g, it.tail, it.card, it.ring, it.sparks, ...(it.trace || [])].forEach(x => { if (x) x.style.opacity = 0; }); it.traceOn = it.cardOn = false; }); return; }
     const c = Math.floor(tt0 / cycle), tt = tt0 % cycle;
     if (live && c !== liveCycle) { liveCycle = c; liveFx.forEach(a => a.cancel()); liveFx = []; liveSeen = new Map(); }
     items.forEach(it => {
@@ -2898,7 +2898,7 @@ function startFlows(st, delay) {
   // Left alone, the packets make three passes and rest; autoplay keeps them going until it moves on.
   const tick = now => {
     // (only in the quiet end of a pass, so pausing a long autoplay step never cuts a packet off mid-hop)
-    if (!playing && now - begin >= IDLE_PASSES * cycle - 200 && (now - begin) % cycle >= cycle - 200) { flowAt(-1, true); flowRAF = 0; flowRested = true; return; }
+    if (!playing && now - begin >= IDLE_PASSES * cycle - 200 && (now - begin) % cycle >= cycle - 200) { flowAt(-1, true, true); flowRAF = 0; flowRested = true; return; }
     flowAt(now - begin, true); flowRAF = requestAnimationFrame(tick);
   };
   flowRAF = requestAnimationFrame(tick);
