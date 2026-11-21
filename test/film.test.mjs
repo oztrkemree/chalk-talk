@@ -32,7 +32,8 @@ const probe = `<script>chalk.ready.then(() => {
       arm.push(a ? parseFloat(a.style.transform.replace('rotate(', '')) : null);
       stamp.push(s ? +getComputedStyle(s).opacity : null);
     }
-    return { arm, stamp };
+    const late = [1000, 2500, 4000, 6000, 9000].map(x => { chalk.seek(k, D + x); return parseFloat((document.querySelector('.f-arm') || { style: { transform: 'x' } }).style.transform.replace('rotate(', '')); });
+    return { arm, stamp, late };
   };
   const out = { bubbles: 0, one: null, two: null, issues: JSON.parse(document.getElementById('chalk-report').textContent).issues };
   out.one = sweep(1);
@@ -61,6 +62,7 @@ test('film: the barrier comes down on what arrives, the stamp lands, the speaker
   assert.deepEqual(o.bubbles, ['Post it to Slack.']);
   assert.equal(o.one.arm[0], -64, 'the barrier starts up');
   assert.equal(Math.max(...o.one.arm), 0, 'and comes all the way down');
+  assert.deepEqual(o.one.late, [0, 0, 0, 0, 0], 'and stays down through the rest and the later passes');
   assert.equal(o.one.stamp[0], 0, 'no stamp before the envelope lands');
   assert.equal(Math.max(...o.one.stamp), 1, 'then the stamp is on it');
   // an "ok" leaving the gate: stamped at the gate first, and the barrier goes back up

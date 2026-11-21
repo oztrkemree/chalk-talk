@@ -2676,7 +2676,7 @@ function gateAfter(k, n) {
 }
 function startFlows(st, delay) {
   // a barrier starts where the step before left it; a still frame shows where this step leaves it
-  if (FILM) nodes.forEach(n => { if (n.kind === 'gate' && n.g) { n.gate0 = st.recap ? [0, ''] : gateAfter(ANIM ? st.k - 1 : st.k, n); gateSet(n, ...n.gate0); } });
+  if (FILM) nodes.forEach(n => { if (n.kind === 'gate' && n.g) { n.gate1 = st.recap ? [0, ''] : gateAfter(st.k, n); n.gate0 = st.recap || !ANIM ? n.gate1 : gateAfter(st.k - 1, n); gateSet(n, ...n.gate0); } });
   const items = st.flow.map(f => ({ ...f, e: edges.get(f.edge), pre: 0, hold: 0 })).filter(i => i.e && i.e.pathEl && !diffHidden(i.e));
   if (!items.length) return 0;
   const cardBoxes = [];
@@ -2787,12 +2787,12 @@ function startFlows(st, delay) {
   items.forEach(it => { it.start = (st.together ? 0 : acc) + it.pre; acc += it.pre + it.dur + it.hold + 200; });
   const span = st.together ? Math.max(...items.map(i => i.pre + i.dur + i.hold)) : acc - 200;
   const cycle = span + Math.max(1400, items.some(it => it.card) ? CARD_MS + 100 : 0);   // the rest between passes outlasts the last receipt
-  // film: a gate stops what arrives (barrier down, lamp in the verdict's colour) and lets an ok or a plain packet out;
-  // before the next pass it goes back to where the step found it
+  // film: a gate stops what arrives (barrier down, lamp in the verdict's colour) and lets an ok or a plain packet out.
+  // The move plays on the first pass; later passes and the rest keep the barrier where the step leaves it (gate1).
   const gates = !FILM || !ANIM || st.recap ? [] : [...new Set(items.flatMap(it => [it.src, it.dst]))].filter(n => n && n.kind === 'gate').map(n => ({
     n, ev: items.flatMap(it => it.dst === n ? [[it.start + it.dur * 0.45, 1, lampOf(it.tn)]]
       : it.src === n ? [it.tn === 'error' || it.tn === 'warn' ? [it.start - it.pre, 1, lampOf(it.tn)] : [it.start - 150, 0, '']] : [])
-      .concat([[cycle - 500, ...n.gate0]]).sort((a, b) => a[0] - b[0]),
+      .sort((a, b) => a[0] - b[0]),
   }));
   const at = (it, p) => it.e.pathEl.getPointAtLength((it.reverse ? 1 - easeInOut(p) : easeInOut(p)) * it.len);
   const hop = p => -10 - Math.sin(Math.PI * easeInOut(p)) * 9;
@@ -2838,7 +2838,7 @@ function startFlows(st, delay) {
   flowItems = items; flowDelay = delay; flowSpan = span + (items.some(it => it.card) ? CARD_MS : 0);   // recorders wait for the last receipt
   let liveCycle = -1, liveSeen = new Map();
   flowAt = (tt0, live) => {
-    if (tt0 < 0) { gates.forEach(({ n }) => gateSet(n, ...n.gate0)); items.forEach(it => { [it.g, it.tail, it.card, it.ring, it.sparks, ...(it.trace || [])].forEach(x => { if (x) x.style.opacity = 0; }); it.traceOn = it.cardOn = false; }); return; }
+    if (tt0 < 0) { gates.forEach(({ n }) => gateSet(n, ...(live ? n.gate1 : n.gate0))); /* live: the rest after the passes; seek: before they start */ items.forEach(it => { [it.g, it.tail, it.card, it.ring, it.sparks, ...(it.trace || [])].forEach(x => { if (x) x.style.opacity = 0; }); it.traceOn = it.cardOn = false; }); return; }
     const c = Math.floor(tt0 / cycle), tt = tt0 % cycle;
     if (live && c !== liveCycle) { liveCycle = c; liveFx.forEach(a => a.cancel()); liveFx = []; liveSeen = new Map(); }
     items.forEach(it => {
@@ -2888,7 +2888,7 @@ function startFlows(st, delay) {
       if ((waits || stays) && it.tail) it.tail.style.opacity = 0;   // nothing trails a parked envelope
     });
     gates.forEach(({ n, ev }) => {
-      let [d, col] = n.gate0;
+      let [d, col] = c > 0 ? n.gate1 : n.gate0;
       ev.forEach(([t, down, c2]) => { if (tt < t) return; d += (down - d) * Math.min(1, (tt - t) / 420); if (down) col = c2; });
       gateSet(n, d, col);
     });

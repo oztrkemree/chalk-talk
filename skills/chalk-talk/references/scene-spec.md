@@ -61,7 +61,7 @@ under it in monospace.
 | field | type | default | what it does |
 |---|---|---|---|
 | `id` | string | `n1`, `n2`... | Referenced by edges, groups and steps. Short and readable. |
-| `kind` | string | `"box"` | `box`, `pill`, `db`, `queue`, `cloud`, `actor`, `browser`, `phone`, `file`, `text`. Aliases: `service`/`server` → box, `process`/`function` → pill, `database`/`storage`/`cache` → db, `topic`/`stream` → queue, `external`/`internet` → cloud, `user`/`person` → actor, `client`/`web` → browser, `mobile`/`app` → phone, `doc` → file. `cloud` cards get a dashed border (outside your system); `pill` cards are fully rounded; `actor` is a round avatar with the label below. |
+| `kind` | string | `"box"` | `box`, `pill`, `db`, `queue`, `cloud`, `actor`, `browser`, `phone`, `file`, `text`, and for the film style `bot` and `gate` (a box with a bot or shield icon in other styles). Aliases: `robot`/`agent` → bot, `guard`/`hook` → gate, `service`/`server` → box, `process`/`function` → pill, `database`/`storage`/`cache` → db, `topic`/`stream` → queue, `external`/`internet` → cloud, `user`/`person` → actor, `client`/`web` → browser, `mobile`/`app` → phone, `doc` → file. `cloud` cards get a dashed border (outside your system); `pill` cards are fully rounded; `actor` is a round avatar with the label below. |
 | `label` | string | | Main text. Wraps to balanced lines (at most ~190px in iso, ~230px in the flat styles); `\n` forces a break. Keep under ~28 characters. |
 | `sub` | string | | Monospace line under the label: the real identifier (file, endpoint, table, topic). |
 | `at` | `[col, row]` | appended to row 0 | Grid position. Integers are cells; fractions (`[1.5, 0]`) sit between cells. |
@@ -215,7 +215,7 @@ is reported. Groups appear when listed in a step's `show` (or in recap) and neve
 | `say` | string | The narration: 1–2 sentences. `**bold**` is emphasized, `` `code` `` becomes a code chip. |
 | `show` | ids | Adds nodes, edges or groups. They stay for later steps. Showing an edge also shows both ends. |
 | `hide` | ids | Removes things from this step on. |
-| `flow` | edge ids or objects | Packets travel these edges, in order, looping while the step is open. Object form: `{ "edge": "id", "packet": "text", "reverse": true, "tone": "ok" }`. In film style `"stamp": "ASK"` stamps a verdict on the envelope in the flow's tone: at the `gate` it leaves, before it sets off, or else where it lands. |
+| `flow` | edge ids or objects | Packets travel these edges, in order, looping while the step is open. Object form: `{ "edge": "id", "packet": "text", "reverse": true, "tone": "ok" }`. In film style `"stamp": "ASK"` stamps a verdict on the envelope in the flow's tone: at the `gate` it leaves, before it sets off, or else where it lands (not in the sequence layout, where there is no envelope). |
 | `together` | boolean | Run all flows of the step at the same time instead of one after another. |
 | `bubble` | object | Film style only: `{ "nodeId": "what it says" }` puts a speech bubble over that node for this step. Keep it under about eight words; three lines at most are drawn. Ignored in other styles. |
 | `focus` | ids | Accent outline with a soft halo around a node or group; an edge turns accent and thicker. |
