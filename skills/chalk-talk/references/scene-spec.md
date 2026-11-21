@@ -18,10 +18,12 @@ page's script tag early; write it as `<\/script` (valid JSON, same text).
 9. [Notes and tags](#notes-and-tags)
 10. [Sequence layout](#sequence-layout)
 11. [Styles](#styles)
-12. [Layout rules the engine applies](#layout-rules-the-engine-applies)
-13. [Viewer controls and URL options](#viewer-controls-and-url-options)
-14. [Recording API](#recording-api)
-15. [Report messages and how to fix them](#report-messages-and-how-to-fix-them)
+12. [Stage](#stage)
+13. [Sound](#sound)
+14. [Layout rules the engine applies](#layout-rules-the-engine-applies)
+15. [Viewer controls and URL options](#viewer-controls-and-url-options)
+16. [Recording API](#recording-api)
+17. [Report messages and how to fix them](#report-messages-and-how-to-fix-them)
 
 ## Top level
 
@@ -32,12 +34,14 @@ page's script tag early; write it as `<\/script` (valid JSON, same text).
 | `eyebrow` | string | "How it works" in `lang` | Small accent line above the title. `""` hides it. |
 | `lang` | string | `"en"` | `<html lang>` and the default eyebrow; set it to the caption language (`"tr"`, `"de"`, ...). |
 | `layout` | `"map"` \| `"sequence"` | `"map"` | Map: nodes on a grid. Sequence: participants in a row with lifelines, edges as messages going down. |
-| `style` | `"iso"` \| `"chalk"` \| `"studio"` \| `"blueprint"` \| `"editorial"` | `"iso"` | Visual style, see [Styles](#styles). |
+| `style` | `"iso"` \| `"film"` \| `"chalk"` \| `"studio"` \| `"blueprint"` \| `"editorial"` | `"iso"` | Visual style, see [Styles](#styles). |
 | `theme` | `"auto"` \| `"light"` \| `"dark"` | `"auto"` | Starting theme. Auto follows the viewer's OS (blueprint starts dark). The viewer flips it with `T`. |
 | `spacing` | number | `1` | Multiplies the gaps between grid tracks. `0.8` tighter, `1.3` airier. |
 | `root` | string | none | Directory that node and edge `code` paths are relative to, itself relative to the scene file. Default: where the build runs, then the scene's folder. |
 | `editor` | `"vscode"` \| `"cursor"` \| `"zed"` \| `"idea"` \| `"none"` | `"vscode"` | Which editor the code panel's "open" link targets. Shown only when the page is opened from the author's disk. |
-| `camera` | boolean | `true` | Early steps with few things get a gentle zoom (max 1.3x) that eases out as the board fills. |
+| `camera` | `true` \| `"wide"` \| `false` | `true` | The camera moves in on what each step is about (what is new, flowing or focused; up to 1.6x in iso and chalk, 1.35x in the flat styles) and pulls back for the recap. Older things a close-up would cut in half or slide under the title step out of the picture. `"wide"` frames everything visible instead (max 1.3x); `false` never moves. A sequence diagram always uses the wide framing. |
+| `stage` | boolean | `false` | Plays the talk as a lit scene, see [Stage](#stage). Iso style, dark theme. |
+| `sound` | boolean | `true` | `false` starts muted. The viewer toggles it with `M`. See [Sound](#sound). |
 | `center` | boolean | `true` | Centers the drawing in the board area. |
 | `proof` | boolean | `true` when any node or edge has `code` (or an edge has `inferred`) | `false` hides all proof UI (marks, proof view, summary line). See [Proof](#proof). |
 | `diff` | object | none | Turns on [change mode](#change-mode): `{ "title": "PR #123 · Add retry queue", "base": "main", "head": "feat/x", "url": "https://github.com/..." }`. Only `title` is needed. |
@@ -57,7 +61,7 @@ under it in monospace.
 | field | type | default | what it does |
 |---|---|---|---|
 | `id` | string | `n1`, `n2`... | Referenced by edges, groups and steps. Short and readable. |
-| `kind` | string | `"box"` | `box`, `pill`, `db`, `queue`, `cloud`, `actor`, `browser`, `phone`, `file`, `text`. Aliases: `service`/`server` → box, `process`/`function` → pill, `database`/`storage`/`cache` → db, `topic`/`stream` → queue, `external`/`internet` → cloud, `user`/`person` → actor, `client`/`web` → browser, `mobile`/`app` → phone, `doc` → file. `cloud` cards get a dashed border (outside your system); `pill` cards are fully rounded; `actor` is a round avatar with the label below. |
+| `kind` | string | `"box"` | `box`, `pill`, `db`, `queue`, `cloud`, `actor`, `browser`, `phone`, `file`, `text`, and for the film style `bot` and `gate` (a box with a bot or shield icon in other styles). Aliases: `robot`/`agent` → bot, `guard`/`hook` → gate, `service`/`server` → box, `process`/`function` → pill, `database`/`storage`/`cache` → db, `topic`/`stream` → queue, `external`/`internet` → cloud, `user`/`person` → actor, `client`/`web` → browser, `mobile`/`app` → phone, `doc` → file. `cloud` cards get a dashed border (outside your system); `pill` cards are fully rounded; `actor` is a round avatar with the label below. |
 | `label` | string | | Main text. Wraps to balanced lines (at most ~190px in iso, ~230px in the flat styles); `\n` forces a break. Keep under ~28 characters. |
 | `sub` | string | | Monospace line under the label: the real identifier (file, endpoint, table, topic). |
 | `at` | `[col, row]` | appended to row 0 | Grid position. Integers are cells; fractions (`[1.5, 0]`) sit between cells. |
@@ -211,8 +215,9 @@ is reported. Groups appear when listed in a step's `show` (or in recap) and neve
 | `say` | string | The narration: 1–2 sentences. `**bold**` is emphasized, `` `code` `` becomes a code chip. |
 | `show` | ids | Adds nodes, edges or groups. They stay for later steps. Showing an edge also shows both ends. |
 | `hide` | ids | Removes things from this step on. |
-| `flow` | edge ids or objects | Packets travel these edges, in order, looping while the step is open. Object form: `{ "edge": "id", "packet": "text", "reverse": true, "tone": "ok" }`. |
+| `flow` | edge ids or objects | Packets travel these edges, in order, looping while the step is open. Object form: `{ "edge": "id", "packet": "text", "reverse": true, "tone": "ok" }`. In film style `"stamp": "ASK"` stamps a verdict on the envelope in the flow's tone: at the `gate` it leaves, before it sets off, or else where it lands (not in the sequence layout, where there is no envelope). |
 | `together` | boolean | Run all flows of the step at the same time instead of one after another. |
+| `bubble` | object | Film style only: `{ "nodeId": "what it says" }` puts a speech bubble over that node for this step. Keep it under about eight words; three lines at most are drawn. Ignored in other styles. |
 | `focus` | ids | Accent outline with a soft halo around a node or group; an edge turns accent and thicker. |
 | `active` | ids | Keep these at full strength without outlining them (they'd otherwise fade as "old"). |
 | `notes` | array | See below. |
@@ -271,6 +276,7 @@ Notes belong to their step only. Repeat a note in a later step if it should stay
 | style | look | fonts | accent |
 |---|---|---|---|
 | `iso` (default) | Isometric toy blocks on a soft floor grid, with small hardware (drive bays, vents, status lights, a database lid, messages waiting on a queue); labels in floating pills, packets as glowing balls with a short trail hopping along floor paths, a glowing floor ring for focus. Light: pale blue-gray floor. Dark: night navy. Best up to 4 columns × 3 rows. | Geist, Geist Mono | coral |
+| `film` | The iso floor with drawn characters and props instead of blocks, always on a [stage](#stage): a person with a face (`actor`), a blinking robot (`bot`), a guard's booth with a barrier (`gate`), a small building with its icon in a lit window (`box`), a chest of drawers (`db`), a stack of notebooks (`file`); the other kinds keep their iso look. Packets are envelopes sealed in the packet's tone. A `gate` lowers its barrier on whatever arrives and lifts it when an `ok` or plain packet leaves; a flow can carry a `stamp`, a step can give a node a `bubble`, and a verified hop opens its line of code with the lines around it. The caption is one large serif line centred under the picture, the step title a small label above it. Starts dark. | Geist, Geist Mono, Newsreader (caption) | coral |
 | `chalk` | The same isometric board drawn on a chalkboard: slightly rough chalk lines, faces shaded by hatching instead of paint, pastel chalk colors, chalk-dot packets, handwritten labels. Light: green slate. Dark: black slate. Works with `"layout": "sequence"` too. | Caveat (titles), Patrick Hand, Geist Mono | yellow chalk |
 | `studio` | Product documentation: soft rounded white cards with a gentle shadow on a light dotted canvas, tinted icon tiles, numbered black badges. Dark theme is near-black. | Geist, Geist Mono | indigo |
 | `blueprint` | Engineering drawing: navy grid paper, thin light lines, outlined icon tiles, registration ticks at card corners, open arrowheads. Light theme is a white "whiteprint". Starts dark. | IBM Plex Mono, IBM Plex Sans | amber (dark) / orange (light) |
@@ -285,8 +291,41 @@ previews another style without editing the scene; `CHALK_STYLE=` does the same f
 the floor, its status light blinks, a server's bays light up, a database lid ripples (a write), a
 browser or phone screen flashes, a message drops onto a queue; a packet leaving a queue takes the
 head message and the rest move up. The focused block settles once and its light breathes slowly.
-Nothing else moves on an idle board. All of it is driven by the step clock, so `chalk.seek(k, ms)`
+Left alone, the packets of a step make three passes and then rest; autoplay keeps them going
+until it moves on. All of it is driven by the step clock, so `chalk.seek(k, ms)`
 draws the same frame every time; `?snap` and reduced motion show the calm still picture.
+
+**Receipt.** When a packet lands on a `verified` edge, a small dark card opens beside the path
+for about a second with the matched line of code and `✓ file:line`. It keeps its size whatever
+the camera does and takes the first spot that covers no label and no block. Not in sequence
+diagrams, not on replies (`reverse`), not in the recap (the count line is there).
+
+## Stage
+
+`"stage": true` (or `?stage` on any iso talk) plays the talk as a lit scene instead of a diagram.
+Use it when the talk is meant to be watched: a demo, a README GIF, a presentation.
+
+- The house is dark. A spotlight, with a visible beam and dust drifting through it, sits on what
+  the step is about and glides there from the previous step. In the recap the house lights come up.
+- Every block the step is about throws its own colour on the floor.
+- The path lights up behind a packet and cools after it lands; the landing throws a ring and a few
+  sparks, in the packet's tone (`ok` green, `error` red).
+- In the recap no path cools: the whole trip glows at once.
+- The caption's words arrive one after another.
+- A talk opened at step 1 starts with its title alone in the dark. Any key or click skips it,
+  `?nointro` turns it off, recordings never show it.
+
+Stage needs the iso style and shows in the dark theme (it starts dark; `T` to light turns the
+effects off). The spotlight runs on the step clock, so `record.mjs` captures it. Still frames
+(`?snap`, `check.mjs`) show the plain board, so layout checks are not affected.
+
+## Sound
+
+Five short synthesized cues, no audio files: a step arriving, a packet leaving, a packet landing
+(lower for an `error` packet), a receipt, the recap. They play on the first pass of a step only.
+`M` or the speaker button mutes and the choice is remembered; `"sound": false` starts a talk
+muted for everyone. Browsers allow audio only after a click or key press, so a page opened with
+`?play` is silent until the viewer touches it. Never in still frames or recordings.
 
 ## Layout rules the engine applies
 
@@ -309,10 +348,14 @@ draws the same frame every time; `?snap` and reduced motion show the calm still 
 
 ## Viewer controls and URL options
 
-← / → / space step, `P` autoplay, `T` light / dark, `C` code of the current step, `V` proof
-view, `D` before / after, `1`–`9` jump, `Esc` closes the code panel; `#3` opens step 3. URL:
-`?theme=dark`, `?style=studio`, `?play` (autoplay; `?play=loop` starts over after the recap), `?proof` (start in proof view), `?diff=before`, `?snap` (still
+← / → / space step, `P` autoplay, `T` light / dark, `M` sound, `C` code of the current step, `V` proof
+view, `D` before / after, `1`–`9` jump, `Esc` closes the code panel; `#3` opens step 3. A focused
+button keeps Space and Enter for itself, and the open code panel keeps the keys that scroll it. URL:
+`?theme=dark`, `?style=studio`, `?stage`, `?nointro`, `?play` (autoplay; `?play=loop` starts over after the recap), `?proof` (start in proof view), `?diff=before`, `?snap` (still
 frame), `?debug` (boxes problems in red).
+
+During autoplay the current segment of the progress bar fills while the step is on, and a step
+ends between two packet passes, never in the middle of a hop.
 
 ## Recording API
 

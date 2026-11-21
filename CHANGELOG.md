@@ -1,5 +1,16 @@
 # Changelog
 
+## Unreleased
+
+- **Film style.** `"style": "film"` draws characters and things instead of blocks, on a lit stage: people with faces, a robot for an agent (`bot`), a guard's booth for a hook (`gate`), little buildings, a chest of drawers, notebooks, and an envelope for what travels. The caption becomes one large narrated line. A gate lowers its barrier on what arrives and turns its lamp to the verdict's colour, `"stamp"` on a flow slams a verdict onto the envelope, `"bubble"` on a step gives a character a line to say, and a verified hop opens the matched line with the lines around it. Not in yet: chapters and shot names.
+- **Stage.** `"stage": true` (or `?stage`) plays an iso talk as a lit scene: a dark house, a spotlight with a visible beam that glides to what each step is about, paths that light up behind the packets, a ring and sparks where they land, every active block throwing its colour on the floor, the caption arriving word by word, and the title alone in the dark before step one. The recap brings the house lights up with the whole trip glowing.
+- **The camera directs.** It moves in on what each step is about (up to 1.6x) and pulls back for the recap. `"camera": "wide"` keeps the old framing.
+- **Receipts.** When a packet lands on a verified edge, a card shows the matched line of code and `✓ file:line`.
+- **Sound.** Five short synthesized cues; `M` mutes, `"sound": false` starts muted.
+- **Autoplay you can see.** The current progress segment fills while a step is on, steps end between two packet passes, and an idle board rests after three passes.
+- **Contrast.** Text-sized colours reach 4.5:1 in every style and theme. In the default light look, packet labels on the coral accent are now dark and the semantic colours are a little deeper.
+- Keyboard and touch: a focused button keeps Space and Enter, the code panel keeps its scroll keys and returns focus when it closes, progress segments have a 23px hit area, pinch-zoom works on the board.
+
 ## 0.3.0
 
 - **Stricter proof** (both skills). A `calls` string now has to match whole names (`"t("` no longer passes because the range contains `split(`), a match on a comment line doesn't count, and a range over 120 lines with `calls` is `broken` instead of proving anything. A talk that passed only by one of these turns `!` on the next build.

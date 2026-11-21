@@ -161,6 +161,7 @@ the retry path") and the agent edits it.
 | `D` | before / after, in a PR talk |
 | `C` / click a block or arrow | the code behind it |
 | `T` | light ↔ dark |
+| `M` | sound on / off |
 | `1`–`9` | jump to a step (also `#3` in the URL) |
 
 On a phone the board turns portrait and follows the part each step is about.
@@ -188,6 +189,10 @@ a looping GIF. `--steps 2-5`, `--width 960`, `--theme dark`.
 | **studio** · **blueprint** · **editorial** | flat card layouts for bigger systems |
 
 `"style": "chalk"` in the scene, or `?style=chalk` on any talk.
+
+**Stage.** `"stage": true` (or `?stage`) turns an iso talk into a lit scene: the house goes dark,
+a spotlight follows each step, the path lights up behind every packet and the landing throws
+sparks, and the recap brings the house lights up. For talks that are meant to be watched.
 
 ## How it works
 

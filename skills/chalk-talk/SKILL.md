@@ -170,6 +170,8 @@ the code in two steps.
 | `phone` | a standing phone | mobile app |
 | `file` | a small stack of sheets | file, config, document, artifact |
 | `actor` | a little person | user, admin, on-call engineer |
+| `bot` | a small robot (film style; a box with a bot icon elsewhere) | an AI agent, a model, an automated worker |
+| `gate` | a guard's booth with a barrier (film style; a box with a shield icon elsewhere) | a hook, a policy check, a firewall, an approval step |
 | `text` | just the label | a free label |
 
 **Colors** tint the object: `blue` clients, `green` your services, `amber` storage,
@@ -246,6 +248,19 @@ the isometric board there are flat card styles: `"studio"` (product docs), `"blu
 (engineering drawing) and `"editorial"` (newspaper explainer). Use iso unless the diagram
 doesn't fit or the user asks for another look.
 
+**Film**: `"style": "film"` tells the journey with drawn characters and things instead of blocks, on a lit stage: people have faces, an agent is a robot that blinks, a hook is a guard's booth, a service is a little building with its icon in a lit window, a store is a chest of drawers, and what travels is an envelope. The caption becomes one large narrated line under the picture. Use it when the user wants the talk to feel like a short film, for a demo or for explaining a system to people who do not read code. Same scene format and the same proof; `bot` and `gate` are the two kinds made for it. Three things only film plays: a gate lowers its barrier on what arrives, `"stamp": "ASK"` on a flow stamps the verdict on the envelope, and `"bubble": { "nodeId": "…" }` on a step lets a character say one short line. Use a stamp for the one or two decisions the story turns on, not on every hop.
+
+**Stage**: `"stage": true` plays an iso talk as a lit scene: a dark house, a spotlight that follows
+each step, paths that light up behind the packets, the title alone in the dark before step one.
+Use it when the talk is meant to be watched (a demo, a presentation, a GIF for a README or a
+PR), or when the user asks for something cinematic or impressive. Leave it off for a talk someone
+will read at their desk to understand code, where a calm board is the better tool. It needs the
+iso style; `?stage` previews it on any iso talk.
+
+**Sound**: talks play five short cues (a step, a packet leaving and landing, a receipt, the
+recap) once the viewer has clicked or pressed a key. `"sound": false` starts a talk muted; set it
+when the talk will be opened in a meeting or embedded in a page.
+
 ## What makes a talk good
 
 - **One claim per step.** If a caption needs "and then", it's two steps.
@@ -272,9 +287,9 @@ doesn't fit or the user asks for another look.
 
 ## Viewer controls (tell the user once if useful)
 
-← / → or space step through, `P` autoplays, `T` flips light / dark, `C` shows the code behind
+← / → or space step through, `P` autoplays, `T` flips light / dark, `M` mutes, `C` shows the code behind
 the current step (or click a block with a `</>` badge, or an arrow's label), `V` toggles proof
 view, `D` flips before / after in a PR talk, `1`–`9` jump, `#3` in the URL opens step 3, swipe
-works on phones. `?theme=dark` forces dark, `?style=studio` previews the flat style, `?play` autoplays (`?play=loop` repeats), `?proof`
+works on phones. `?theme=dark` forces dark, `?style=studio` previews the flat style, `?stage` the lit scene, `?play` autoplays (`?play=loop` repeats), `?proof`
 opens in proof view, `?diff=before` in the before view, `?snap` renders a still frame (used by
 `check.mjs`, which also takes `CHALK_THEME=dark` and `CHALK_STYLE=studio` or `CHALK_STYLE=chalk`).
