@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- **Film style.** `"style": "film"` draws characters and things instead of blocks, on a lit stage: people with faces, a robot for an agent (`bot`), a guard's booth for a hook (`gate`), little buildings, a chest of drawers, notebooks, and an envelope for what travels. The caption becomes one large narrated line. First slice: the props, the envelope and the caption; stop and stamp beats, speech bubbles and the close-up panel are not in yet.
 - **Stage.** `"stage": true` (or `?stage`) plays an iso talk as a lit scene: a dark house, a spotlight with a visible beam that glides to what each step is about, paths that light up behind the packets, a ring and sparks where they land, every active block throwing its colour on the floor, the caption arriving word by word, and the title alone in the dark before step one. The recap brings the house lights up with the whole trip glowing.
 - **The camera directs.** It moves in on what each step is about (up to 1.6x) and pulls back for the recap. `"camera": "wide"` keeps the old framing.
 - **Receipts.** When a packet lands on a verified edge, a card shows the matched line of code and `✓ file:line`.

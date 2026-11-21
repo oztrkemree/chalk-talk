@@ -34,7 +34,7 @@ page's script tag early; write it as `<\/script` (valid JSON, same text).
 | `eyebrow` | string | "How it works" in `lang` | Small accent line above the title. `""` hides it. |
 | `lang` | string | `"en"` | `<html lang>` and the default eyebrow; set it to the caption language (`"tr"`, `"de"`, ...). |
 | `layout` | `"map"` \| `"sequence"` | `"map"` | Map: nodes on a grid. Sequence: participants in a row with lifelines, edges as messages going down. |
-| `style` | `"iso"` \| `"chalk"` \| `"studio"` \| `"blueprint"` \| `"editorial"` | `"iso"` | Visual style, see [Styles](#styles). |
+| `style` | `"iso"` \| `"film"` \| `"chalk"` \| `"studio"` \| `"blueprint"` \| `"editorial"` | `"iso"` | Visual style, see [Styles](#styles). |
 | `theme` | `"auto"` \| `"light"` \| `"dark"` | `"auto"` | Starting theme. Auto follows the viewer's OS (blueprint starts dark). The viewer flips it with `T`. |
 | `spacing` | number | `1` | Multiplies the gaps between grid tracks. `0.8` tighter, `1.3` airier. |
 | `root` | string | none | Directory that node and edge `code` paths are relative to, itself relative to the scene file. Default: where the build runs, then the scene's folder. |
