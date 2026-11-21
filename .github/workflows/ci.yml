@@ -15,6 +15,9 @@ jobs:
           node-version: 22
       - name: Proof rules
         run: node --test test/proof.test.mjs
+      - name: Film choreography (in Chrome)
+        if: matrix.os == 'ubuntu-latest'
+        run: node --test test/film.test.mjs
       - name: Build examples
         shell: bash
         run: |
