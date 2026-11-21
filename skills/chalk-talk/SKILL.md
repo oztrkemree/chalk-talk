@@ -170,6 +170,8 @@ the code in two steps.
 | `phone` | a standing phone | mobile app |
 | `file` | a small stack of sheets | file, config, document, artifact |
 | `actor` | a little person | user, admin, on-call engineer |
+| `bot` | a small robot (film style; a box with a bot icon elsewhere) | an AI agent, a model, an automated worker |
+| `gate` | a guard's booth with a barrier (film style; a box with a shield icon elsewhere) | a hook, a policy check, a firewall, an approval step |
 | `text` | just the label | a free label |
 
 **Colors** tint the object: `blue` clients, `green` your services, `amber` storage,
@@ -245,6 +247,8 @@ hand-drawn or "teacher" look, or for a talk meant to be shared as a GIF. For sys
 the isometric board there are flat card styles: `"studio"` (product docs), `"blueprint"`
 (engineering drawing) and `"editorial"` (newspaper explainer). Use iso unless the diagram
 doesn't fit or the user asks for another look.
+
+**Film**: `"style": "film"` tells the journey with drawn characters and things instead of blocks, on a lit stage: people have faces, an agent is a robot that blinks, a hook is a guard's booth, a service is a little building with its icon in a lit window, a store is a chest of drawers, and what travels is an envelope. The caption becomes one large narrated line under the picture. Use it when the user wants the talk to feel like a short film, for a demo or for explaining a system to people who do not read code. Same scene format and the same proof; `bot` and `gate` are the two kinds made for it.
 
 **Stage**: `"stage": true` plays an iso talk as a lit scene: a dark house, a spotlight that follows
 each step, paths that light up behind the packets, the title alone in the dark before step one.
