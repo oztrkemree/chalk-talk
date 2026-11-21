@@ -402,6 +402,34 @@ body{background-color:var(--bg); background-image:var(--bg-image); background-si
    so nothing spills onto the caption bar and the floor grid can keep running to the page edge */
 #world .cam-out{opacity:0 !important; pointer-events:none}
 #world .elabel.cam-out{transition:opacity .45s ease}
+/* ---------- film: drawn props, and a caption that narrates ---------- */
+.pk-seal{fill:var(--accent)} .packet.t-ok .pk-seal{fill:var(--ok)} .packet.t-error .pk-seal{fill:var(--error)} .packet.t-warn .pk-seal{fill:var(--warn)} .packet.t-info .pk-seal{fill:var(--info)}
+.f-eyes{transform-origin:0px -161px; animation:f-blink 4.6s infinite}
+.f-ant{opacity:.8; animation:f-pulse 2.8s ease-in-out infinite}
+@keyframes f-blink{0%,93%,100%{transform:scaleY(1)} 96%{transform:scaleY(.1)}}
+@keyframes f-pulse{50%{opacity:.35}}
+:is(.still,.seeking) :is(.f-eyes,.f-ant){animation:none}   /* a frame is a frame: stills and recordings do not blink at random */
+.pk-stamp{pointer-events:none}
+.pk-stamp rect{fill:#FBF6E9; fill-opacity:.9; stroke:var(--accent); stroke-width:3}
+.pk-stamp text.t-packet{fill:var(--accent); font-weight:800; letter-spacing:.08em}
+.pk-stamp.t-ok rect{stroke:var(--ok)} .pk-stamp.t-error rect{stroke:var(--error)} .pk-stamp.t-warn rect{stroke:var(--warn)} .pk-stamp.t-info rect{stroke:var(--info)}
+.pk-stamp.t-ok text.t-packet{fill:var(--ok)} .pk-stamp.t-error text.t-packet{fill:var(--error)} .pk-stamp.t-warn text.t-packet{fill:var(--warn)} .pk-stamp.t-info text.t-packet{fill:var(--info)}
+.f-bubble{pointer-events:none}
+.f-bubble :is(rect,path){fill:#FBF6E9}
+.f-bubble text.t-note{fill:#16203A; font-weight:600}
+.f-bubble > g{transform-box:fill-box; transform-origin:50% 100%}
+/* the caption is the narrator: one large line, centred under the picture */
+[data-film] .bar{container-type:inline-size}
+[data-film] .cap{display:block; position:relative}
+[data-film] .count{display:none}
+[data-film] .txt{text-align:center; min-height:96px; padding:0 250px}
+[data-film] .txt h2{font-family:var(--ui-mono); font-size:12.5px; font-weight:600; letter-spacing:.16em; text-transform:uppercase; color:var(--muted); margin:0 0 8px}
+[data-film] .txt p{font-family:"Newsreader",Georgia,serif; font-size:clamp(20px, 2.3vw, 33px); line-height:1.22; letter-spacing:-.01em; color:var(--ink); max-width:none; text-wrap:balance}
+[data-film] .txt p b{font-weight:500; text-decoration:underline; text-decoration-color:var(--accent); text-decoration-thickness:.09em; text-underline-offset:.16em}
+[data-film] .txt code{font-size:.7em}
+[data-film] .ctl{position:absolute; right:0; top:0}
+[data-film] .txt p.proofline{justify-content:center; font-family:var(--ui-f); font-size:15px; letter-spacing:0; margin-top:8px}
+@container (max-width:1000px){ [data-film] .txt{padding:0; min-height:0} [data-film] .txt p{font-size:clamp(17px, 3.4cqw, 26px)} [data-film] .ctl{position:static; justify-content:center; margin-top:12px} }
 /* ---------- stage: the talk as a lit scene ---------- */
 [data-stage][data-theme="dark"]{--bg:#05080F; --grid-line:#101A2C; --track:#0F1A2D}
 .stage-dark{display:none; pointer-events:none}
@@ -415,7 +443,7 @@ body{background-color:var(--bg); background-image:var(--bg-image); background-si
 :is(.pk-trace,.pk-ring).t-warn{stroke:var(--warn)} :is(.pk-trace,.pk-ring).t-info{stroke:var(--info)}
 [data-stage][data-theme="dark"] .pk-glow{opacity:.95}
 [data-stage][data-theme="dark"] .el.dim{opacity:.34}   /* the dark already does the fading */
-[data-stage][data-theme="dark"] .txt h2{font-size:25px} [data-stage][data-theme="dark"] .txt p{font-size:18.5px}
+[data-stage][data-theme="dark"]:not([data-film]) .txt h2{font-size:25px} [data-stage][data-theme="dark"]:not([data-film]) .txt p{font-size:18.5px}   /* film sets its own caption */
 .stage-light{display:none; pointer-events:none; mix-blend-mode:screen}
 [data-stage][data-theme="dark"] .stage-light{display:inline}
 .stage-beam{filter:blur(16px)}
@@ -440,6 +468,8 @@ body{background-color:var(--bg); background-image:var(--bg-image); background-si
 .pk-code :is(rect,path){fill:var(--ink)}
 .pk-code text.t-packet{fill:var(--bg)}   /* two classes: has to beat the chalk rule for .t-packet */
 .pk-code text.pk-src{opacity:.72; font-weight:500}
+.pk-code rect.pk-hit{fill:var(--ok); opacity:.32}
+.pk-code text.pk-ctx{opacity:.6}
 .pk-glow{fill:var(--accent); opacity:.5}
 .pk-tail circle{fill:var(--accent)}
 .packet.t-ok :is(.pk-glow,.pk-tail circle){fill:var(--ok)} .packet.t-error :is(.pk-glow,.pk-tail circle){fill:var(--error)}
@@ -770,10 +800,10 @@ html:not(.diff-before) .edge.chg-removed :is(.edge-line,.iso-path){stroke-dashar
 const NS = 'http://www.w3.org/2000/svg';
 const W = 1600, H = 900;
 const AREA = { x: 60, y: 176, w: 1480, h: 682 };     // where the diagram is centered
-const KINDS = new Set(['box', 'pill', 'db', 'queue', 'cloud', 'actor', 'browser', 'phone', 'file', 'text']);
-const ALIAS = { service: 'box', server: 'box', process: 'pill', fn: 'pill', function: 'pill', database: 'db', storage: 'db', cache: 'db', user: 'actor', person: 'actor', client: 'browser', web: 'browser', mobile: 'phone', app: 'phone', doc: 'file', document: 'file', topic: 'queue', stream: 'queue', external: 'cloud', internet: 'cloud', label: 'text' };
-const DEFAULT_COLOR = { box: 'mint', pill: 'mint', db: 'butter', queue: 'lilac', cloud: 'white', actor: 'peach', browser: 'sky', phone: 'sky', file: 'white', text: 'none' };
-const DEFAULT_ICON = { box: 'box', pill: 'code', db: 'db', queue: 'queue', cloud: 'cloud', actor: 'user', browser: 'window', phone: 'phone', file: 'file' };
+const KINDS = new Set(['box', 'pill', 'db', 'queue', 'cloud', 'actor', 'browser', 'phone', 'file', 'text', 'bot', 'gate']);
+const ALIAS = { robot: 'bot', agent: 'bot', guard: 'gate', hook: 'gate', service: 'box', server: 'box', process: 'pill', fn: 'pill', function: 'pill', database: 'db', storage: 'db', cache: 'db', user: 'actor', person: 'actor', client: 'browser', web: 'browser', mobile: 'phone', app: 'phone', doc: 'file', document: 'file', topic: 'queue', stream: 'queue', external: 'cloud', internet: 'cloud', label: 'text' };
+const DEFAULT_COLOR = { box: 'mint', pill: 'mint', db: 'butter', queue: 'lilac', cloud: 'white', actor: 'peach', browser: 'sky', phone: 'sky', file: 'white', text: 'none', bot: 'lilac', gate: 'mint' };
+const DEFAULT_ICON = { bot: 'bot', gate: 'shield', box: 'box', pill: 'code', db: 'db', queue: 'queue', cloud: 'cloud', actor: 'user', browser: 'window', phone: 'phone', file: 'file' };
 const COLORS = new Set(['mint', 'sky', 'butter', 'peach', 'lilac', 'rose', 'sage', 'sand', 'white', 'none']);
 const COLOR_ALIAS = { blue: 'sky', green: 'mint', amber: 'butter', yellow: 'butter', orange: 'peach', violet: 'lilac', purple: 'lilac', red: 'rose', pink: 'rose', teal: 'sage', stone: 'sand', gray: 'sand', grey: 'sand', neutral: 'white' };
 const TONES = new Set(['ink', 'muted', 'accent', 'error', 'ok', 'info', 'warn']);
@@ -781,6 +811,8 @@ const TONES = new Set(['ink', 'muted', 'accent', 'error', 'ok', 'info', 'warn'])
 const STYLES = {
   iso:       { radius: 14, tileR: 10, bend: 10, pill: 99, head: 'solid', corners: false, shadow: false, theme: null, iso: true },
   chalk:     { radius: 14, tileR: 10, bend: 10, pill: 99, head: 'open',  corners: false, shadow: false, theme: null, iso: true, chalk: true },
+  // film: the iso floor and its tokens, but the things on it are drawn characters and props, on a lit stage
+  film:      { radius: 14, tileR: 10, bend: 10, pill: 99, head: 'solid', corners: false, shadow: false, theme: 'dark', iso: true, film: true },
   studio:    { radius: 18, tileR: 12, bend: 22, pill: 99, head: 'solid', corners: false, shadow: true,  theme: null },
   blueprint: { radius: 8,  tileR: 6,  bend: 14, pill: 6,  head: 'open',  corners: true,  shadow: false, theme: 'dark' },
   editorial: { radius: 6,  tileR: 5,  bend: 12, pill: 4,  head: 'solid', corners: false, shadow: false, theme: null },
@@ -811,8 +843,10 @@ if (S.style && !STYLES[S.style]) issue('warn', 'scene', `unknown style "${S.styl
 const ST = STYLES[STYLE_NAME];
 const ISO = !!ST.iso;
 const CHALK = !!ST.chalk;   // chalk is the iso geometry drawn as a teacher's board
-const STAGE = ISO && !CHALK && !SNAP && (S.stage === true || qs.has('stage'));   // the lit-scene look, see spotlight()
-document.documentElement.dataset.style = STYLE_NAME;
+const FILM = !!ST.film;     // film is iso with drawn props, always on a stage
+const STAGE = ISO && !CHALK && !SNAP && (FILM || S.stage === true || qs.has('stage'));   // the lit-scene look, see spotlight()
+document.documentElement.dataset.style = FILM ? 'iso' : STYLE_NAME;   // film wears the iso tokens
+if (FILM) document.documentElement.dataset.film = '';
 const LANG = S.lang || 'en';
 
 /* ---------- small helpers ---------- */
@@ -970,6 +1004,7 @@ arr(S.nodes).forEach((d, i) => {
   if (all.has(id)) issue('error', id, 'duplicate id');
   let kind = d.kind ? (ALIAS[d.kind] || d.kind) : 'box';
   if (!KINDS.has(kind)) { issue('warn', id, `unknown kind "${d.kind}", drawn as box`); kind = 'box'; }
+  if ((kind === 'bot' || kind === 'gate') && !FILM) { d = { icon: DEFAULT_ICON[kind], color: DEFAULT_COLOR[kind], ...d }; kind = 'box'; }   // only film draws them as characters
   let color = COLOR_ALIAS[d.color] || d.color || DEFAULT_COLOR[kind];
   if (!COLORS.has(color)) { issue('warn', id, `unknown color "${d.color}"`); color = DEFAULT_COLOR[kind]; }
   if (d.icon && !ICONS[d.icon]) issue('warn', id, `unknown icon "${d.icon}" (known: ${Object.keys(ICONS).join(', ')})`);
@@ -999,6 +1034,7 @@ const steps = (arr(S.steps).length ? arr(S.steps) : [{ title: S.title || '', rec
   flow: arr(d.flow).map(f => typeof f === 'string' ? { edge: f } : { ...f, edge: String(f.edge) }),
   notes: arr(d.notes).map(n => typeof n === 'string' ? { text: n } : n),
   recap: !!d.recap, dim: d.dim, together: !!d.together, wait: d.wait,
+  bubble: d.bubble && typeof d.bubble === 'object' ? d.bubble : {},   // film: node id -> what it says out loud
 }));
 report.steps = steps.length;
 
@@ -1017,6 +1053,7 @@ steps.forEach(st => {
   });
   st.focus.forEach(id => known(id, st.k, 'focus') && addAny(id));
   st.notes.forEach(n => n.on && known(n.on, st.k, 'note target') && addAny(n.on));
+  Object.keys(st.bubble).forEach(id => { if (known(id, st.k, 'bubble') && !nodes.has(id)) issue('error', `step ${st.k + 1}`, `bubble "${id}" is not a node`); });
   st.hide.forEach(id => { if (known(id, st.k, 'hide')) vis.delete(id); });
   st.visible = new Set(vis); st.added = added;
   const act = new Set(added);
@@ -1402,6 +1439,7 @@ const ISO_SHAPE = {
 };
 function isoGeom(n) {   // floor footprint and the screen box around the anchor (the floor center)
   const s = ISO_SHAPE[n.kind] || ISO_SHAPE.box;
+  if (FILM && FILM_BOX[n.kind]) { const [w, h, f] = FILM_BOX[n.kind]; return { fw: f, fd: f, box: rect(-w / 2, -h, w, h + 12) }; }
   const cube = (w, d, top) => { const hx = (w + d) * IC / 2, hy = (w + d) * IS / 2; return rect(-hx, -hy - top, 2 * hx, 2 * hy + top); };
   switch (n.kind) {
     case 'db': { const rx = s.r * Math.SQRT2 * IC, ry = s.r * Math.SQRT2 * IS; return { fw: s.r * 2, fd: s.r * 2, box: rect(-rx, -s.h - ry, 2 * rx, s.h + 2 * ry) }; }
@@ -1600,6 +1638,58 @@ function chalkDefs(defs) {
   el('feTurbulence', { type: 'fractalNoise', baseFrequency: '0.004 0.009', numOctaves: 3, seed: 8, result: 'n' }, haze);
   el('feColorMatrix', { type: 'matrix', values: '0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 1.1 0 0 0 -0.45' }, haze);
 }
+/* ---------- film props (style "film") ----------
+   A character or a thing instead of a block: you are a person with a face, an agent is a small
+   robot that blinks, a hook is a guard's booth with a barrier, a service is a little building with
+   its icon in a lit window, a store is a chest of drawers, files are notebooks. Each is drawn
+   upright around its floor anchor (0,0 = where it stands) at design size, then scaled by its k.
+   FILM_BOX is what layout sees: screen width, height above the floor, floor footprint. */
+const FILM_PAL = { mint: ['#9BF0D2', '#58D7AE', '#23856B'], sky: ['#B5D5FF', '#8EC0FF', '#3F78D8'], butter: ['#FFE9B0', '#F6CD96', '#B27A43'], peach: ['#FFC09E', '#F0926B', '#B85A3C'],
+  lilac: ['#CBC3FF', '#8676F2', '#5546BF'], rose: ['#FFB0BC', '#F08A9B', '#C5405A'], sage: ['#BFE8E0', '#7FCFC3', '#2F8F86'], sand: ['#E5DED2', '#C9BFAE', '#8E8474'], white: ['#F4F6FB', '#D9E0EE', '#9AA7C0'], none: ['#F4F6FB', '#D9E0EE', '#9AA7C0'] };
+const FILM_BOX = { actor: [56, 100, 44], bot: [74, 146, 60], gate: [176, 152, 92], box: [138, 124, 88], db: [132, 128, 88], file: [104, 58, 72] };
+function filmProp(n) {
+  const [hi, mid, lo] = FILM_PAL[n.color] || FILM_PAL.white, gid = 'fg-' + String(n.id).replace(/[^\w-]/g, '_'), G = `url(#${gid})`;
+  const grad = `<linearGradient id="${gid}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${hi}"/><stop offset=".5" stop-color="${mid}"/><stop offset="1" stop-color="${lo}"/></linearGradient>`;
+  const sh = (rx, ry, cx = 4) => `<ellipse cx="${cx}" cy="7" rx="${rx}" ry="${ry}" class="iso-shadow" filter="url(#iso-blur)"/>`;
+  const icon = (x, y, k, col) => ICONS[n.icon2] ? `<g transform="translate(${x} ${y}) scale(${k}) translate(-12 -12)"><path d="${ICONS[n.icon2]}" fill="none" stroke="${col}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></g>` : '';
+  switch (n.kind) {
+    case 'actor': return [0.62, lo, `${grad}${sh(48, 14, 6)}
+      <path d="M-27 -100Q-30 -112 -16 -114L16 -114Q30 -112 27 -100L20 -8Q0 -1 -20 -8Z" fill="${G}"/><path d="M-27 -100Q-30 -112 -16 -114L-8 -114" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" opacity=".6"/>
+      <path d="M-9 -113L0 -103L9 -113" fill="none" stroke="${lo}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+      <g class="f-head"><circle cx="0" cy="-136" r="18" fill="#FFC9A8"/><path d="M-17 -141a18 18 0 0 1 34 -3q-10 -8 -20 -4t-14 7z" fill="#3B2A24"/><circle cx="-7" cy="-135" r="2.1" fill="#3B2A24"/><circle cx="6" cy="-135" r="2.1" fill="#3B2A24"/><path d="M-6 -127q5.5 5 11 0" fill="none" stroke="#3B2A24" stroke-width="1.9" stroke-linecap="round"/></g>
+      <g transform="translate(-23 -100)"><g class="f-hand"><path d="M0 0L-4 40" stroke="${mid}" stroke-width="11" stroke-linecap="round"/><circle cx="-4.5" cy="47" r="7.5" fill="#FFC9A8"/></g></g>`];
+    case 'bot': return [0.62, mid, `${grad}${sh(60, 18)}
+      <rect x="-34" y="-16" width="26" height="20" rx="8" fill="${lo}"/><rect x="8" y="-16" width="26" height="20" rx="8" fill="${lo}"/>
+      <path d="M40 -84Q66 -78 72 -62" fill="none" stroke="${mid}" stroke-width="13" stroke-linecap="round"/>
+      <rect x="-46" y="-114" width="92" height="104" rx="28" fill="${G}"/><path d="M-44 -86q0 -26 24 -27" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" opacity=".65"/>
+      <rect x="-22" y="-62" width="44" height="26" rx="9" fill="${lo}"/><circle cx="-10" cy="-49" r="3.4" fill="${hi}"/><circle cx="0" cy="-49" r="3.4" fill="${hi}" opacity=".6"/><circle cx="10" cy="-49" r="3.4" fill="${hi}" opacity=".35"/>
+      <g class="f-head"><path d="M0 -198L0 -224" stroke="${mid}" stroke-width="4" stroke-linecap="round"/><circle class="f-ant" cx="0" cy="-229" r="15" fill="#FF7A8E" filter="url(#iso-blur)"/><circle cx="0" cy="-229" r="6" fill="#FF9AAA"/>
+        <rect x="-54" y="-198" width="108" height="78" rx="32" fill="${hi}"/><rect x="-54" y="-198" width="108" height="78" rx="32" fill="${G}" opacity=".55"/><path d="M-51 -168q2 -27 30 -28" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" opacity=".7"/>
+        <rect x="-40" y="-184" width="80" height="48" rx="19" fill="#0A1024"/><g class="f-eyes" fill="#7DF9FF"><rect x="-22" y="-170" width="12" height="18" rx="6"/><rect x="10" y="-170" width="12" height="18" rx="6"/></g></g>`];
+    case 'gate': return [0.6, mid, `${grad}<ellipse cx="-40" cy="2" rx="130" ry="30" class="iso-shadow" filter="url(#iso-blur)"/>
+      <g transform="translate(-96 0)"><path d="M100 -6L138 -22L138 -168L100 -152Z" fill="${lo}"/><rect x="0" y="-152" width="100" height="152" rx="5" fill="${G}"/>
+        <path d="M-12 -152L100 -152L138 -168L32 -172Z" fill="${hi}"/><path d="M-12 -152L-12 -144L100 -144L100 -152Z" fill="${mid}"/><path d="M2 -150L2 -6" stroke="#fff" stroke-width="2.5" stroke-linecap="round" opacity=".4"/>
+        <rect x="16" y="-124" width="68" height="56" rx="6" fill="#FFD98A"/><rect x="16" y="-124" width="68" height="56" rx="6" fill="#FFD27A" filter="url(#iso-blur)" opacity=".5"/>
+        <g class="f-guard"><circle cx="50" cy="-100" r="11" fill="#1D2B3F"/><path d="M30 -68q2 -19 20 -19t20 19z" fill="#1D2B3F"/><path d="M38 -106h24l-3 -8h-18z" fill="#101A2B"/></g>
+        ${icon(50, -30, 0.95, '#0F2A24')}
+        <path d="M118 -164L118 -196" stroke="#2A3550" stroke-width="5" stroke-linecap="round"/><circle class="f-lampG" cx="118" cy="-204" r="24" fill="#3DDC97" filter="url(#iso-blur)" opacity=".8"/><circle class="f-lamp" cx="118" cy="-204" r="9.5" fill="#3DDC97"/><circle cx="115" cy="-207" r="3" fill="#fff" opacity=".7"/></g>
+      <rect x="58" y="-66" width="13" height="62" rx="4" fill="#33415E"/><rect x="58" y="-66" width="5" height="62" rx="2.5" fill="#5A6C92"/>
+      <g transform="translate(64 -56)"><g class="f-arm" style="transform:rotate(-64deg)"><rect x="0" y="-7" width="150" height="14" rx="7" fill="#F4F6FB" stroke="#9AA7C0" stroke-width="1.5"/>${[0, 1, 2, 3].map(i => `<rect x="${14 + i * 36}" y="-6" width="18" height="12" fill="#F0546B"/>`).join('')}<circle r="9" fill="#33415E"/><circle r="4" fill="#8A9BC0"/></g></g>`];
+    case 'box': return [0.62, mid, `${grad}<ellipse cx="14" cy="6" rx="112" ry="24" class="iso-shadow" filter="url(#iso-blur)"/>
+      <path d="M70 0L112 -18L112 -136L70 -118Z" fill="${lo}"/><rect x="-70" y="-118" width="140" height="118" rx="4" fill="${G}"/>
+      <path d="M-82 -118L0 -176L82 -118Z" fill="#E7ECF6"/><path d="M0 -176L42 -194L124 -136L82 -118Z" fill="#B9C4DA"/><path d="M-68 -116L-68 -4" stroke="#fff" stroke-width="2.5" stroke-linecap="round" opacity=".35"/>
+      <rect x="-52" y="-98" width="58" height="52" rx="6" fill="#FFD98A"/><rect x="-52" y="-98" width="58" height="52" rx="6" fill="#FFD27A" filter="url(#iso-blur)" opacity=".45"/>${icon(-23, -72, 1.5, '#1D2B3F')}
+      <rect x="22" y="-70" width="36" height="70" rx="5" fill="#0C1322"/><circle cx="50" cy="-34" r="3" fill="#C9D4EA"/>`];
+    case 'db': return [0.38, mid, `${grad}<ellipse cx="14" cy="8" rx="190" ry="30" class="iso-shadow" filter="url(#iso-blur)"/>
+      <path d="M160 0L196 -18L196 -358L160 -340Z" fill="${lo}"/><rect x="-160" y="-340" width="320" height="340" rx="8" fill="${G}"/><path d="M-160 -340L160 -340L196 -358L-124 -358Z" fill="${hi}"/>
+      ${[0, 1, 2].map(r => [0, 1, 2].map(c => `<rect x="${-150 + c * 104}" y="${-324 + r * 104}" width="92" height="88" rx="6" fill="${hi}" opacity=".9"/><rect x="${-124 + c * 104}" y="${-300 + r * 104}" width="40" height="18" rx="4" fill="#FFF7E8"/><rect x="${-114 + c * 104}" y="${-270 + r * 104}" width="20" height="8" rx="4" fill="${lo}"/>`).join('')).join('')}`];
+    case 'file': return [0.62, mid, `${grad}${sh(84, 18, 6)}
+      <rect x="-74" y="-28" width="148" height="28" rx="6" fill="#3F78D8"/><rect x="-66" y="-56" width="136" height="28" rx="6" fill="#8676F2"/><rect x="-70" y="-84" width="142" height="28" rx="6" fill="${G}"/>
+      <path d="M-60 -70h40M-56 -42h46M-64 -14h36" stroke="#fff" stroke-width="3" stroke-linecap="round" opacity=".5"/>`];
+  }
+  return null;
+}
+
 function drawNodeIso(n) {
   const outer = el('g', { class: 'el k-' + n.kind + ' c-' + n.color, 'data-id': n.id }, L.nodes);
   if (n.lifePts) el('path', { class: 'lifeline', d: `M${f1(n.cx)} ${f1(n.lifePts[0][1])}V${f1(n.lifePts[n.lifePts.length - 1][1])}` }, outer);
@@ -1640,7 +1730,11 @@ function drawNodeIso(n) {
     el('path', { class: 'iso-ink', d: ICONS[name], 'vector-effect': 'non-scaling-stroke' }, ig);
   };
   const s = ISO_SHAPE[n.kind] || ISO_SHAPE.box;
-  switch (n.kind) {
+  const prop = FILM ? filmProp(n) : null;
+  if (prop) {   // a drawn character or thing stands where the block would
+    n.glowColor = prop[1];
+    el('g', { transform: `translate(${f1(ax)} ${f1(ay)}) scale(${prop[0]})` }, g).insertAdjacentHTML('beforeend', prop[2]);
+  } else switch (n.kind) {
     case 'box': case 'pill': {
       shadow(s.w, s.d);
       block(-s.w / 2, -s.d / 2, s.w, s.d, 0, s.h);
@@ -2241,6 +2335,23 @@ function renderNotes(st) {
   });
 }
 
+// film: a character says its line out loud, in a bubble over its head
+function renderBubbles(st) {
+  if (!FILM) return [];
+  return Object.entries(st.bubble).map(([id, str]) => {
+    const n = nodes.get(id);
+    if (!n || !n.box || !st.visible.has(id) || diffHidden(n) || !str) return null;
+    const lines = wrapBalanced(String(str), 'note', 200).slice(0, 3), lh = M.note.lh, w = widest(lines, 'note') + 30, h = lines.length * lh + 18;
+    const g = el('g', { class: 'f-bubble', transform: `translate(${f1(n.box.x + n.box.w / 2)} ${f1(n.box.y - 6)}) scale(${f1(1.1 / camS * 100) / 100})` }, L.notes);   // keeps its size on screen, like a receipt
+    const inner = el('g', {}, g);
+    el('rect', { x: f1(-w / 2), y: f1(-h - 13), width: f1(w), height: f1(h), rx: 15 }, inner);
+    el('path', { d: 'M-9 -14L1 0L11 -14Z' }, inner);
+    lines.forEach((l, j) => text(inner, l, 0, -h - 13 + 9 + lh / 2 + j * lh, 't-note'));
+    g.pop = inner;
+    return g;
+  }).filter(Boolean);
+}
+
 function drawDebug() {
   debugBoxes.forEach(b => el('rect', { x: f1(b.x), y: f1(b.y), width: f1(b.w), height: f1(b.h), class: 'dbg' }, L.debug));
   const list = report.issues.slice(0, 8);
@@ -2495,6 +2606,10 @@ function enter(k, animate) {
     g.querySelectorAll('.note-lead').forEach(p => drawPath(p, d + 120, 380));
   });
   if (animate && notes.length) t += notes.length * 200 + 240;
+  renderBubbles(st).forEach((g, i) => {
+    dyn.push(g);
+    if (ANIM) running.push(g.pop.animate([{ opacity: 0, transform: 'scale(.5)' }, { opacity: 1, transform: 'scale(1.06)', offset: 0.7 }, { opacity: 1, transform: 'scale(1)' }], { duration: 380, delay: (animate ? t : 120) + i * 260, easing: 'cubic-bezier(.2,.7,.3,1)', fill: 'backwards' }));
+  });
   st.focus.forEach((id, i) => {
     const o = all.get(id); if (!o) return;
     if (o.type === 'edge') { o.g.classList.add('hot'); return; }
@@ -2509,9 +2624,9 @@ function enter(k, animate) {
   });
   if (animate && st.focus.length) t += 480;
   if (STAGE && ANIM) st.activeSet.forEach(id => {   // every block the step is about glows on the floor in its own colour
-    const o = all.get(id), top = o && o.type === 'node' && o.fbox && st.visible.has(id) && o.g.querySelector('.iso-top');
+    const o = all.get(id), top = o && o.type === 'node' && o.fbox && st.visible.has(id) && (o.glowColor || o.g.querySelector('.iso-top'));
     if (!top) return;
-    const glow = el('path', { class: 'stage-glow', d: floorRR(pad(o.fbox, 30), 34), fill: getComputedStyle(top).fill });
+    const glow = el('path', { class: 'stage-glow', d: floorRR(pad(o.fbox, 30), 34), fill: o.glowColor || getComputedStyle(top).fill });
     L.floorfx.insertBefore(glow, L.floorfx.firstChild); dyn.push(glow);
     running.push(glow.animate([{ opacity: 0 }, { opacity: 0.55, offset: 0.25 }, { opacity: 0.34, offset: 0.62 }, { opacity: 0.55 }], { duration: 3600, delay: animate ? 200 : 0, fill: 'backwards', iterations: Infinity, easing: 'ease-in-out' }));
   });
@@ -2533,10 +2648,36 @@ function focusRing(o) {
   return g;
 }
 
-const CARD_MS = 1300;   // how long a proven hop's line of code stays open
+const CARD_MS = FILM ? 2200 : 1300;   // how long a proven hop's line of code stays open (film shows three lines)
+const STAMP_MS = 1100;  // film: how long an envelope sits still under its stamp
 const IDLE_PASSES = 3;  // packet passes on a step nobody is playing, before the board rests
+// film: a gate's barrier, d from 0 (up) to 1 (down), and its lamp in the colour of the verdict
+function gateSet(n, d, col) {
+  if (!n.arm) { n.arm = n.g.querySelector('.f-arm'); n.lamps = n.g.querySelectorAll('.f-lamp, .f-lampG'); }
+  if (!n.arm) return;
+  n.arm.style.transform = `rotate(${f1(-64 + 64 * easeInOut(d))}deg)`;
+  n.lamps.forEach(l => { l.style.fill = d > 0.05 ? col : ''; });
+}
+const lampOf = tone => `var(--${['ok', 'error', 'info'].includes(tone) ? tone : 'warn'})`;
+// where step k leaves a gate: down after an arrival or a refusal, up once anything else has left it
+function gateAfter(k, n) {
+  for (; k >= 0; k--) {
+    const st = steps[k];
+    if (st.recap) break;
+    for (let i = st.flow.length - 1; i >= 0; i--) {
+      const f = st.flow[i], e = edges.get(f.edge);
+      if (!e) continue;
+      const tone = TONES.has(f.tone) ? f.tone : e.tone;
+      if ((f.reverse ? e.from : e.to) === n.id) return [1, lampOf(tone)];
+      if ((f.reverse ? e.to : e.from) === n.id) return tone === 'error' || tone === 'warn' ? [1, lampOf(tone)] : [0, ''];
+    }
+  }
+  return [0, ''];
+}
 function startFlows(st, delay) {
-  const items = st.flow.map(f => ({ ...f, e: edges.get(f.edge) })).filter(i => i.e && i.e.pathEl && !diffHidden(i.e));
+  // a barrier starts where the step before left it; a still frame shows where this step leaves it
+  if (FILM) nodes.forEach(n => { if (n.kind === 'gate' && n.g) { n.gate0 = st.recap ? [0, ''] : gateAfter(ANIM ? st.k - 1 : st.k, n); gateSet(n, ...n.gate0); } });
+  const items = st.flow.map(f => ({ ...f, e: edges.get(f.edge), pre: 0, hold: 0 })).filter(i => i.e && i.e.pathEl && !diffHidden(i.e));
   if (!items.length) return 0;
   const cardBoxes = [];
   items.forEach(it => {
@@ -2551,18 +2692,35 @@ function startFlows(st, delay) {
         L.packets.insertBefore(it.tail, g); it.tail.style.opacity = 0; dyn.push(it.tail);
         for (let j = 0; j < 5; j++) el('circle', { r: f1(6.4 - j * 0.9) }, it.tail);
       }
-      el('ellipse', { rx: 8, ry: 4, class: 'iso-shadow' }, g);
-      const ball = el('g', { transform: 'translate(0 -12)' }, g);
-      el('circle', { r: 12, class: 'pk-glow', filter: 'url(#iso-blur)' }, ball);
-      el('circle', { r: 8, class: 'pk-ball' }, ball);
-      el('circle', { cx: -2.5, cy: -2.5, r: 2.4, class: 'pk-shine' }, ball);
+      el('ellipse', FILM ? { rx: 22, ry: 7, class: 'iso-shadow', filter: 'url(#iso-blur)' } : { rx: 8, ry: 4, class: 'iso-shadow' }, g);
+      const ball = el('g', { transform: 'translate(0 -12)' }, g), ly = FILM ? -74 : -38;
+      if (FILM) {   // the hero of a film is the thing that travels: an envelope with its seal in the packet's tone
+        ball.insertAdjacentHTML('beforeend', `<g transform="translate(0 -22) rotate(-11) scale(.62)"><rect x="-40" y="-27" width="80" height="54" rx="6" class="pk-glow" filter="url(#iso-blur)"/><rect x="-40" y="-27" width="80" height="54" rx="6" fill="#FBF6E9"/>
+          <path d="M-40 -21L0 8L40 -21" fill="none" stroke="#C9B48A" stroke-width="2.4" stroke-linejoin="round"/><path d="M-40 27L-12 2M40 27L12 2" fill="none" stroke="#DCCBA5" stroke-width="1.6"/><circle cx="0" cy="9" r="7" class="pk-seal"/></g>`);
+      } else {
+        el('circle', { r: 12, class: 'pk-glow', filter: 'url(#iso-blur)' }, ball);
+        el('circle', { r: 8, class: 'pk-ball' }, ball);
+        el('circle', { cx: -2.5, cy: -2.5, r: 2.4, class: 'pk-shine' }, ball);
+      }
       if (label) {
         const w = tw(label, 'packet') + 16;
-        el('rect', { x: f1(-w / 2), y: -38, width: f1(w), height: 22, rx: 11, class: 'pk-bg' }, ball);
-        text(ball, label, 0, -26.5, 't-packet');
-        it.w = w; it.h = 52;
-      } else it.w = it.h = 22;
+        el('rect', { x: f1(-w / 2), y: ly, width: f1(w), height: 22, rx: 11, class: 'pk-bg' }, ball);
+        text(ball, label, 0, ly + 11.5, 't-packet');
+        it.w = Math.max(w, FILM ? 56 : 0); it.h = FILM ? 86 : 52;
+      } else it.w = it.h = FILM ? 56 : 22;
       it.ball = ball;
+      it.src = nodes.get(it.reverse ? it.e.to : it.e.from); it.dst = nodes.get(it.reverse ? it.e.from : it.e.to);
+      it.tn = tone;
+      if (FILM && it.stamp && !st.recap) {   // the verdict is stamped on the envelope: at the gate it leaves, or else where it lands
+        const s = String(it.stamp).toLocaleUpperCase(LANG), sw = tw(s, 'packet') + 20;
+        it.stampG = el('g', { class: 'pk-stamp' + (tone ? ' t-' + tone : ''), transform: 'translate(0 -22)' }, ball);
+        it.stampIn = el('g', {}, it.stampG);
+        el('rect', { x: f1(-sw / 2), y: -13, width: f1(sw), height: 26, rx: 5 }, it.stampIn);
+        text(it.stampIn, s, 0, 0.5, 't-packet');
+        it.stampIn.setAttribute('transform', 'rotate(-9)');
+        if (ANIM) it.stampG.style.opacity = 0;   // a still frame keeps the verdict on the envelope
+        it[it.src && it.src.kind === 'gate' ? 'pre' : 'hold'] = STAMP_MS;
+      }
     } else if (label) {
       const h = 24, w = tw(label, 'packet') + 18;
       el('rect', { x: f1(-w / 2), y: -h / 2, width: f1(w), height: h, rx: Math.min(h / 2, ST.pill), class: 'pk-bg' }, g);
@@ -2586,13 +2744,18 @@ function startFlows(st, delay) {
     const pr = it.e.proof, cd = it.e.code;
     // (not in a sequence diagram: the next message row is too close for a card)
     if (ANIM && PROOF && !SEQ && !st.recap && !it.reverse && pr && pr.status === 'verified' && pr.hit && cd && cd.text != null) {
-      let line = [...(cd.text.split('\n')[pr.hit - cd.start] || '').trim()];
+      const all3 = cd.text.split('\n'), hi = pr.hit - cd.start, cut = s => { const c = [...s]; return c.length > 46 ? c.slice(0, 45).join('') + '…' : s; };
+      const line = cut((all3[hi] || '').trim());
       if (line.length) {
-        if (line.length > 46) line = [...line.slice(0, 45), '…'];
-        const src = `${String(cd.file).split('/').pop()}:${pr.hit}`, w = Math.max(tw(line.join(''), 'packet'), tw(src, 'packet')) + 28;
+        // film opens the close-up: the line with its neighbours, indentation kept, the hit marked
+        const near = FILM ? [hi - 1, hi, hi + 1].filter(i => i === hi || (all3[i] || '').trim()) : [hi];
+        const ind = Math.min(...near.map(i => all3[i].length - all3[i].trimStart().length));
+        const rows = near.map(i => [i === hi, FILM ? cut(all3[i].slice(ind).trimEnd().replace(/\t/g, '  ')) : line]);
+        const src = `${String(cd.file).split('/').pop()}:${pr.hit}`, w = Math.max(tw(src, 'packet'), ...rows.map(r => tw(r[1], 'packet'))) + 28;
+        const CH = (rows.length + 1) * 18 + 14;   // the card's own height: one row per line, one for the source
         // The card keeps its size on screen whatever the camera does (k), and takes the first spot
         // beside the path that covers no label and no block; the receipt must not hide what it proves.
-        const k = 1.15 / camS, cw = w * k, ch = 58 * k;   // a touch larger than a packet label: it is the point of the hop
+        const k = (FILM ? 1.3 : 1.15) / camS, cw = w * k, ch = (CH + 8) * k;   // a touch larger than a packet label: it is the point of the hop
         const taken = [...edges.values()].filter(e => e.lbox && st.visible.has(e.id)).map(e => e.lbox)
           .concat([...nodes.values()].filter(n => st.visible.has(n.id)).map(n => n.box), cardBoxes);
         let spot = null, least = Infinity;
@@ -2605,19 +2768,32 @@ function startFlows(st, delay) {
         }
         cardBoxes.push(spot.r);
         const up = spot.up, gap = spot.gap, card = el('g', { class: 'pk-code' }, L.packets), inner = el('g', {}, card);
-        el('rect', { x: f1(-w / 2), y: up ? -58 : 8, width: f1(w), height: 50, rx: 9 }, inner);
+        const top = up ? -CH - 8 : 8, many = rows.length > 1;
+        el('rect', { x: f1(-w / 2), y: top, width: f1(w), height: CH, rx: 9 }, inner);
         if (gap < 20 * k) el('path', { d: up ? 'M-7 -9L0 0L7 -9Z' : 'M-7 9L0 0L7 9Z' }, inner);   // a pointer only when it reaches the path
-        text(inner, line.join(''), 0, up ? -40 : 26, 't-packet');
-        text(inner, '✓ ' + src, 0, up ? -22 : 44, 't-packet pk-src');
+        rows.forEach(([isHit, s], i) => {
+          if (many && isHit) el('rect', { x: f1(-w / 2 + 6), y: top + 9 + i * 18, width: f1(w - 12), height: 18, rx: 4, class: 'pk-hit' }, inner);
+          if (many) text(inner, s, -w / 2 + 14, top + 18 + i * 18, 't-packet' + (isHit ? '' : ' pk-ctx'), 'start');
+          else text(inner, s, 0, top + 18, 't-packet');
+        });
+        text(inner, '✓ ' + src, 0, top + 18 + rows.length * 18, 't-packet pk-src');
         card.setAttribute('transform', `translate(${f1(spot.pt.x)} ${f1(spot.pt.y + (up ? -gap : gap))})`);
         card.style.opacity = 0; it.card = card; it.cardIn = inner; it.cardK = k; it.cardUp = up; dyn.push(card);
       }
     }
   });
   let acc = 0;
-  items.forEach(it => { it.start = st.together ? 0 : acc; acc += it.dur + 200; });
-  const span = st.together ? Math.max(...items.map(i => i.dur)) : acc - 200;
-  const cycle = span + 1400;
+  // a stamped envelope waits under its stamp: before it leaves a gate (pre) or after it lands (hold)
+  items.forEach(it => { it.start = (st.together ? 0 : acc) + it.pre; acc += it.pre + it.dur + it.hold + 200; });
+  const span = st.together ? Math.max(...items.map(i => i.pre + i.dur + i.hold)) : acc - 200;
+  const cycle = span + Math.max(1400, items.some(it => it.card) ? CARD_MS + 100 : 0);   // the rest between passes outlasts the last receipt
+  // film: a gate stops what arrives (barrier down, lamp in the verdict's colour) and lets an ok or a plain packet out;
+  // before the next pass it goes back to where the step found it
+  const gates = !FILM || !ANIM || st.recap ? [] : [...new Set(items.flatMap(it => [it.src, it.dst]))].filter(n => n && n.kind === 'gate').map(n => ({
+    n, ev: items.flatMap(it => it.dst === n ? [[it.start + it.dur * 0.45, 1, lampOf(it.tn)]]
+      : it.src === n ? [it.tn === 'error' || it.tn === 'warn' ? [it.start - it.pre, 1, lampOf(it.tn)] : [it.start - 150, 0, '']] : [])
+      .concat([[cycle - 500, ...n.gate0]]).sort((a, b) => a[0] - b[0]),
+  }));
   const at = (it, p) => it.e.pathEl.getPointAtLength((it.reverse ? 1 - easeInOut(p) : easeInOut(p)) * it.len);
   const hop = p => -10 - Math.sin(Math.PI * easeInOut(p)) * 9;
   const placeAt = (it, p, op = 1) => {
@@ -2662,7 +2838,7 @@ function startFlows(st, delay) {
   flowItems = items; flowDelay = delay; flowSpan = span + (items.some(it => it.card) ? CARD_MS : 0);   // recorders wait for the last receipt
   let liveCycle = -1, liveSeen = new Map();
   flowAt = (tt0, live) => {
-    if (tt0 < 0) { items.forEach(it => { [it.g, it.tail, it.card, it.ring, it.sparks, ...(it.trace || [])].forEach(x => { if (x) x.style.opacity = 0; }); it.traceOn = it.cardOn = false; }); return; }
+    if (tt0 < 0) { gates.forEach(({ n }) => gateSet(n, ...n.gate0)); items.forEach(it => { [it.g, it.tail, it.card, it.ring, it.sparks, ...(it.trace || [])].forEach(x => { if (x) x.style.opacity = 0; }); it.traceOn = it.cardOn = false; }); return; }
     const c = Math.floor(tt0 / cycle), tt = tt0 % cycle;
     if (live && c !== liveCycle) { liveCycle = c; liveFx.forEach(a => a.cancel()); liveFx = []; liveSeen = new Map(); }
     items.forEach(it => {
@@ -2697,14 +2873,24 @@ function startFlows(st, delay) {
       const p = (tt - it.start) / it.dur, src = nodes.get(it.reverse ? it.e.to : it.e.from), dst = nodes.get(it.reverse ? it.e.from : it.e.to);
       // sounds only on the first pass: a loop that keeps ticking is noise
       if (live && p >= 0 && it.left !== c) { it.left = c; liveFx.push(...fxDepart(src, 0, liveSeen)); if (c === 0) SFX.send(); }
-      if (p < 0 || p > 1) {
-        it.g.style.opacity = 0; if (it.tail) it.tail.style.opacity = 0;
-        if (live && p > 1 && it.pulsed !== c) { it.pulsed = c; liveFx.push(...fxArrive(dst, 0, liveSeen)); if (c === 0) SFX[it.g.classList.contains('t-error') ? 'fail' : 'land'](); }
-        return;
+      if (live && p > 1 && it.pulsed !== c) { it.pulsed = c; liveFx.push(...fxArrive(dst, 0, liveSeen)); if (c === 0) SFX[it.g.classList.contains('t-error') ? 'fail' : 'land'](); }
+      const ms = tt - it.start, waits = ms < 0 && ms >= -it.pre, stays = ms > it.dur && ms <= it.dur + it.hold;   // sitting under its stamp
+      if (it.stampG) {   // slams down from large, then rides along (pre) or sits until the envelope goes (hold)
+        const s = it.pre ? ms + it.pre - 250 : ms - it.dur - 80, on = s >= 0 && (waits || stays || (p >= 0 && p <= 1));
+        it.stampG.style.opacity = on ? Math.min(1, s / 70) : 0;
+        if (on) { const q = Math.min(1, s / 170); it.stampIn.setAttribute('transform', `rotate(-9) scale(${f1((2.6 - 1.6 * q * q + (q < 1 ? 0 : 0.12 * Math.max(0, 1 - (s - 170) / 140))) * 100) / 100})`); }
+        if (on && live && c === 0 && it.stamped !== c) { it.stamped = c; SFX.proof(); }
       }
-      const op = Math.min(1, p * 9, (1 - p) * 9);
+      if (!waits && !stays && (p < 0 || p > 1)) { it.g.style.opacity = 0; if (it.tail) it.tail.style.opacity = 0; return; }
+      const pp = clamp(p, 0, 1), op = waits ? Math.min(1, (ms + it.pre) / 150) : stays ? Math.min(1, (it.dur + it.hold - ms) / 200) : Math.min(1, it.pre ? 1 : p * 9, it.hold ? 1 : (1 - p) * 9);
       it.g.style.opacity = op;
-      placeAt(it, p, op);
+      placeAt(it, pp, op);
+      if ((waits || stays) && it.tail) it.tail.style.opacity = 0;   // nothing trails a parked envelope
+    });
+    gates.forEach(({ n, ev }) => {
+      let [d, col] = n.gate0;
+      ev.forEach(([t, down, c2]) => { if (tt < t) return; d += (down - d) * Math.min(1, (tt - t) / 420); if (down) col = c2; });
+      gateSet(n, d, col);
     });
   };
   if (seekMode) return delay + cycle;
